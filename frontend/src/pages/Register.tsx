@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Building, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -8,6 +9,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +25,7 @@ export default function Register() {
         throw new Error(data.error || 'Registration failed');
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Redirect to onboarding/dashboard
-      navigate('/dashboard');
+      login(data.user, data.token);
     } catch (err: any) {
       setError(typeof err.message === 'string' ? err.message : JSON.stringify(err.message));
     }
