@@ -7,6 +7,14 @@ import DashboardRouter from './pages/Dashboards';
 import Layout from './components/Layout';
 import { AuthProvider } from './context/AuthContext';
 
+import Staff from './pages/Staff';
+import Students from './pages/Students';
+import Finance from './pages/Finance';
+import Lessons from './pages/Lessons';
+import Attendance from './pages/Attendance';
+import Messages from './pages/Messages';
+import Progress from './pages/Progress';
+
 function App() {
   return (
     <BrowserRouter>
@@ -18,16 +26,17 @@ function App() {
           
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardRouter />} />
-            {/* Placeholders for other routes */}
-            <Route path="/tenants" element={<div className="text-surface-500 text-center py-12">Tenants Management (Coming Soon)</div>} />
-            <Route path="/settings" element={<div className="text-surface-500 text-center py-12">Settings (Coming Soon)</div>} />
-            <Route path="/staff" element={<div className="text-surface-500 text-center py-12">Staff & HR (Coming Soon)</div>} />
-            <Route path="/students" element={<div className="text-surface-500 text-center py-12">Student Directory (Coming Soon)</div>} />
-            <Route path="/finance" element={<div className="text-surface-500 text-center py-12">Fees & Finance (Coming Soon)</div>} />
-            <Route path="/lessons" element={<div className="text-surface-500 text-center py-12">Lesson Planner (Coming Soon)</div>} />
-            <Route path="/attendance" element={<div className="text-surface-500 text-center py-12">Smart Attendance (Coming Soon)</div>} />
-            <Route path="/messages" element={<div className="text-surface-500 text-center py-12">Messages (Coming Soon)</div>} />
-            <Route path="/progress" element={<div className="text-surface-500 text-center py-12">Progress Tracker (Coming Soon)</div>} />
+            
+            <Route path="/staff" element={<Staff />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/finance" element={<Finance />} />
+            <Route path="/lessons" element={<Lessons />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/progress" element={<Progress />} />
+
+            <Route path="/tenants" element={<div className="text-surface-500 text-center py-12 font-medium">Tenants Management (Platform Feature)</div>} />
+            <Route path="/settings" element={<div className="text-surface-500 text-center py-12 font-medium">Settings Configuration</div>} />
           </Route>
           
           <Route path="*" element={<Navigate to="/" replace />} />
