@@ -1,0 +1,106 @@
+import { useState } from 'react';
+import { ClipboardList, Award, CheckCircle2, Calendar, Clock } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { tests, testResults } from '@/data/mockData';
+import { formatDate, getGradeColor } from '@/lib/utils';
+
+export const StudentTestsPage: React.FC = () => {
+  const [tab, setTab] = useState<'upcoming' | 'results'>('upcoming');
+
+  const upcomingTests = tests.filter(t => t.status === 'upcoming');
+  const myResults = testResults.filter(r => r.studentId === 's1');
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800">Tests & Evaluations</h1>
+        <p className="text-sm text-slate-500">Track your exam schedules, check grading results, and view teacher feedback</p>
+      </div>
+
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <button
+          onClick={() => setTab('upcoming')}
+          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+            tab === 'upcoming'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+          }`}
+        >
+          Upcoming Tests ({upcomingTests.length})
+        </button>
+        <button
+          onClick={() => setTab('results')}
+          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+            tab === 'results'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+          }`}
+        >
+          Evaluated Results ({myResults.length})
+        </button>
+      </div>
+
+      {tab === 'upcoming' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {upcomingTests.map(test => (
+            <Card key={test.id} className="p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                    {test.subject}
+                  </Badge>
+                  <span className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                    <Calendar size={13} /> {formatDate(test.date)}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-slate-800 mb-1">{test.title}</h3>
+                <p className="text-xs text-slate-500 mb-3">{test.instructions || 'Review syllabus chapters thoroughly.'}</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Class: {test.class}</span>
+                <span className="font-semibold text-slate-700">Max Score: {test.maxMarks} pts</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {tab === 'results' && (
+        <div className="space-y-4">
+          {myResults.map(res => {
+            const percentage = Math.round((res.marksObtained / res.maxMarks) * 100);
+            return (
+              <Card key={res.id} className="p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary" className="text-[10px]">{res.subject}</Badge>
+                    <span className="text-xs text-slate-400">{formatDate(res.date)}</span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-800">{res.testTitle}</h3>
+                  {res.teacherComment && (
+                    <p className="text-xs text-slate-500 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      "{res.teacherComment}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-slate-800">{res.marksObtained} / {res.maxMarks}</span>
+                    <span className="text-xs text-slate-400 block">{percentage}% Score</span>
+                  </div>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${getGradeColor(res.grade)}`}>
+                    {res.grade}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};

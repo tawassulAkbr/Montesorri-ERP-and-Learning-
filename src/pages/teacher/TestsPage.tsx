@@ -1,0 +1,287 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ClipboardList, Plus, Search, Calendar, Award, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useData } from '@/context/DataContext';
+import { formatDate } from '@/lib/utils';
+import type { Test } from '@/types';
+
+export const TestsPage: React.FC = () => {
+  const { tests, students, testResults, addTest } = useData();
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+
+  // Form State
+  const [title, setTitle] = useState('');
+  const [subject, setSubject] = useState('Phonics & Early Language');
+  const [targetClass, setTargetClass] = useState('Junior Montessori (Nursery)');
+  const [date, setDate] = useState('');
+  const [maxMarks, setMaxMarks] = useState(20);
+  const [instructions, setInstructions] = useState('');
+
+  const handleCreateTest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !date) return;
+
+    addTest({
+      title,
+      subject,
+      class: targetClass,
+      teacherId: 't1',
+      date,
+      maxMarks,
+      instructions,
+    });
+
+    setOpenModal(false);
+    setTitle('');
+    setDate('');
+    setInstructions('');
+  };
+
+  const getStatusBadge = (status: Test['status']) => {
+    switch (status) {
+      case 'upcoming':
+        return <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200">Upcoming Milestone</Badge>;
+      case 'published':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Evaluating</Badge>;
+      case 'evaluated':
+        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">Mastered</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Developmental Milestones & Observations</h1>
+          <p className="text-sm text-slate-500">Track early childhood learning milestones, sensorial evaluations, and fine motor skills</p>
+        </div>
+
+        <Button onClick={() => setOpenModal(true)} className="gap-2 shadow-sm">
+          <Plus size={16} /> Schedule Milestone Evaluation
+        </Button>
+      </div>
+
+      {/* Tests Table */}
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <span className="font-semibold text-sm text-slate-800">Scheduled Developmental Milestones ({tests.length})</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <tr>
+                <th className="p-3.5 pl-5">Milestone Area</th>
+                <th className="p-3.5">Learning Domain</th>
+                <th className="p-3.5">Class Cohort</th>
+                <th className="p-3.5">Target Date</th>
+                <th className="p-3.5">Max Score</th>
+                <th className="p-3.5">Status</th>
+                <th className="p-3.5 pr-5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tests.map(test => (
+                <tr key={test.id} className="hover:bg-slate-50/70 transition-colors">
+                  <td className="p-3.5 pl-5 font-semibold text-slate-800">{test.title}</td>
+                  <td className="p-3.5">
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
+                      {test.subject}
+                    </span>
+                  </td>
+                  <td className="p-3.5 text-slate-600">{test.class}</td>
+                  <td className="p-3.5 text-slate-600">{formatDate(test.date)}</td>
+                  <td className="p-3.5 font-mono text-slate-700">{test.maxMarks} pts</td>
+                  <td className="p-3.5">{getStatusBadge(test.status)}</td>
+                  <td className="p-3.5 pr-5 text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedTest(test)}
+                      className="text-xs text-indigo-600 hover:text-indigo-700"
+                    >
+                      Evaluation Details
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Schedule Test Dialog */}
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="text-indigo-600" size={20} />
+              Schedule Developmental Milestone
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateTest} className="space-y-4">
+            <div>
+              <Label className="text-xs font-medium text-slate-600">Milestone Title</Label>
+              <Input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. 3-Letter Phonetic Word Blending"
+                className="mt-1 text-xs"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium text-slate-600">Learning Area</Label>
+                <select
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option>Phonics & Early Language</option>
+                  <option>Sensorial & Practical Life</option>
+                  <option>Early Mathematics</option>
+                  <option>Rhymes & Story Circle</option>
+                  <option>Creative Arts & Crafts</option>
+                </select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-slate-600">Class</Label>
+                <select
+                  value={targetClass}
+                  onChange={e => setTargetClass(e.target.value)}
+                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option>Montessori Toddler (Playgroup)</option>
+                  <option>Junior Montessori (Nursery)</option>
+                  <option>Senior Montessori (Prep)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium text-slate-600">Observation Date</Label>
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="mt-1 text-xs"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-slate-600">Max Rubric Score</Label>
+                <Input
+                  type="number"
+                  value={maxMarks}
+                  onChange={e => setMaxMarks(Number(e.target.value))}
+                  className="mt-1 text-xs"
+                  min={5}
+                  max={50}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-medium text-slate-600">Observation Rubric / Criteria</Label>
+              <textarea
+                value={instructions}
+                onChange={e => setInstructions(e.target.value)}
+                rows={3}
+                placeholder="Specify materials observed (sandpaper letters, knobbed cylinders, spindle box)..."
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setOpenModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Schedule Milestone</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Evaluation Dialog */}
+      {selectedTest && (
+        <Dialog open={!!selectedTest} onOpenChange={() => setSelectedTest(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>{selectedTest.title}</span>
+                {getStatusBadge(selectedTest.status)}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl text-xs">
+                <div>
+                  <span className="text-slate-400">Area:</span>
+                  <p className="font-semibold text-slate-700">{selectedTest.subject}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400">Cohort:</span>
+                  <p className="font-semibold text-slate-700">{selectedTest.class}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400">Date:</span>
+                  <p className="font-semibold text-slate-700">{formatDate(selectedTest.date)}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Toddler Milestone Observations
+                </h4>
+                <div className="max-h-60 overflow-y-auto border border-slate-100 rounded-xl">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-400">
+                      <tr>
+                        <th className="p-2.5 pl-4">Child</th>
+                        <th className="p-2.5">Roll No</th>
+                        <th className="p-2.5">Score</th>
+                        <th className="p-2.5 pr-4 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {students.slice(0, 5).map((stu, i) => (
+                        <tr key={stu.id} className="hover:bg-slate-50">
+                          <td className="p-2.5 pl-4 font-medium text-slate-800">{stu.name}</td>
+                          <td className="p-2.5 text-slate-500 font-mono">#{stu.rollNo}</td>
+                          <td className="p-2.5 font-semibold text-indigo-600">18 / {selectedTest.maxMarks}</td>
+                          <td className="p-2.5 pr-4 text-right">
+                            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
+                              Mastered 🌟
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button onClick={() => setSelectedTest(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+};
