@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useData } from '@/context/DataContext';
 import type { Role } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +23,14 @@ const ROLE_REDIRECTS: Record<Role, string> = {
   admin: '/admin/dashboard',
 };
 
+// Known seeded accounts (passwords are hashed in the DB; these hints exist for demo access).
+const DEMO_ACCOUNTS: Record<Role, { email: string; password: string }> = {
+  teacher: { email: 'sarah.mitchell@kinderguide.edu', password: 'teacher123' },
+  student: { email: 'ali.hassan@student.edu', password: 'student123' },
+  parent: { email: 'hassan.ahmed@parent.com', password: 'parent123' },
+  admin: { email: 'admin@kinderguide.edu', password: 'admin123' },
+};
+
 export const LoginPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<Role>('teacher');
   const [email, setEmail] = useState('');
@@ -32,10 +39,9 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const { credentials } = useData();
   const navigate = useNavigate();
 
-  const demoCred = credentials.find(c => c.role === selectedRole);
+  const demoCred = DEMO_ACCOUNTS[selectedRole];
 
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role);

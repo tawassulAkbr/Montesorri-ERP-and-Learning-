@@ -1,0 +1,35 @@
+import { prisma } from '../db';
+
+export async function nextEmployeeId(): Promise<string> {
+  const last = await prisma.teacher.findFirst({
+    orderBy: { employeeId: 'desc' },
+    select: { employeeId: true },
+  });
+  const n = last ? parseInt(last.employeeId.replace('EMP-', ''), 10) || 0 : 0;
+  return `EMP-${String(n + 1).padStart(3, '0')}`;
+}
+
+export async function nextEnrollmentId(): Promise<string> {
+  const year = new Date().getFullYear();
+  const prefix = `MON-${year}-`;
+  const last = await prisma.student.findFirst({
+    where: { enrollmentId: { startsWith: prefix } },
+    orderBy: { enrollmentId: 'desc' },
+    select: { enrollmentId: true },
+  });
+  const n = last ? parseInt(last.enrollmentId.replace(prefix, ''), 10) || 0 : 0;
+  return `${prefix}${String(n + 1).padStart(3, '0')}`;
+}
+
+export async function nextRollNo(cls: string): Promise<string> {
+  const count = await prisma.student.count({ where: { class: cls } });
+  return String(count + 1).padStart(2, '0');
+}
+
+export function slugEmail(name: string, domain: string): string {
+  const local = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '.')
+    .replace(/^\.+|\.+$/g, '');
+  return `${local}@${domain}`;
+}

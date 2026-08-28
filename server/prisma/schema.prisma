@@ -1,0 +1,348 @@
+// KinderGuide — Prisma schema
+// Date-only values are stored as ISO strings ('YYYY-MM-DD') so API responses
+// match the frontend types in src/types/index.ts without conversion.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  HOLIDAY
+}
+
+enum LeaveKind {
+  STUDENT
+  TEACHER
+}
+
+enum LeaveStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum RemarkType {
+  POSITIVE
+  CONSTRUCTIVE
+  CONCERN
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum NotificationKind {
+  FEE_DUE
+  FEE_CLEARED
+  GENERAL
+}
+
+enum ScheduleCategory {
+  CIRCLE_TIME
+  PHONICS
+  SENSORIAL
+  MATH
+  SNACK_BREAK
+  ART_CRAFT
+  OUTDOOR_PLAY
+  STORYTELLING
+  LIVE_CLASS
+}
+
+model Credential {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  userId       String
+  createdAt    DateTime @default(now())
+
+  @@index([userId, role])
+  @@map("credentials")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  role      Role
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  adminCode String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("admins")
+}
+
+model Teacher {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  employeeId    String   @unique
+  subject       String
+  qualification String
+  phone         String
+  classes       String[]
+  createdAt     DateTime @default(now())
+
+  lessons          Lesson[]
+  tests            Test[]
+  remarks          Remark[]
+  dailyWorks       DailyWork[]
+  attendance       TeacherAttendanceRecord[]
+  leaveRequests    LeaveRequest[]
+
+  @@map("teachers")
+}
+
+model Parent {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String
+  createdAt DateTime @default(now())
+
+  children      Student[]
+  leaveRequests LeaveRequest[]
+
+  @@map("parents")
+}
+
+model Student {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  rollNo       String
+  enrollmentId String   @unique
+  class        String
+  ageGroup     String?
+  parentId     String
+  phone        String
+  address      String
+  guardianName String
+  feeAmount    Int
+  feeDue       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  parent           Parent             @relation(fields: [parentId], references: [id])
+  attendance       AttendanceRecord[]
+  testResults      TestResult[]
+  remarks          Remark[]
+  leaveRequests    LeaveRequest[]
+
+  @@unique([class, rollNo])
+  @@map("students")
+}
+
+model Notification {
+  id               String           @id @default(cuid())
+  userId           String
+  role             Role
+  title            String
+  message          String
+  type             NotificationType @default(INFO)
+  kind             NotificationKind @default(GENERAL)
+  read             Boolean          @default(false)
+  relatedStudentId String?
+  createdAt        DateTime         @default(now())
+
+  @@index([userId, role, read])
+  @@map("notifications")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  subject     String
+  class       String
+  teacherId   String
+  teacherName String
+  youtubeId   String
+  description String
+  notes       String?
+  duration    String
+  uploadedAt  String
+  views       Int      @default(0)
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@map("lessons")
+}
+
+model Test {
+  id           String   @id @default(cuid())
+  title        String
+  subject      String
+  class        String
+  teacherId    String
+  date         String
+  maxMarks     Int
+  instructions String
+  status       String   @default("upcoming")
+  createdAt    String
+
+  teacher Teacher      @relation(fields: [teacherId], references: [id])
+  results TestResult[]
+
+  @@map("tests")
+}
+
+model TestResult {
+  id              String  @id @default(cuid())
+  testId          String
+  testTitle       String
+  studentId       String
+  subject         String
+  marksObtained   Int
+  maxMarks        Int
+  grade           String
+  milestoneStatus String?
+  date            String
+  teacherComment  String?
+
+  test    Test    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("test_results")
+}
+
+model AttendanceRecord {
+  id             String           @id @default(cuid())
+  studentId      String
+  date           String
+  status         AttendanceStatus
+  markedBy       String
+  leaveRequestId String?
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, date])
+  @@map("attendance_records")
+}
+
+model TeacherAttendanceRecord {
+  id             String           @id @default(cuid())
+  teacherId      String
+  date           String
+  status         AttendanceStatus
+  leaveRequestId String?
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@unique([teacherId, date])
+  @@map("teacher_attendance_records")
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  kind        LeaveKind
+  studentId   String?
+  studentName String?
+  parentId    String?
+  parentName  String?
+  teacherId   String?
+  teacherName String?
+  fromDate    String
+  toDate      String
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  submittedAt String
+  respondedAt String?
+  respondedBy String?
+
+  student Student? @relation(fields: [studentId], references: [id])
+  parent  Parent?  @relation(fields: [parentId], references: [id])
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+
+  @@map("leave_requests")
+}
+
+model Remark {
+  id             String     @id @default(cuid())
+  teacherId      String
+  teacherName    String
+  teacherSubject String
+  studentId      String
+  studentName    String
+  parentId       String
+  content        String
+  type           RemarkType
+  createdAt      String
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("remarks")
+}
+
+model DailyWork {
+  id                    String   @id @default(cuid())
+  teacherId             String
+  teacherName           String
+  teacherSubject        String
+  class                 String
+  content               String
+  attachmentName        String?
+  postedAt              String
+  visibleTo             String[]
+  completedByStudentIds String[]
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@map("daily_works")
+}
+
+model ScheduleItem {
+  id          String           @id @default(cuid())
+  title       String
+  category    ScheduleCategory
+  startTime   String
+  endTime     String
+  class       String
+  teacherName String
+  description String
+  roomOrLink  String?
+  isLive      Boolean          @default(false)
+
+  @@map("schedule_items")
+}
+
+model LiveClassSession {
+  id                String   @id @default("singleton")
+  isActive          Boolean  @default(false)
+  topic             String   @default("")
+  subject           String   @default("")
+  class             String   @default("")
+  teacherName       String   @default("")
+  startedAt         String   @default("")
+  participantsCount Int      @default(0)
+
+  @@map("live_class_session")
+}

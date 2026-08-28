@@ -91,7 +91,7 @@ const AddTeacherModal: React.FC<{
   onClose: () => void;
   onCreated: (cred: IssuedCredentials) => void;
 }> = ({ open, onClose, onCreated }) => {
-  const { createTeacher, credentials } = useData();
+  const { createTeacher } = useData();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -99,6 +99,7 @@ const AddTeacherModal: React.FC<{
   const [subject, setSubject] = useState<string>(TEACHER_SUBJECTS[0]);
   const [classes, setClasses] = useState<string[]>([MONTESSORI_CLASSES[1]]);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleClass = (cls: string) => {
     setClasses(prev => prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]);
@@ -109,24 +110,28 @@ const AddTeacherModal: React.FC<{
     setSubject(TEACHER_SUBJECTS[0]); setClasses([MONTESSORI_CLASSES[1]]); setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const emailLower = email.trim().toLowerCase();
-    if (credentials.some(c => c.email.toLowerCase() === emailLower)) {
-      setError('A user with this email already exists.');
-      return;
-    }
     if (classes.length === 0) {
       setError('Select at least one class.');
       return;
     }
-    const cred = createTeacher({
-      name: name.trim(), email: emailLower, phone: phone.trim(),
-      qualification: qualification.trim(), subject, classes,
-    });
-    reset();
-    onClose();
-    onCreated(cred);
+    setSubmitting(true);
+    setError('');
+    try {
+      const cred = await createTeacher({
+        name: name.trim(), email: emailLower, phone: phone.trim(),
+        qualification: qualification.trim(), subject, classes,
+      });
+      reset();
+      onClose();
+      onCreated(cred);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create teacher.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -222,23 +227,27 @@ const AddStudentModal: React.FC<{
     setGuardianPhone(''); setAddress(''); setCls(MONTESSORI_CLASSES[1]); setFeeAmount('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const fee = Number(feeAmount);
     if (!Number.isFinite(fee) || fee <= 0) return;
-    const creds = createStudentWithParent({
-      name: name.trim(),
-      phone: phone.trim(),
-      address: address.trim(),
-      guardianName: guardianName.trim(),
-      guardianEmail: guardianEmail.trim() || undefined,
-      guardianPhone: guardianPhone.trim() || undefined,
-      class: cls,
-      feeAmount: fee,
-    });
-    reset();
-    onClose();
-    onCreated(creds);
+    try {
+      const creds = await createStudentWithParent({
+        name: name.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        guardianName: guardianName.trim(),
+        guardianEmail: guardianEmail.trim() || undefined,
+        guardianPhone: guardianPhone.trim() || undefined,
+        class: cls,
+        feeAmount: fee,
+      });
+      reset();
+      onClose();
+      onCreated(creds);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to enroll student.');
+    }
   };
 
   return (
@@ -334,11 +343,15 @@ export const AdminUsersPage: React.FC = () => {
   const teacherStatus = (t: Teacher) =>
     teacherAttendance.find(r => r.teacherId === t.id && r.date === today)?.status;
 
-  const handleResetPassword = (userId: string, role: 'teacher' | 'student' | 'parent') => {
+  const handleResetPassword = async (userId: string, role: 'teacher' | 'student' | 'parent') => {
     const user = findUser(userId, role);
-    const newPassword = resetPassword(userId);
-    if (user && newPassword) {
-      setIssued([{ role, name: user.name, email: user.email, password: newPassword }]);
+    try {
+      const newPassword = await resetPassword(userId, role);
+      if (user && newPassword) {
+        setIssued([{ role, name: user.name, email: user.email, password: newPassword }]);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to reset password.');
     }
   };
 

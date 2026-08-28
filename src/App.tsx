@@ -69,8 +69,8 @@ const ProtectedRoute: React.FC<{ allowedRole?: Role; children: React.ReactNode }
 
 export default function App() {
   return (
-    <DataProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <DataProvider>
         <BrowserRouter>
           <Routes>
             {/* Public Auth Routes */}
@@ -137,7 +137,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </DataProvider>
+      </DataProvider>
+    </AuthProvider>
   );
 }

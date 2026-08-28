@@ -17,12 +17,12 @@ export const ChangePasswordPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!currentUser) return;
     if (newPassword !== confirmPassword) return;
-    const ok = changePassword(currentUser.id, currentPassword, newPassword);
+    const ok = await changePassword(currentUser.id, currentPassword, newPassword);
     if (ok) {
       setSubmitted(true);
       setCurrentPassword('');
