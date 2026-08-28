@@ -5,7 +5,6 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 // Auth Pages
 import { LoginPage } from '@/pages/auth/LoginPage';
-import { SignupPage } from '@/pages/auth/SignupPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
 
@@ -19,6 +18,7 @@ import { AttendancePage as TeacherAttendancePage } from '@/pages/teacher/Attenda
 import { ReportsPage as TeacherReportsPage } from '@/pages/teacher/ReportsPage';
 import { RemarksPage as TeacherRemarksPage } from '@/pages/teacher/RemarksPage';
 import { DailyWorkPage as TeacherDailyWorkPage } from '@/pages/teacher/DailyWorkPage';
+import { StudentsPage as TeacherStudentsPage } from '@/pages/teacher/StudentsPage';
 
 // Student Pages
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
@@ -69,13 +69,12 @@ const ProtectedRoute: React.FC<{ allowedRole?: Role; children: React.ReactNode }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
+    <DataProvider>
+      <AuthProvider>
         <BrowserRouter>
           <Routes>
             {/* Public Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Authenticated Dashboard Base */}
@@ -97,6 +96,7 @@ export default function App() {
                 <Route path="lessons" element={<ProtectedRoute allowedRole="teacher"><TeacherLessonsPage /></ProtectedRoute>} />
                 <Route path="tests" element={<ProtectedRoute allowedRole="teacher"><TeacherTestsPage /></ProtectedRoute>} />
                 <Route path="attendance" element={<ProtectedRoute allowedRole="teacher"><TeacherAttendancePage /></ProtectedRoute>} />
+                <Route path="students" element={<ProtectedRoute allowedRole="teacher"><TeacherStudentsPage /></ProtectedRoute>} />
                 <Route path="reports" element={<ProtectedRoute allowedRole="teacher"><TeacherReportsPage /></ProtectedRoute>} />
                 <Route path="remarks" element={<ProtectedRoute allowedRole="teacher"><TeacherRemarksPage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="teacher"><TeacherDailyWorkPage /></ProtectedRoute>} />
@@ -137,7 +137,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
-      </DataProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </DataProvider>
   );
 }

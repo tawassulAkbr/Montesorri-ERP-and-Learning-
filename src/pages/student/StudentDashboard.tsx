@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Video, CalendarCheck, ClipboardList, TrendingUp, BookOpen, Award, ArrowUpRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -9,13 +10,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LiveClassBanner } from '@/components/shared/LiveClassBanner';
 import { useData } from '@/context/DataContext';
-import { scoreChartData } from '@/data/mockData';
-import { formatDate } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { buildScoreChartData, formatDate } from '@/lib/utils';
 
 export const StudentDashboard: React.FC = () => {
-  const { lessons, tests, dailyWork } = useData();
+  const { lessons, tests, dailyWork, testResults, attendance, students } = useData();
+  const { currentUser } = useAuth();
+  const me = students.find(s => s.id === currentUser?.id);
+
   const recentLessons = lessons.slice(0, 2);
-  const upcomingTests = tests.filter(t => t.status === 'upcoming').slice(0, 3);
+  const upcomingTests = tests.filter(t => t.status === 'upcoming' && (!me || t.class === me.class)).slice(0, 3);
+
+  const myAttendance = useMemo(() => attendance.filter(a => a.studentId === currentUser?.id), [attendance, currentUser?.id]);
+  const attendanceRate = myAttendance.length
+    ? Math.round((myAttendance.filter(a => a.status === 'present').length / myAttendance.length) * 100)
+    : 100;
+  const scoreChart = useMemo(() => buildScoreChartData(testResults, currentUser?.id), [testResults, currentUser?.id]);
 
   return (
     <div className="space-y-6">
@@ -26,9 +36,9 @@ export const StudentDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs uppercase tracking-wider text-indigo-200 font-bold">Montessori Student Portal</span>
-          <h1 className="text-2xl font-bold mt-1">Hello, Little Ali! 🌟</h1>
+          <h1 className="text-2xl font-bold mt-1">Hello, {currentUser?.name?.split(' ')[0]}! 🌟</h1>
           <p className="text-xs text-indigo-100 mt-1">
-            Junior Montessori (Nursery) • Roll #01 • Age 3-4 Years
+            {me?.class || 'Montessori'} • Roll #{me?.rollNo || '—'} • Age {me?.ageGroup || '—'}
           </p>
         </div>
 
@@ -50,10 +60,9 @@ export const StudentDashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Roll Call Rate"
-          value="96%"
+          value={`${attendanceRate}%`}
           subtitle="Montessori circle attendance"
           icon={<CalendarCheck className="text-emerald-600" size={20} />}
-          trend={2}
           iconBg="bg-emerald-50"
         />
         <StatCard
@@ -93,7 +102,7 @@ export const StudentDashboard: React.FC = () => {
             </Link>
           </CardHeader>
           <CardContent>
-            <TestScoreBarChart data={scoreChartData} height={220} />
+            <TestScoreBarChart data={scoreChart} height={220} />
           </CardContent>
         </Card>
 
@@ -104,7 +113,7 @@ export const StudentDashboard: React.FC = () => {
             <p className="text-xs text-slate-400">Montessori roll call record</p>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-4">
-            <RadialProgress value={96} label="Circle Attendance" color="#10B981" />
+            <RadialProgress value={attendanceRate} label="Circle Attendance" color="#10B981" />
             <p className="text-xs text-slate-500 text-center mt-2">
               Consistent morning circle routine helps social development!
             </p>

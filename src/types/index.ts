@@ -18,6 +18,7 @@ export interface Teacher extends User {
   employeeId: string;
   classes: string[];
   phone: string;
+  qualification: string;
 }
 
 // ─── Student ─────────────────────────────────────────────────────────────────
@@ -29,6 +30,11 @@ export interface Student extends User {
   section?: string;
   parentId: string;
   enrollmentId: string;
+  phone: string;
+  address: string;
+  guardianName: string;
+  feeAmount: number;
+  feeDue: boolean;
 }
 
 // ─── Parent ───────────────────────────────────────────────────────────────────
@@ -101,15 +107,41 @@ export interface AttendanceRecord {
   leaveRequestId?: string;
 }
 
+export interface TeacherAttendanceRecord {
+  id: string;
+  teacherId: string;
+  date: string;
+  status: AttendanceStatus;
+  leaveRequestId?: string;
+}
+
+export interface Credential {
+  userId: string;
+  email: string;
+  password: string;
+  role: Role;
+}
+
+export interface IssuedCredentials {
+  role: Role;
+  name: string;
+  email: string;
+  password: string;
+}
+
 // ─── Leave Request ────────────────────────────────────────────────────────────
 export type LeaveStatus = 'pending' | 'accepted' | 'rejected';
+export type LeaveKind = 'student' | 'teacher';
 
 export interface LeaveRequest {
   id: string;
-  studentId: string;
-  studentName: string;
-  parentId: string;
-  parentName: string;
+  kind: LeaveKind;
+  studentId?: string;
+  studentName?: string;
+  parentId?: string;
+  parentName?: string;
+  teacherId?: string;
+  teacherName?: string;
   fromDate: string;
   toDate: string;
   reason: string;
@@ -193,11 +225,14 @@ export interface SubjectTeacher {
 // ─── Notification ─────────────────────────────────────────────────────────────
 export interface Notification {
   id: string;
+  userId: string;
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   read: boolean;
   createdAt: string;
+  kind?: 'fee_due' | 'fee_cleared' | 'general';
+  relatedStudentId?: string;
 }
 
 // ─── Chart Data ───────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { User, Role } from '../types';
-import { teachers, students, parents, admins, mockCredentials } from '../data/mockData';
+import { useData } from '@/context/DataContext';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -12,9 +12,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const allUsers: User[] = [...teachers, ...students, ...parents, ...admins];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { credentials, findUser } = useData();
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = sessionStorage.getItem('kg_user');
     return saved ? JSON.parse(saved) : null;
@@ -24,19 +23,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const login = useCallback(async (email: string, password: string, selectedRole: Role): Promise<boolean> => {
-    const creds = mockCredentials[selectedRole];
-    if (email.toLowerCase() === creds.email && password === creds.password) {
-      const user = allUsers.find(u => u.id === creds.userId) || null;
-      if (user) {
-        setCurrentUser(user);
-        setRole(selectedRole);
-        sessionStorage.setItem('kg_user', JSON.stringify(user));
-        sessionStorage.setItem('kg_role', selectedRole);
-        return true;
-      }
-    }
-    return false;
-  }, []);
+    const match = credentials.find(
+      c => c.email.toLowerCase() === email.trim().toLowerCase()
+        && c.password === password
+        && c.role === selectedRole
+    );
+    if (!match) return false;
+    const user = findUser(match.userId, selectedRole);
+    if (!user) return false;
+    setCurrentUser(user);
+    setRole(selectedRole);
+    sessionStorage.setItem('kg_user', JSON.stringify(user));
+    sessionStorage.setItem('kg_role', selectedRole);
+    return true;
+  }, [credentials, findUser]);
 
   const logout = useCallback(() => {
     setCurrentUser(null);

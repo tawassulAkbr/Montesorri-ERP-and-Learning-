@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Whiteboard } from '@/components/shared/Whiteboard';
 import { useData } from '@/context/DataContext';
-import { students } from '@/data/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { getInitials } from '@/lib/utils';
 
 interface StudentHand {
   studentId: string;
@@ -17,25 +18,29 @@ interface StudentHand {
 }
 
 export const TeacherLiveClassPage: React.FC = () => {
-  const { liveClass, endLiveClass } = useData();
+  const { liveClass, endLiveClass, students } = useData();
+  const { currentUser } = useAuth();
+  const teacherName = currentUser?.name || 'Teacher';
+  const participants = students.filter(s => s.class === liveClass.class);
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [activeTab, setActiveTab] = useState<'participants' | 'hands' | 'chat'>('participants');
-  const [raisedHands, setRaisedHands] = useState<StudentHand[]>([
-    { studentId: 's1', name: 'Ali Hassan', time: '1 min ago' },
-    { studentId: 's2', name: 'Zara Ahmed', time: 'Just now' },
-  ]);
+  const [raisedHands, setRaisedHands] = useState<StudentHand[]>(
+    participants.slice(0, 2).map((s, i) => ({
+      studentId: s.id,
+      name: s.name,
+      time: i === 0 ? '1 min ago' : 'Just now',
+    }))
+  );
   const [chatMessages, setChatMessages] = useState<{ sender: string; text: string; isTeacher?: boolean }[]>([
-    { sender: 'Maria Montessori', text: 'Good morning little explorers! Today we are learning letter sounds /s/ and /a/.', isTeacher: true },
-    { sender: 'Zara Ahmed', text: 'Good morning teacher! 👋' },
-    { sender: 'Ali Hassan', text: 'I brought my apple picture! 🍎' },
+    { sender: teacherName, text: 'Good morning little explorers! Today we are learning letter sounds /s/ and /a/.', isTeacher: true },
   ]);
   const [newMsg, setNewMsg] = useState('');
 
   const handleSendMsg = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMsg) return;
-    setChatMessages(prev => [...prev, { sender: 'Maria Montessori', text: newMsg, isTeacher: true }]);
+    setChatMessages(prev => [...prev, { sender: teacherName, text: newMsg, isTeacher: true }]);
     setNewMsg('');
   };
 
@@ -104,9 +109,9 @@ export const TeacherLiveClassPage: React.FC = () => {
             {camOn ? (
               <div className="w-full h-full bg-gradient-to-tr from-indigo-900 to-purple-900 flex flex-col items-center justify-center text-white">
                 <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xl mb-1 shadow-md">
-                  MM
+                  {currentUser ? getInitials(currentUser.name) : 'KG'}
                 </div>
-                <span className="text-xs font-bold">Maria Montessori (Teacher)</span>
+                <span className="text-xs font-bold">{teacherName} (Teacher)</span>
                 <span className="text-[10px] text-emerald-400 font-semibold mt-0.5">● Camera Active</span>
               </div>
             ) : (
@@ -130,7 +135,7 @@ export const TeacherLiveClassPage: React.FC = () => {
                   activeTab === 'participants' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'
                 }`}
               >
-                <Users size={13} /> Toddlers (8)
+                <Users size={13} /> Children ({participants.length})
               </button>
               <button
                 onClick={() => setActiveTab('hands')}
@@ -159,7 +164,7 @@ export const TeacherLiveClassPage: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-3">
               {activeTab === 'participants' && (
                 <div className="space-y-2">
-                  {students.slice(0, 6).map((stu, i) => (
+                  {participants.slice(0, 8).map(stu => (
                     <div key={stu.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">

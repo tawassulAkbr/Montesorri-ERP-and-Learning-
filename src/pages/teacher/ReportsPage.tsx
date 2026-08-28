@@ -1,24 +1,38 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, Download, Printer, Search, ArrowUpRight, Award, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TestScoreBarChart } from '@/components/shared/Charts';
-import { students, testResults, scoreChartData } from '@/data/mockData';
-import { getGradeColor } from '@/lib/utils';
-import type { Student } from '@/types';
+import { useData } from '@/context/DataContext';
+import { buildScoreChartData, getGradeColor } from '@/lib/utils';
 
 export const ReportsPage: React.FC = () => {
-  const [selectedStudent, setSelectedStudent] = useState<Student>(students[0]);
+  const { students, testResults } = useData();
+  const [selectedStudentId, setSelectedStudentId] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const selectedStudent = students.find(s => s.id === selectedStudentId) || students[0];
 
   const filteredStudents = students.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.rollNo.includes(searchQuery)
   );
 
-  const studentResults = testResults.filter(r => r.studentId === selectedStudent.id);
+  const studentResults = testResults.filter(r => r.studentId === selectedStudent?.id);
+  const scoreChart = useMemo(
+    () => buildScoreChartData(testResults, selectedStudent?.id),
+    [testResults, selectedStudent?.id]
+  );
+
+  if (!selectedStudent) {
+    return (
+      <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
+        <p className="text-sm font-semibold text-slate-700">No students enrolled yet.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -58,7 +72,7 @@ export const ReportsPage: React.FC = () => {
             {filteredStudents.map(student => (
               <button
                 key={student.id}
-                onClick={() => setSelectedStudent(student)}
+                onClick={() => setSelectedStudentId(student.id)}
                 className={`w-full py-3 px-2 flex items-center justify-between text-left rounded-lg transition-colors ${
                   selectedStudent.id === student.id
                     ? 'bg-indigo-50/80 text-indigo-700'
@@ -106,7 +120,7 @@ export const ReportsPage: React.FC = () => {
               <CardTitle className="text-sm font-semibold">Subject-Wise Performance (vs Class Average)</CardTitle>
             </CardHeader>
             <CardContent>
-              <TestScoreBarChart data={scoreChartData} height={200} />
+              <TestScoreBarChart data={scoreChart} height={200} />
             </CardContent>
           </Card>
 

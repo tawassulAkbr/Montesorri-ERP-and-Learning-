@@ -1,19 +1,29 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { CalendarCheck, Check, X, Users, Clock, Filter, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Clock, CalendarOff, Check, Plus, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { AttendanceGrid } from '@/components/shared/AttendanceGrid';
-import { LeaveRequestCard } from '@/components/shared/LeaveModal';
+import { LeaveRequestCard, SubmitLeaveModal } from '@/components/shared/LeaveModal';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
+import { todayISO, isWeekend, formatDate } from '@/lib/utils';
 import type { AttendanceStatus } from '@/types';
 
 export const AttendancePage: React.FC = () => {
-  const { students, attendance, leaveRequests, markDailyAttendance, updateLeaveStatus } = useData();
+  const {
+    students, attendance, leaveRequests, teacherAttendance,
+    markDailyAttendance, updateLeaveStatus, applyTeacherLeave, markTeacherPresent,
+  } = useData();
+  const { currentUser } = useAuth();
   const [selectedClass, setSelectedClass] = useState('Junior Montessori (Nursery)');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(todayISO());
   const [activeTab, setActiveTab] = useState<'daily' | 'monthly' | 'leaves'>('daily');
+  const [openLeaveModal, setOpenLeaveModal] = useState(false);
+
+  const today = todayISO();
+  const weekend = isWeekend(today);
+  const myRecord = teacherAttendance.find(r => r.teacherId === currentUser?.id && r.date === today);
+  const myLeaves = leaveRequests.filter(l => l.kind === 'teacher' && l.teacherId === currentUser?.id);
 
   const filteredStudents = students.filter(s => s.class === selectedClass);
 
@@ -30,10 +40,7 @@ export const AttendancePage: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleToggleStatus = (studentId: string, newStatus: AttendanceStatus) => {
-    setDailyStatus(prev => ({
-      ...prev,
-      [studentId]: newStatus,
-    }));
+    setDailyStatus(prev => ({ ...prev, [studentId]: newStatus }));
   };
 
   const handleMarkAllPresent = () => {
@@ -48,9 +55,20 @@ export const AttendancePage: React.FC = () => {
       date: selectedDate,
       status,
     }));
-    markDailyAttendance(recordsToSave);
+    markDailyAttendance(recordsToSave, currentUser?.id);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
+  };
+
+  const handleApplyTeacherLeave = (data: { fromDate: string; toDate: string; reason: string }) => {
+    if (!currentUser) return;
+    applyTeacherLeave({
+      teacherId: currentUser.id,
+      teacherName: currentUser.name,
+      fromDate: data.fromDate,
+      toDate: data.toDate,
+      reason: data.reason,
+    });
   };
 
   const presentCount = Object.values(dailyStatus).filter(s => s === 'present').length;
@@ -63,7 +81,7 @@ export const AttendancePage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Montessori Attendance & Leave Portal</h1>
-          <p className="text-sm text-slate-500">Record daily roll calls, review attendance trends, and approve parent leave requests</p>
+          <p className="text-sm text-slate-500">Mark your own presence, record roll calls, and manage leaves</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -85,6 +103,58 @@ export const AttendancePage: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* My Own Attendance Card */}
+      <Card className={
+        myRecord?.status === 'present'
+          ? 'border-emerald-200 bg-emerald-50/50'
+          : 'border-indigo-200 bg-indigo-50/40'
+      }>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                myRecord?.status === 'present' ? 'bg-emerald-600' : 'bg-indigo-600'
+              } text-white`}>
+                {myRecord?.status === 'present' ? <CheckCircle2 size={20} /> : <Clock size={20} />}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {weekend
+                    ? 'It\'s the weekend'
+                    : myRecord?.status === 'present'
+                      ? 'You are marked present today'
+                      : myRecord?.status === 'leave'
+                        ? 'You are on approved leave today'
+                        : 'Mark your presence for today'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 max-w-md">
+                  {weekend
+                    ? 'No attendance is required on Saturday and Sunday.'
+                    : myRecord?.status === 'present'
+                      ? `Great! Your presence for ${formatDate(today)} has been recorded.`
+                      : myRecord?.status === 'leave'
+                        ? 'An approved leave covers today, so you are not marked absent.'
+                        : 'If you are at school, mark yourself present. Failing to mark present or apply for leave results in an automatic absent.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {!weekend && myRecord?.status !== 'present' && myRecord?.status !== 'leave' && (
+                <Button size="sm" className="gap-1.5 shadow-sm" onClick={() => currentUser && markTeacherPresent(currentUser.id)}>
+                  <Check size={15} /> Mark Myself Present
+                </Button>
+              )}
+              {!weekend && (
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setOpenLeaveModal(true)}>
+                  <CalendarOff size={15} /> Apply for Leave
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
@@ -154,7 +224,14 @@ export const AttendancePage: React.FC = () => {
                           {student.rollNo}
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-slate-800">{student.name}</p>
+                          <p className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                            {student.name}
+                            {student.feeDue && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded-full">
+                                <AlertCircle size={9} /> Fee Due
+                              </span>
+                            )}
+                          </p>
                           <p className="text-[10px] text-slate-400 font-mono">{student.enrollmentId} • {student.ageGroup}</p>
                         </div>
                       </div>
@@ -214,24 +291,57 @@ export const AttendancePage: React.FC = () => {
 
       {/* Leave Requests Tab */}
       {activeTab === 'leaves' && (
-        <div className="space-y-3">
-          {leaveRequests.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-slate-100">
-              <p className="text-sm font-semibold text-slate-700">No leave requests found</p>
-            </div>
-          ) : (
-            leaveRequests.map(leave => (
-              <LeaveRequestCard
-                key={leave.id}
-                leave={leave}
-                showActions={true}
-                onAccept={(id) => updateLeaveStatus(id, 'accepted')}
-                onReject={(id) => updateLeaveStatus(id, 'rejected')}
-              />
-            ))
-          )}
+        <div className="space-y-6">
+          {/* My own leaves */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-sm">My Leave Applications</CardTitle>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setOpenLeaveModal(true)}>
+                <Plus size={14} /> Apply for Leave
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {myLeaves.length === 0 ? (
+                <p className="text-xs text-slate-400 py-4 text-center">You have not applied for any leave yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {myLeaves.map(leave => (
+                    <LeaveRequestCard key={leave.id} leave={leave} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Student / parent leaves to review */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700">Student Leave Requests to Review</h3>
+            {leaveRequests.filter(l => l.kind === 'student').length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-slate-100">
+                <p className="text-sm font-semibold text-slate-700">No student leave requests found</p>
+              </div>
+            ) : (
+              leaveRequests.filter(l => l.kind === 'student').map(leave => (
+                <LeaveRequestCard
+                  key={leave.id}
+                  leave={leave}
+                  showActions={true}
+                  onAccept={(id) => updateLeaveStatus(id, 'accepted', currentUser?.id)}
+                  onReject={(id) => updateLeaveStatus(id, 'rejected', currentUser?.id)}
+                />
+              ))
+            )}
+          </div>
         </div>
       )}
+
+      <SubmitLeaveModal
+        open={openLeaveModal}
+        onOpenChange={setOpenLeaveModal}
+        applicantName={currentUser?.name || ''}
+        applicantLabel="Teacher"
+        onSubmit={handleApplyTeacherLeave}
+      />
     </div>
   );
 };

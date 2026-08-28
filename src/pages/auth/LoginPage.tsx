@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { mockCredentials } from '@/data/mockData';
+import { useData } from '@/context/DataContext';
 import type { Role } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -32,14 +32,13 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { credentials } = useData();
   const navigate = useNavigate();
 
-  const creds = mockCredentials[selectedRole];
+  const demoCred = credentials.find(c => c.role === selectedRole);
 
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role);
-    setEmail(mockCredentials[role].email);
-    setPassword(mockCredentials[role].password);
     setError('');
   };
 
@@ -51,7 +50,7 @@ export const LoginPage: React.FC = () => {
     if (ok) {
       navigate(ROLE_REDIRECTS[selectedRole]);
     } else {
-      setError('Invalid credentials. Use the demo credentials shown below.');
+      setError('Invalid credentials for this portal. Accounts are issued by the school admin.');
     }
     setLoading(false);
   };
@@ -83,21 +82,21 @@ export const LoginPage: React.FC = () => {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              Empowering Education<br />
-              <span className="text-indigo-200">Together</span>
+              A Montessori Home<br />
+              <span className="text-indigo-200">For Everyone</span>
             </h1>
             <p className="text-indigo-200 text-lg leading-relaxed mb-12">
-              A unified platform connecting teachers, students, and parents for a seamless learning experience.
+              Separate portals for teachers, children, and parents — one school, one shared journey.
             </p>
           </motion.div>
 
           {/* Feature pills */}
           <div className="space-y-3">
             {[
-              '📹 Video lessons with YouTube integration',
-              '📊 Real-time attendance tracking',
+              '🧩 Montessori work cycles & video lessons',
+              '📊 Daily attendance for children and staff',
               '💬 Direct teacher-parent communication',
-              '📈 Performance reports & analytics',
+              '🏫 Admin-managed accounts & fee records',
             ].map((feat, i) => (
               <motion.div
                 key={feat}
@@ -131,7 +130,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <h2 className="text-2xl font-bold text-slate-800 mb-1">Welcome back!</h2>
-          <p className="text-sm text-slate-400 mb-7">Sign in to your account to continue</p>
+          <p className="text-sm text-slate-400 mb-7">Choose your portal and sign in</p>
 
           {/* Role Selector */}
           <div className="grid grid-cols-4 gap-2 mb-6">
@@ -190,15 +189,6 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
-                <input type="checkbox" className="rounded" /> Remember me
-              </label>
-              <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
-                Forgot password?
-              </Link>
-            </div>
-
             {error && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -213,18 +203,31 @@ export const LoginPage: React.FC = () => {
               {loading ? 'Signing in...' : 'Sign in'}
               {!loading && <ArrowRight size={16} />}
             </Button>
+
+            <div className="text-center">
+              <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                Forgot password?
+              </Link>
+            </div>
           </form>
 
           {/* Demo credentials */}
           <div className={cn('mt-5 p-3 rounded-xl border text-xs', roleConfig.bg)}>
-            <p className={cn('font-semibold mb-1', roleConfig.color)}>Demo credentials ({roleConfig.label})</p>
-            <p className="text-slate-600">Email: <span className="font-mono font-medium">{creds.email}</span></p>
-            <p className="text-slate-600">Password: <span className="font-mono font-medium">{creds.password}</span></p>
+            <p className={cn('font-semibold mb-1', roleConfig.color)}>
+              Demo credentials ({roleConfig.label})
+            </p>
+            {demoCred ? (
+              <>
+                <p className="text-slate-600">Email: <span className="font-mono font-medium">{demoCred.email}</span></p>
+                <p className="text-slate-600">Password: <span className="font-mono font-medium">{demoCred.password}</span></p>
+              </>
+            ) : (
+              <p className="text-slate-600">No accounts yet — ask the school admin to create one.</p>
+            )}
           </div>
 
           <p className="text-center text-xs text-slate-400 mt-5">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-indigo-600 font-medium hover:text-indigo-700">Create one</Link>
+            Accounts are created and managed by the school administrator.
           </p>
         </motion.div>
       </div>

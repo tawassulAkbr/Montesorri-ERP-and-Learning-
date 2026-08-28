@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Video, ClipboardList, TrendingUp, Plus, CalendarCheck, MessageSquare, ArrowUpRight, Radio, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -9,12 +9,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LiveClassBanner } from '@/components/shared/LiveClassBanner';
 import { useData } from '@/context/DataContext';
-import { attendanceChartData, classPerformanceData } from '@/data/mockData';
-import { formatDate } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { buildAttendanceChartData, buildClassPerformanceData, formatDate } from '@/lib/utils';
 
 export const TeacherDashboard: React.FC = () => {
-  const { students, lessons, tests, dailyWork, leaveRequests, liveClass, startLiveClass } = useData();
+  const { students, lessons, tests, dailyWork, leaveRequests, liveClass, startLiveClass, attendance, testResults } = useData();
+  const { currentUser } = useAuth();
   const [activeClass, setActiveClass] = useState('Junior Montessori (Nursery)');
+
+  const classStudentIds = useMemo(
+    () => students.filter(s => s.class === activeClass).map(s => s.id),
+    [students, activeClass]
+  );
+  const attendanceChart = useMemo(
+    () => buildAttendanceChartData(attendance.filter(a => classStudentIds.includes(a.studentId))),
+    [attendance, classStudentIds]
+  );
+  const performanceChart = useMemo(() => buildClassPerformanceData(testResults), [testResults]);
 
   const pendingLeaves = leaveRequests.filter(l => l.status === 'pending');
   const upcomingTests = tests.filter(t => t.status === 'upcoming').slice(0, 3);
@@ -29,7 +40,7 @@ export const TeacherDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Montessori Teacher Console</h1>
-          <p className="text-sm text-slate-500">Welcome, Maria Montessori. Manage sensorial work, phonics lessons, and live online classes.</p>
+          <p className="text-sm text-slate-500">Welcome, {currentUser?.name}. Manage sensorial work, phonics lessons, and live online classes.</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -105,7 +116,7 @@ export const TeacherDashboard: React.FC = () => {
             </Link>
           </CardHeader>
           <CardContent>
-            <AttendanceAreaChart data={attendanceChartData} height={230} />
+            <AttendanceAreaChart data={attendanceChart} height={230} />
           </CardContent>
         </Card>
 
@@ -115,7 +126,7 @@ export const TeacherDashboard: React.FC = () => {
             <p className="text-xs text-slate-400 mt-0.5">Milestone attainment breakdown</p>
           </CardHeader>
           <CardContent>
-            <ClassPerformancePieChart data={classPerformanceData} height={230} />
+            <ClassPerformancePieChart data={performanceChart} height={230} />
           </CardContent>
         </Card>
       </div>
@@ -167,7 +178,7 @@ export const TeacherDashboard: React.FC = () => {
                 pendingLeaves.slice(0, 2).map(req => (
                   <div key={req.id} className="p-2.5 bg-amber-50/60 border border-amber-100 rounded-lg text-xs">
                     <div className="flex justify-between items-center font-semibold text-slate-800">
-                      <span>{req.studentName}</span>
+                      <span>{req.kind === 'teacher' ? req.teacherName : req.studentName}</span>
                       <Badge variant="outline" className="text-[10px] bg-white border-amber-300 text-amber-700">Pending</Badge>
                     </div>
                     <p className="text-slate-600 mt-1 line-clamp-1">{req.reason}</p>

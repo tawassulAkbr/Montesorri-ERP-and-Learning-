@@ -6,13 +6,25 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { teachers } from '@/data/mockData';
+import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import type { Teacher } from '@/types';
 
 export const ParentTeachersPage: React.FC = () => {
+  const { teachers, students } = useData();
+  const { currentUser } = useAuth();
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [message, setMessage] = useState('');
   const [sentSuccess, setSentSuccess] = useState(false);
+
+  const myClassSet = new Set(
+    students.filter(s => s.parentId === currentUser?.id).map(s => s.class)
+  );
+  const orderedTeachers = [...teachers].sort((a, b) => {
+    const aMine = a.classes.some(c => myClassSet.has(c)) ? 0 : 1;
+    const bMine = b.classes.some(c => myClassSet.has(c)) ? 0 : 1;
+    return aMine - bMine;
+  });
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +46,9 @@ export const ParentTeachersPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {teachers.map(teacher => {
+        {orderedTeachers.map(teacher => {
           const initials = teacher.name.split(' ').map(n => n[0]).join('');
+          const isMyChildTeacher = teacher.classes.some(c => myClassSet.has(c));
           return (
             <Card key={teacher.id} className="border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
               <CardContent className="p-5 space-y-4">
@@ -45,9 +58,16 @@ export const ParentTeachersPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-slate-800">{teacher.name}</h3>
-                    <Badge variant="outline" className="mt-1 bg-indigo-50 text-indigo-700 border-indigo-200 text-xs">
-                      {teacher.subject}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                      <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 text-xs">
+                        {teacher.subject}
+                      </Badge>
+                      {isMyChildTeacher && (
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
+                          My child's class
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -62,7 +82,7 @@ export const ParentTeachersPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <GraduationCap size={13} className="text-slate-400" />
-                    <span>Classes: {teacher.classes.join(', ')}</span>
+                    <span>{teacher.qualification}</span>
                   </div>
                 </div>
               </CardContent>

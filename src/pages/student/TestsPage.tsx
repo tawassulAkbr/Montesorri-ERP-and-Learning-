@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { ClipboardList, Award, CheckCircle2, Calendar, Clock } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { tests, testResults } from '@/data/mockData';
+import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDate, getGradeColor } from '@/lib/utils';
 
 export const StudentTestsPage: React.FC = () => {
+  const { tests, testResults, students } = useData();
+  const { currentUser } = useAuth();
+  const me = students.find(s => s.id === currentUser?.id);
   const [tab, setTab] = useState<'upcoming' | 'results'>('upcoming');
 
-  const upcomingTests = tests.filter(t => t.status === 'upcoming');
-  const myResults = testResults.filter(r => r.studentId === 's1');
+  const upcomingTests = tests.filter(t => t.status === 'upcoming' && (!me || t.class === me.class));
+  const myResults = testResults.filter(r => r.studentId === currentUser?.id);
 
   return (
     <div className="space-y-6">

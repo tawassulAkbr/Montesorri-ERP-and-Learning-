@@ -1,16 +1,27 @@
-import { Download, Printer, BarChart3, TrendingUp, Users, CalendarCheck } from 'lucide-react';
+import { useMemo } from 'react';
+import { Download, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ClassPerformancePieChart, AttendanceAreaChart, EnrollmentLineChart } from '@/components/shared/Charts';
-import { attendanceChartData, classPerformanceData, enrollmentChartData } from '@/data/mockData';
+import { ClassPerformancePieChart, AttendanceAreaChart } from '@/components/shared/Charts';
+import { useData } from '@/context/DataContext';
+import { buildAttendanceChartData, buildClassPerformanceData, MONTESSORI_CLASSES } from '@/lib/utils';
 
 export const AdminReportsPage: React.FC = () => {
+  const { attendance, testResults, students } = useData();
+
+  const attendanceChart = useMemo(() => buildAttendanceChartData(attendance), [attendance]);
+  const performanceChart = useMemo(() => buildClassPerformanceData(testResults), [testResults]);
+  const classDistribution = useMemo(() => MONTESSORI_CLASSES.map(cls => ({
+    month: cls.split(' (')[0].replace('Montessori', '').trim() || cls,
+    students: students.filter(s => s.class === cls).length,
+  })), [students]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Institution Performance Reports</h1>
-          <p className="text-sm text-slate-500">School-wide academic metrics, exam standings, and enrollment evaluations</p>
+          <p className="text-sm text-slate-500">School-wide academic metrics, milestone standings, and enrollment overview</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -18,7 +29,7 @@ export const AdminReportsPage: React.FC = () => {
             <Printer size={15} /> Print Summary
           </Button>
           <Button size="sm" className="gap-1.5 text-xs">
-            <Download size={15} /> Export Audit PDF
+            <Download size={15} /> Export PDF
           </Button>
         </div>
       </div>
@@ -26,31 +37,39 @@ export const AdminReportsPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Campus Grade Distribution</CardTitle>
-            <p className="text-xs text-slate-400">Term 1 overall performance breakdown across all classes</p>
+            <CardTitle className="text-base font-semibold">Milestone Grade Distribution</CardTitle>
+            <p className="text-xs text-slate-400">Overall performance breakdown across all evaluated milestones</p>
           </CardHeader>
           <CardContent>
-            <ClassPerformancePieChart data={classPerformanceData} height={240} />
+            <ClassPerformancePieChart data={performanceChart} height={240} />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">School-Wide Attendance Volume</CardTitle>
-            <p className="text-xs text-slate-400">Daily student presence numbers across campus</p>
+            <p className="text-xs text-slate-400">Daily student presence numbers across campus (30 days)</p>
           </CardHeader>
           <CardContent>
-            <AttendanceAreaChart data={attendanceChartData} height={240} />
+            <AttendanceAreaChart data={attendanceChart} height={240} />
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">Yearly Enrollment Statistics</CardTitle>
+          <CardTitle className="text-base font-semibold">Enrollment by Class</CardTitle>
+          <p className="text-xs text-slate-400">Current student distribution across Montessori cohorts</p>
         </CardHeader>
         <CardContent>
-          <EnrollmentLineChart data={enrollmentChartData} height={240} />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {classDistribution.map(item => (
+              <div key={item.month} className="p-4 rounded-xl border border-slate-100 bg-slate-50 text-center">
+                <p className="text-2xl font-bold text-indigo-700">{item.students}</p>
+                <p className="text-xs font-semibold text-slate-600 mt-1">{item.month}</p>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -6,16 +6,17 @@ import { Check, X, Calendar, FileText } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import type { LeaveRequest } from '@/types';
 
-// ─── Parent: Submit Leave Modal ───────────────────────────────────────────────
+// ─── Submit Leave Modal (students via parents, and teachers) ─────────────────
 interface SubmitLeaveModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentName: string;
+  applicantName: string;
+  applicantLabel?: string;
   onSubmit: (data: { fromDate: string; toDate: string; reason: string }) => void;
 }
 
 export const SubmitLeaveModal: React.FC<SubmitLeaveModalProps> = ({
-  open, onOpenChange, studentName, onSubmit,
+  open, onOpenChange, applicantName, applicantLabel = 'Student', onSubmit,
 }) => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -40,7 +41,7 @@ export const SubmitLeaveModal: React.FC<SubmitLeaveModalProps> = ({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-indigo-50 rounded-lg p-3 text-sm text-indigo-700">
-            Student: <strong>{studentName}</strong>
+            {applicantLabel}: <strong>{applicantName}</strong>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -111,7 +112,12 @@ export const LeaveRequestCard: React.FC<LeaveRequestCardProps> = ({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <span className="font-semibold text-sm text-slate-800">{leave.studentName}</span>
+          <span className="font-semibold text-sm text-slate-800">
+            {leave.kind === 'teacher' ? leave.teacherName : leave.studentName}
+            {leave.kind === 'teacher' && (
+              <span className="ml-2 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full">Teacher</span>
+            )}
+          </span>
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.className}`}>
             {cfg.label}
           </span>
@@ -120,7 +126,9 @@ export const LeaveRequestCard: React.FC<LeaveRequestCardProps> = ({
           {formatDate(leave.fromDate)} {leave.fromDate !== leave.toDate && `– ${formatDate(leave.toDate)}`}
         </p>
         <p className="text-xs text-slate-600 line-clamp-2">{leave.reason}</p>
-        <p className="text-xs text-slate-400 mt-1">by {leave.parentName}</p>
+        {leave.kind !== 'teacher' && (
+          <p className="text-xs text-slate-400 mt-1">by {leave.parentName}</p>
+        )}
         {showActions && leave.status === 'pending' && (
           <div className="flex gap-2 mt-2">
             <button

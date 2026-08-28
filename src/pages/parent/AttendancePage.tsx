@@ -6,23 +6,28 @@ import { Badge } from '@/components/ui/badge';
 import { AttendanceGrid } from '@/components/shared/AttendanceGrid';
 import { SubmitLeaveModal } from '@/components/shared/LeaveModal';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDate } from '@/lib/utils';
 import type { LeaveRequest } from '@/types';
 
 export const ParentAttendancePage: React.FC = () => {
   const { students, attendance, leaveRequests, applyLeave } = useData();
-  const myChildren = students.filter(s => s.parentId === 'p1');
-  const [selectedChildId, setSelectedChildId] = useState<string>(myChildren[0]?.id || 's1');
+  const { currentUser } = useAuth();
+  const myChildren = students.filter(s => s.parentId === currentUser?.id);
+  const [selectedChildId, setSelectedChildId] = useState<string>(myChildren[0]?.id || '');
   const [openModal, setOpenModal] = useState(false);
 
   const selectedChild = myChildren.find(c => c.id === selectedChildId) || myChildren[0];
-  const childLeaves = leaveRequests.filter(l => l.studentId === selectedChild.id);
-  const childAttendance = attendance.filter(a => a.studentId === selectedChild.id);
+  const childLeaves = leaveRequests.filter(l => l.kind === 'student' && l.studentId === selectedChild?.id);
+  const childAttendance = attendance.filter(a => a.studentId === selectedChild?.id);
 
   const handleApplyLeave = (data: { fromDate: string; toDate: string; reason: string }) => {
+    if (!selectedChild || !currentUser) return;
     applyLeave({
       studentId: selectedChild.id,
       studentName: selectedChild.name,
+      parentId: currentUser.id,
+      parentName: currentUser.name,
       fromDate: data.fromDate,
       toDate: data.toDate,
       reason: data.reason,
@@ -39,6 +44,15 @@ export const ParentAttendancePage: React.FC = () => {
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">Rejected</Badge>;
     }
   };
+
+  if (!selectedChild) {
+    return (
+      <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
+        <p className="text-sm font-semibold text-slate-700">No children are linked to this account yet.</p>
+        <p className="text-xs text-slate-400 mt-1">Please contact the school administrator.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -115,7 +129,7 @@ export const ParentAttendancePage: React.FC = () => {
       <SubmitLeaveModal
         open={openModal}
         onOpenChange={setOpenModal}
-        studentName={selectedChild.name}
+        applicantName={selectedChild.name}
         onSubmit={handleApplyLeave}
       />
     </div>

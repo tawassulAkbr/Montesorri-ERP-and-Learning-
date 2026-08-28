@@ -8,30 +8,37 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
+import { useData } from '@/context/DataContext';
 import { useSidebar } from '@/hooks/useSidebar';
 import { getInitials, avatarColors } from '@/lib/utils';
-import { notifications } from '@/data/mockData';
 
 const BREADCRUMB_LABELS: Record<string, string> = {
   dashboard: 'Dashboard', lessons: 'Lessons', tests: 'Tests', attendance: 'Attendance',
   reports: 'Reports', remarks: 'Remarks', 'daily-work': 'Daily Work', lectures: 'Lectures',
   teachers: 'Teachers', users: 'Users', classes: 'Classes', settings: 'Settings',
+  students: 'Students', 'live-class': 'Live Class', schedule: 'Schedule',
 };
 
 export const Topbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
+  const { notifications, markNotificationRead } = useData();
   const { openMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const unread = notifications.filter(n => !n.read).length;
+  const myNotifications = notifications.filter(n => n.userId === currentUser?.id);
+  const unread = myNotifications.filter(n => !n.read).length;
   const crumbs = location.pathname.split('/').filter(Boolean);
 
   const initials = currentUser ? getInitials(currentUser.name) : 'KG';
   const avatarCls = currentUser ? avatarColors(currentUser.name) : 'bg-indigo-100 text-indigo-700';
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const handleMarkAllRead = () => {
+    myNotifications.filter(n => !n.read).forEach(n => markNotificationRead(n.id));
+  };
 
   return (
     <header className="h-16 bg-white/80 backdrop-blur-sm border-b border-slate-100 flex items-center px-4 gap-3 sticky top-0 z-30">
@@ -83,23 +90,28 @@ export const Topbar: React.FC = () => {
                 {unread > 0 && <Badge variant="secondary" className="ml-2 text-xs">{unread} new</Badge>}
               </div>
               <div className="max-h-72 overflow-y-auto">
-                {notifications.map(n => (
-                  <div
-                    key={n.id}
-                    className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.read ? 'bg-indigo-50/40' : ''}`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.type === 'success' ? 'bg-emerald-400' : n.type === 'warning' ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : 'bg-indigo-400'}`} />
-                      <div>
-                        <p className="text-xs font-semibold text-slate-700">{n.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{n.message}</p>
+                {myNotifications.length === 0 ? (
+                  <p className="text-xs text-slate-400 text-center py-6">No notifications yet.</p>
+                ) : (
+                  myNotifications.map(n => (
+                    <button
+                      key={n.id}
+                      onClick={() => markNotificationRead(n.id)}
+                      className={`w-full text-left px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${!n.read ? 'bg-indigo-50/40' : ''}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.type === 'success' ? 'bg-emerald-400' : n.type === 'warning' ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : 'bg-indigo-400'}`} />
+                        <div>
+                          <p className="text-xs font-semibold text-slate-700">{n.title}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{n.message}</p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    </button>
+                  ))
+                )}
               </div>
               <button
-                onClick={() => setNotifOpen(false)}
+                onClick={handleMarkAllRead}
                 className="w-full text-center text-xs text-indigo-600 font-medium py-3 hover:bg-slate-50 transition-colors"
               >
                 Mark all as read

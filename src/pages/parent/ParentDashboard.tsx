@@ -1,37 +1,60 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { CalendarCheck, MessageSquare, BookOpen, GraduationCap, Heart, Award, ArrowUpRight, Plus, Sparkles } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { CalendarCheck, MessageSquare, ArrowUpRight, Plus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
 import { AttendanceAreaChart } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { SubmitLeaveModal } from '@/components/shared/LeaveModal';
 import { LiveClassBanner } from '@/components/shared/LiveClassBanner';
 import { useData } from '@/context/DataContext';
-import { attendanceChartData } from '@/data/mockData';
-import { formatDate } from '@/lib/utils';
-import type { Student } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
+import { buildAttendanceChartData, formatDate, getInitials } from '@/lib/utils';
 
 export const ParentDashboard: React.FC = () => {
-  const { students, remarks, leaveRequests, teachers, applyLeave } = useData();
-  const myChildren = students.filter(s => s.parentId === 'p1');
-  const [selectedChild, setSelectedChild] = useState<Student>(myChildren[0] || students[0]);
+  const { currentUser } = useAuth();
+  const { students, remarks, leaveRequests, teachers, applyLeave, attendance } = useData();
+  const myChildren = students.filter(s => s.parentId === currentUser?.id);
+  const [selectedChildId, setSelectedChildId] = useState('');
   const [openLeaveModal, setOpenLeaveModal] = useState(false);
 
-  const childRemarks = remarks.filter(r => r.studentId === selectedChild.id);
-  const childLeaves = leaveRequests.filter(l => l.studentId === selectedChild.id);
+  const selectedChild = myChildren.find(c => c.id === selectedChildId) || myChildren[0];
+
+  const childAttendance = useMemo(
+    () => attendance.filter(a => a.studentId === selectedChild?.id),
+    [attendance, selectedChild?.id]
+  );
+  const chartData = useMemo(() => buildAttendanceChartData(childAttendance), [childAttendance]);
+
+  const childRemarks = remarks.filter(r => r.studentId === selectedChild?.id);
+  const childLeaves = leaveRequests.filter(l => l.kind === 'student' && l.studentId === selectedChild?.id);
+
+  const presentCount = childAttendance.filter(a => a.status === 'present').length;
+  const attendanceRate = childAttendance.length
+    ? Math.round((presentCount / childAttendance.length) * 100)
+    : 100;
 
   const handleApplyLeave = (data: { fromDate: string; toDate: string; reason: string }) => {
+    if (!selectedChild || !currentUser) return;
     applyLeave({
       studentId: selectedChild.id,
       studentName: selectedChild.name,
+      parentId: currentUser.id,
+      parentName: currentUser.name,
       fromDate: data.fromDate,
       toDate: data.toDate,
       reason: data.reason,
     });
   };
+
+  if (!selectedChild) {
+    return (
+      <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
+        <p className="text-sm font-semibold text-slate-700">No children are linked to this account yet.</p>
+        <p className="text-xs text-slate-400 mt-1">Please contact the school administrator.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -42,7 +65,7 @@ export const ParentDashboard: React.FC = () => {
       <div className="bg-gradient-to-r from-sky-600 via-indigo-600 to-indigo-700 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs uppercase tracking-wider text-sky-200 font-bold">Montessori Parent Portal</span>
-          <h1 className="text-2xl font-bold mt-1">Welcome, Mr. Hassan Ahmed! 👨‍👧‍👦</h1>
+          <h1 className="text-2xl font-bold mt-1">Welcome, {currentUser?.name}!</h1>
           <p className="text-xs text-sky-100 mt-1">
             Active child development monitoring & live kindergarten communication
           </p>
@@ -52,10 +75,7 @@ export const ParentDashboard: React.FC = () => {
           <span className="text-xs font-semibold text-sky-100 pl-2">Active Child:</span>
           <select
             value={selectedChild.id}
-            onChange={e => {
-              const c = myChildren.find(child => child.id === e.target.value);
-              if (c) setSelectedChild(c);
-            }}
+            onChange={e => setSelectedChildId(e.target.value)}
             className="text-xs font-bold bg-white text-slate-800 rounded-lg px-3 py-1.5 outline-none shadow-sm cursor-pointer"
           >
             {myChildren.map(c => (
@@ -69,10 +89,9 @@ export const ParentDashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Circle Attendance"
-          value="96%"
-          subtitle="28 days attended"
+          value={`${attendanceRate}%`}
+          subtitle={`${presentCount} days attended`}
           icon={<CalendarCheck className="text-emerald-600" size={20} />}
-          trend={3}
           iconBg="bg-emerald-50"
         />
         <StatCard
@@ -92,9 +111,8 @@ export const ParentDashboard: React.FC = () => {
         <StatCard
           title="Milestone Progress"
           value="Mastered 🌟"
-          subtitle="Age group 3-4 years"
+          subtitle={`Age group ${selectedChild.ageGroup || '2-4 Years'}`}
           icon={<Sparkles className="text-amber-600" size={20} />}
-          trend={4}
           iconBg="bg-amber-50"
         />
       </div>
@@ -112,7 +130,7 @@ export const ParentDashboard: React.FC = () => {
             </Link>
           </CardHeader>
           <CardContent>
-            <AttendanceAreaChart data={attendanceChartData} height={230} />
+            <AttendanceAreaChart data={chartData} height={230} />
           </CardContent>
         </Card>
 
@@ -172,11 +190,11 @@ export const ParentDashboard: React.FC = () => {
             </Link>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            {teachers.slice(0, 3).map(teacher => (
+            {teachers.filter(t => t.classes.includes(selectedChild.class)).slice(0, 3).map(teacher => (
               <div key={teacher.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                    {teacher.name.split(' ').map(n => n[0]).join('')}
+                    {getInitials(teacher.name)}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-800">{teacher.name}</p>
@@ -198,7 +216,7 @@ export const ParentDashboard: React.FC = () => {
       <SubmitLeaveModal
         open={openLeaveModal}
         onOpenChange={setOpenLeaveModal}
-        studentName={selectedChild.name}
+        applicantName={selectedChild.name}
         onSubmit={handleApplyLeave}
       />
     </div>

@@ -20,6 +20,7 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Video Lessons', to: '/teacher/lessons', icon: <Video size={18} /> },
     { label: 'Daily Activities', to: '/teacher/daily-work', icon: <BookOpen size={18} /> },
     { label: 'Attendance', to: '/teacher/attendance', icon: <CalendarCheck size={18} /> },
+    { label: 'My Students', to: '/teacher/students', icon: <Users size={18} /> },
     { label: 'Milestones & Tests', to: '/teacher/tests', icon: <ClipboardList size={18} /> },
     { label: 'Observations & Remarks', to: '/teacher/remarks', icon: <MessageSquare size={18} /> },
     { label: 'Progress Reports', to: '/teacher/reports', icon: <BarChart3 size={18} /> },

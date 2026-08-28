@@ -1,27 +1,36 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { KeyRound, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { KeyRound, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ChangePasswordPage: React.FC = () => {
+  const { changePassword } = useData();
+  const { currentUser } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword && newPassword === confirmPassword) {
+    setError('');
+    if (!currentUser) return;
+    if (newPassword !== confirmPassword) return;
+    const ok = changePassword(currentUser.id, currentPassword, newPassword);
+    if (ok) {
       setSubmitted(true);
-      setTimeout(() => {
-        setSubmitted(false);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      }, 3000);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setSubmitted(false), 3000);
+    } else {
+      setError('Current password is incorrect. Please try again.');
     }
   };
 
@@ -53,6 +62,13 @@ export const ChangePasswordPage: React.FC = () => {
               <CheckCircle2 size={16} />
               Password updated successfully!
             </motion.div>
+          )}
+
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm mb-4">
+              <AlertCircle size={16} />
+              {error}
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
