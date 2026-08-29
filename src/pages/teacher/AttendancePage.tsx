@@ -132,7 +132,7 @@ export const AttendancePage: React.FC = () => {
                   {weekend
                     ? 'No attendance is required on Saturday and Sunday.'
                     : myRecord?.status === 'present'
-                      ? `Great! Your presence for ${formatDate(today)} has been recorded.`
+                      ? `Great! Your presence for ${formatDate(today)} has been recorded${myRecord.checkInTime ? ` at ${myRecord.checkInTime}` : ''}. The admin can see your check-in time.`
                       : myRecord?.status === 'leave'
                         ? 'An approved leave covers today, so you are not marked absent.'
                         : 'If you are at school, mark yourself present. Failing to mark present or apply for leave results in an automatic absent.'}

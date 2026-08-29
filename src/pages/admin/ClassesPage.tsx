@@ -1,160 +1,91 @@
-import { useState } from 'react';
-import { BookMarked, Plus, Users, GraduationCap, Edit, Trash2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { BookMarked, Users, GraduationCap, AlertCircle } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-
-interface ClassItem {
-  id: string;
-  name: string;
-  section: string;
-  studentsCount: number;
-  classTeacher: string;
-  subjects: string[];
-}
-
-const initialClasses: ClassItem[] = [
-  { id: 'c1', name: 'Grade 5', section: 'A', studentsCount: 24, classTeacher: 'Sarah Mitchell', subjects: ['Math', 'English', 'Science', 'Arabic', 'Art'] },
-  { id: 'c2', name: 'Grade 5', section: 'B', studentsCount: 22, classTeacher: 'James Harrison', subjects: ['Math', 'English', 'Science', 'Arabic'] },
-  { id: 'c3', name: 'Grade 6', section: 'A', studentsCount: 26, classTeacher: 'Fatima Al-Rashid', subjects: ['Math', 'English', 'Science', 'Social Studies'] },
-  { id: 'c4', name: 'Grade 6', section: 'B', studentsCount: 20, classTeacher: 'Omar Sheikh', subjects: ['Math', 'English', 'Science', 'Arabic'] },
-];
+import { useData } from '@/context/DataContext';
+import { MONTESSORI_CLASSES } from '@/lib/utils';
 
 export const AdminClassesPage: React.FC = () => {
-  const [classesList, setClassesList] = useState<ClassItem[]>(initialClasses);
-  const [openModal, setOpenModal] = useState(false);
-  const [className, setClassName] = useState('');
-  const [section, setSection] = useState('');
-  const [teacher, setTeacher] = useState('Sarah Mitchell');
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!className || !section) return;
-
-    const newClass: ClassItem = {
-      id: `class-${Date.now()}`,
-      name: className,
-      section,
-      studentsCount: 0,
-      classTeacher: teacher,
-      subjects: ['Math', 'English', 'Science'],
-    };
-
-    setClassesList([...classesList, newClass]);
-    setOpenModal(false);
-    setClassName('');
-    setSection('');
-  };
+  const { students, teachers, schedules } = useData();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Classrooms & Sections</h1>
-          <p className="text-sm text-slate-500">Manage academic cohorts, assign lead teachers, and monitor cohort enrollment</p>
-        </div>
-
-        <Button onClick={() => setOpenModal(true)} className="gap-2 shadow-sm">
-          <Plus size={16} /> Create New Class
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800">Montessori Cohorts</h1>
+        <p className="text-sm text-slate-500">Live overview of each cohort — enrollment, assigned guides, and fee status</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {classesList.map(cls => (
-          <Card key={cls.id} className="border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
-            <CardHeader className="p-5 bg-slate-50/70 border-b border-slate-100 flex flex-row items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-800">{cls.name} — Section {cls.section}</h3>
-                <p className="text-xs text-slate-400">Class Lead: {cls.classTeacher}</p>
-              </div>
-              <Badge className="bg-indigo-600 text-white text-xs">
-                {cls.studentsCount} Students
-              </Badge>
-            </CardHeader>
+        {MONTESSORI_CLASSES.map(cohort => {
+          const cohortStudents = students.filter(s => s.class === cohort);
+          const cohortTeachers = teachers.filter(t => t.classes.includes(cohort));
+          const feeDueCount = cohortStudents.filter(s => s.feeDue).length;
+          const scheduleCount = schedules.filter(s => s.class === cohort).length;
 
-            <CardContent className="p-5 space-y-3">
-              <div>
-                <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1.5">
-                  Curriculum Subjects
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {cls.subjects.map(s => (
-                    <span key={s} className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium">
-                      {s}
-                    </span>
-                  ))}
+          return (
+            <Card key={cohort} className="border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
+              <CardHeader className="p-5 bg-slate-50/70 border-b border-slate-100 flex flex-row items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-slate-800">{cohort}</h3>
+                  <p className="text-xs text-slate-400">
+                    {cohortTeachers.length} guide{cohortTeachers.length !== 1 ? 's' : ''} assigned
+                  </p>
                 </div>
-              </div>
-            </CardContent>
+                <Badge className="bg-indigo-600 text-white text-xs">
+                  <Users size={12} className="mr-1" /> {cohortStudents.length}
+                </Badge>
+              </CardHeader>
 
-            <div className="p-4 bg-slate-50/40 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs text-slate-400">Term 1 Active</span>
-              <div className="space-x-1">
-                <Button variant="ghost" size="sm" className="text-xs text-indigo-600">
-                  Manage Roster
-                </Button>
+              <CardContent className="p-5 space-y-3">
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1.5">
+                    Assigned Guides
+                  </span>
+                  {cohortTeachers.length === 0 ? (
+                    <p className="text-xs text-slate-400">No guides assigned yet.</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {cohortTeachers.map(t => (
+                        <div key={t.id} className="flex items-center gap-2 text-xs">
+                          <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                            <GraduationCap size={12} />
+                          </div>
+                          <span className="text-slate-700 font-medium">{t.name}</span>
+                          <span className="text-slate-400 text-[10px] truncate">{t.subject}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="bg-slate-50 rounded-lg p-2.5 text-center">
+                    <p className="text-lg font-bold text-slate-800">{scheduleCount}</p>
+                    <p className="text-[10px] text-slate-400">Daily activities</p>
+                  </div>
+                  <div className={`rounded-lg p-2.5 text-center ${feeDueCount > 0 ? 'bg-red-50' : 'bg-emerald-50'}`}>
+                    <p className={`text-lg font-bold ${feeDueCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{feeDueCount}</p>
+                    <p className={`text-[10px] ${feeDueCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>Fee due</p>
+                  </div>
+                </div>
+
+                {feeDueCount > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-red-600 bg-red-50 border border-red-100 rounded-lg px-2.5 py-2">
+                    <AlertCircle size={13} />
+                    {cohortStudents.filter(s => s.feeDue).map(s => s.name).join(', ')}
+                  </div>
+                )}
+              </CardContent>
+
+              <div className="p-4 bg-slate-50/40 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <BookMarked size={13} /> Active cohort
+                </span>
+                <span className="text-xs text-slate-500 font-medium">{cohortStudents.length} enrolled</span>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
-
-      <Dialog open={openModal} onOpenChange={setOpenModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create Academic Cohort</DialogTitle>
-          </DialogHeader>
-
-          <form onSubmit={handleCreate} className="space-y-4">
-            <div>
-              <Label className="text-xs font-medium text-slate-600">Grade Level</Label>
-              <Input
-                value={className}
-                onChange={e => setClassName(e.target.value)}
-                placeholder="e.g. Grade 7"
-                className="mt-1 text-xs"
-                required
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-medium text-slate-600">Section</Label>
-              <Input
-                value={section}
-                onChange={e => setSection(e.target.value)}
-                placeholder="e.g. A"
-                className="mt-1 text-xs"
-                required
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-medium text-slate-600">Assign Class Teacher</Label>
-              <select
-                value={teacher}
-                onChange={e => setTeacher(e.target.value)}
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option>Sarah Mitchell</option>
-                <option>James Harrison</option>
-                <option>Fatima Al-Rashid</option>
-                <option>Omar Sheikh</option>
-                <option>Priya Sharma</option>
-              </select>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => setOpenModal(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">Create Class</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

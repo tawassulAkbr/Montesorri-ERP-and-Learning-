@@ -49,3 +49,24 @@ export const apiPost = <T>(path: string, body?: unknown) => request<T>('POST', p
 export const apiPut = <T>(path: string, body?: unknown) => request<T>('PUT', path, body);
 export const apiPatch = <T>(path: string, body?: unknown) => request<T>('PATCH', path, body);
 export const apiDelete = <T>(path: string) => request<T>('DELETE', path);
+
+export async function uploadFile(file: File): Promise<{ fileName: string; filePath: string; url: string }> {
+  const form = new FormData();
+  form.append('file', file);
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch('/api/upload', { method: 'POST', headers, body: form });
+  let data: unknown = null;
+  try {
+    data = await res.json();
+  } catch {
+    // ignore non-JSON
+  }
+  if (!res.ok) {
+    const message = (data as { error?: string })?.error || `Upload failed (${res.status})`;
+    throw new ApiError(res.status, message);
+  }
+  return data as { fileName: string; filePath: string; url: string };
+}

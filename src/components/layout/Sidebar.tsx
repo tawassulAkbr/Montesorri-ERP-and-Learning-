@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Video, ClipboardList, CalendarCheck, BarChart3,
   MessageSquare, BookOpen, Users, GraduationCap, Heart, ShieldCheck,
-  LogOut, ChevronLeft, ChevronRight, Settings, BookMarked, Radio, Calendar
+  LogOut, ChevronLeft, ChevronRight, Settings, BookMarked, Radio, Calendar,
+  MessageSquareHeart
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,7 +23,10 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Attendance', to: '/teacher/attendance', icon: <CalendarCheck size={18} /> },
     { label: 'My Students', to: '/teacher/students', icon: <Users size={18} /> },
     { label: 'Milestones & Tests', to: '/teacher/tests', icon: <ClipboardList size={18} /> },
+    { label: 'Assignments & Tasks', to: '/teacher/assignments', icon: <ClipboardList size={18} /> },
     { label: 'Observations & Remarks', to: '/teacher/remarks', icon: <MessageSquare size={18} /> },
+    { label: 'Student Feedback', to: '/teacher/feedback', icon: <MessageSquareHeart size={18} /> },
+    { label: 'Parent Messages', to: '/teacher/messages', icon: <MessageSquare size={18} /> },
     { label: 'Progress Reports', to: '/teacher/reports', icon: <BarChart3 size={18} /> },
   ],
   student: [
@@ -32,7 +36,9 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Video Lectures', to: '/student/lectures', icon: <Video size={18} /> },
     { label: 'Daily Activities', to: '/student/daily-work', icon: <BookOpen size={18} /> },
     { label: 'Milestones & Tests', to: '/student/tests', icon: <ClipboardList size={18} /> },
+    { label: 'My Assignments', to: '/student/assignments', icon: <ClipboardList size={18} /> },
     { label: 'Progress Report', to: '/student/reports', icon: <BarChart3 size={18} /> },
+    { label: 'Give Feedback', to: '/student/feedback', icon: <MessageSquareHeart size={18} /> },
   ],
   parent: [
     { label: 'Dashboard', to: '/parent/dashboard', icon: <LayoutDashboard size={18} /> },
@@ -47,6 +53,8 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Users Directory', to: '/admin/users', icon: <Users size={18} /> },
     { label: 'Class Cohorts', to: '/admin/classes', icon: <BookMarked size={18} /> },
     { label: 'School Reports', to: '/admin/reports', icon: <BarChart3 size={18} /> },
+    { label: 'Teacher Reports', to: '/admin/teacher-reports', icon: <GraduationCap size={18} /> },
+    { label: 'Student Feedback', to: '/admin/feedback', icon: <MessageSquareHeart size={18} /> },
     { label: 'Settings', to: '/admin/settings', icon: <Settings size={18} /> },
   ],
 };

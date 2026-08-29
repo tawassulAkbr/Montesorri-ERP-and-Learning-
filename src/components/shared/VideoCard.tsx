@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, Eye, BookOpen } from 'lucide-react';
+import { Play, Eye, BookOpen, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
@@ -10,16 +10,24 @@ interface VideoCardProps {
 }
 
 const SUBJECT_COLORS: Record<string, string> = {
-  'Mathematics': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'Science': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'English': 'bg-sky-50 text-sky-700 border-sky-200',
-  'Arabic': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Art & Craft': 'bg-pink-50 text-pink-700 border-pink-200',
+  'Phonics & Language': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'Phonics & Early Language': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'Sensorial & Practical Life': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Sensorial & Practical Life (EPL)': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Early Mathematics': 'bg-sky-50 text-sky-700 border-sky-200',
+  'Early Mathematics & Counting': 'bg-sky-50 text-sky-700 border-sky-200',
+  'Rhymes & Story Circle': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Rhymes, Story Circle & Arabic': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Creative Arts & Crafts': 'bg-pink-50 text-pink-700 border-pink-200',
+  'Creative Arts & Motor Skills': 'bg-pink-50 text-pink-700 border-pink-200',
 };
 
 export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
   const [open, setOpen] = useState(false);
-  const thumbUrl = `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`;
+  const isUpload = !lesson.youtubeId && !!lesson.videoUrl;
+  const thumbUrl = lesson.youtubeId
+    ? `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`
+    : null;
   const subjectColor = SUBJECT_COLORS[lesson.subject] || 'bg-slate-50 text-slate-700 border-slate-200';
 
   return (
@@ -32,12 +40,19 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
         onClick={() => setOpen(true)}
       >
         {/* Thumbnail */}
-        <div className="relative aspect-video bg-slate-100 overflow-hidden">
-          <img
-            src={thumbUrl}
-            alt={lesson.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+        <div className="relative aspect-video bg-gradient-to-br from-indigo-100 to-violet-100 overflow-hidden">
+          {thumbUrl ? (
+            <img
+              src={thumbUrl}
+              alt={lesson.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-indigo-400 gap-2">
+              <Video size={28} />
+              <span className="text-[10px] font-semibold uppercase tracking-wide">Teacher Recording</span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
             <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
               <Play className="text-indigo-600 w-5 h-5 ml-0.5" fill="currentColor" />
@@ -54,6 +69,11 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${subjectColor}`}>
               {lesson.subject}
             </span>
+            {isUpload && (
+              <span className="text-[10px] font-semibold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+                Uploaded
+              </span>
+            )}
           </div>
           <h3 className="font-semibold text-slate-800 text-sm leading-snug mb-2 line-clamp-2">
             {lesson.title}
@@ -78,14 +98,18 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
           <DialogHeader className="p-4 pb-0">
             <DialogTitle className="text-base">{lesson.title}</DialogTitle>
           </DialogHeader>
-          <div className="aspect-video w-full">
-            <iframe
-              src={`https://www.youtube.com/embed/${lesson.youtubeId}?autoplay=1`}
-              className="w-full h-full"
-              allowFullScreen
-              allow="autoplay"
-              title={lesson.title}
-            />
+          <div className="aspect-video w-full bg-black">
+            {lesson.youtubeId ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${lesson.youtubeId}?autoplay=1`}
+                className="w-full h-full"
+                allowFullScreen
+                allow="autoplay"
+                title={lesson.title}
+              />
+            ) : (
+              <video src={lesson.videoUrl} controls autoPlay className="w-full h-full" title={lesson.title} />
+            )}
           </div>
           <div className="p-4">
             <div className="flex items-center gap-2 mb-2">

@@ -268,6 +268,32 @@ adminRouter.patch('/students/:id/fee-due', async (req, res) => {
   res.json({ ok: true, feeDue: due });
 });
 
+// ─── Fee reminder (admin nudges student + parent) ────────────────────────────
+adminRouter.post('/students/:id/fee-reminder', async (req, res) => {
+  const student = await prisma.student.findUnique({ where: { id: String(req.params.id) } });
+  if (!student) throw notFound('Student not found');
+
+  await prisma.$transaction([
+    prisma.notification.create({
+      data: {
+        userId: student.id, role: 'STUDENT',
+        title: 'Fee reminder',
+        message: 'Reminder: a fee payment is due. Please ask a parent/guardian to contact the school office.',
+        type: 'WARNING', kind: 'FEE_DUE', relatedStudentId: student.id,
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: student.parentId, role: 'PARENT',
+        title: 'Fee reminder',
+        message: `Reminder: a fee payment is due for ${student.name}. Please contact the school office.`,
+        type: 'WARNING', kind: 'FEE_DUE', relatedStudentId: student.id,
+      },
+    }),
+  ]);
+  res.json({ ok: true });
+});
+
 // ─── Password reset (admin-generated, emailed) ───────────────────────────────
 adminRouter.post('/users/:id/reset-password', async (req, res) => {
   const role = z.enum(['teacher', 'student', 'parent']).parse(req.body.role);

@@ -21,6 +21,11 @@ export const ReportsPage: React.FC = () => {
   );
 
   const studentResults = testResults.filter(r => r.studentId === selectedStudent?.id);
+
+  const GRADE_ORDER = ['A+', 'A', 'B', 'C', 'D', 'F'];
+  const bestGrade = studentResults.length
+    ? [...studentResults].sort((a, b) => GRADE_ORDER.indexOf(a.grade) - GRADE_ORDER.indexOf(b.grade))[0].grade
+    : null;
   const scoreChart = useMemo(
     () => buildScoreChartData(testResults, selectedStudent?.id),
     [testResults, selectedStudent?.id]
@@ -44,10 +49,10 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
             <Printer size={15} /> Print Report
           </Button>
-          <Button size="sm" className="gap-1.5 text-xs">
+          <Button size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
             <Download size={15} /> Export PDF
           </Button>
         </div>
@@ -107,7 +112,7 @@ export const ReportsPage: React.FC = () => {
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl">
                 <div>
                   <span className="text-[10px] text-indigo-100 uppercase font-bold block">Overall Standing</span>
-                  <span className="text-xl font-bold">Grade A</span>
+                  <span className="text-xl font-bold">{bestGrade ? `Grade ${bestGrade}` : 'No results yet'}</span>
                 </div>
                 <Award className="text-amber-300" size={28} />
               </div>

@@ -27,6 +27,14 @@ export const TeacherDashboard: React.FC = () => {
   );
   const performanceChart = useMemo(() => buildClassPerformanceData(testResults), [testResults]);
 
+  const mastery = useMemo(() => {
+    if (testResults.length === 0) return null;
+    const mastered = testResults.filter(r =>
+      r.milestoneStatus ? r.milestoneStatus === 'Mastered' : r.grade === 'A+' || r.grade === 'A'
+    ).length;
+    return Math.round((mastered / testResults.length) * 100);
+  }, [testResults]);
+
   const pendingLeaves = leaveRequests.filter(l => l.status === 'pending');
   const upcomingTests = tests.filter(t => t.status === 'upcoming').slice(0, 3);
   const recentWork = dailyWork.slice(0, 3);
@@ -95,10 +103,9 @@ export const TeacherDashboard: React.FC = () => {
         />
         <StatCard
           title="Milestone Mastery"
-          value="91.5%"
-          subtitle="Sensorial & motor development"
+          value={mastery === null ? '—' : `${mastery}%`}
+          subtitle="Mastered milestones across results"
           icon={<Sparkles className="text-amber-600" size={20} />}
-          trend={4.2}
           iconBg="bg-amber-50"
         />
       </div>

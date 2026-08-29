@@ -6,24 +6,28 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDate } from '@/lib/utils';
 import type { Remark, RemarkType, Student } from '@/types';
 
 export const RemarksPage: React.FC = () => {
-  const { students, remarks, addRemark } = useData();
+  const { students, teachers, remarks, addRemark } = useData();
+  const { currentUser } = useAuth();
   const [selectedStudent, setSelectedStudent] = useState<Student>(students[0]);
   const [remarkType, setRemarkType] = useState<RemarkType>('positive');
   const [content, setContent] = useState('');
   const [sentSuccess, setSentSuccess] = useState(false);
+
+  const me = teachers.find(t => t.id === currentUser?.id);
 
   const handleSendRemark = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content || content === '<p><br></p>') return;
 
     addRemark({
-      teacherId: 't1',
-      teacherName: 'Maria Montessori',
-      teacherSubject: 'Phonics & Sensorial',
+      teacherId: currentUser?.id ?? '',
+      teacherName: currentUser?.name ?? '',
+      teacherSubject: me?.subject ?? '',
       studentId: selectedStudent.id,
       studentName: selectedStudent.name,
       parentId: selectedStudent.parentId,

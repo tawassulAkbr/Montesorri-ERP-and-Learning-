@@ -9,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDateTime } from '@/lib/utils';
 import type { DailyWork } from '@/types';
 
 export const DailyWorkPage: React.FC = () => {
   const { dailyWork, addDailyWork } = useData();
+  const { currentUser } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   const [subject, setSubject] = useState('Phonics & Early Language');
   const [targetClass, setTargetClass] = useState('Junior Montessori (Nursery)');
@@ -25,8 +27,8 @@ export const DailyWorkPage: React.FC = () => {
     if (!content || content === '<p><br></p>') return;
 
     addDailyWork({
-      teacherId: 't1',
-      teacherName: 'Maria Montessori',
+      teacherId: currentUser?.id ?? '',
+      teacherName: currentUser?.name ?? '',
       teacherSubject: subject,
       class: targetClass,
       content,

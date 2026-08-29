@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type {
   Lesson, Test, TestResult, AttendanceRecord, TeacherAttendanceRecord,
   LeaveRequest, Remark, DailyWork, ScheduleItem, LiveClassSession,
-  Student, Teacher, Parent, Admin, Notification, IssuedCredentials, Role,
+  Student, Teacher, Parent, Admin, Notification, IssuedCredentials, Role, FeedbackItem,
+  Assignment, Submission,
 } from '@/types';
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,9 +28,19 @@ interface BootstrapData {
 }
 
 interface DataContextType extends BootstrapData {
+  feedbacks: FeedbackItem[];
+  addFeedback: (teacherId: string, content: string) => Promise<void>;
+  markFeedbackRead: (feedbackId: string) => void;
+  assignments: Assignment[];
+  submissions: Submission[];
+  addAssignment: (input: { title: string; class: string; subject: string; instructions: string; dueAt: string }) => Promise<void>;
+  deleteAssignment: (assignmentId: string) => Promise<void>;
+  submitAssignment: (assignmentId: string, payload: { text?: string; fileName?: string; filePath?: string }) => Promise<void>;
+  gradeSubmission: (submissionId: string, grade: number, feedback?: string) => Promise<void>;
   addLesson: (lesson: Omit<Lesson, 'id' | 'views' | 'uploadedAt'>) => void;
   deleteLesson: (id: string) => void;
   addTest: (test: Omit<Test, 'id' | 'createdAt' | 'status'>) => void;
+  saveTestResults: (testId: string, results: { studentId: string; marksObtained: number; grade: TestResult['grade']; milestoneStatus?: TestResult['milestoneStatus']; teacherComment?: string }[]) => void;
   markDailyAttendance: (records: { studentId: string; date: string; status: AttendanceRecord['status'] }[], markedBy?: string) => void;
   applyLeave: (leave: { studentId: string; studentName: string; parentId: string; parentName: string; fromDate: string; toDate: string; reason: string }) => void;
   applyTeacherLeave: (leave: { teacherId: string; teacherName: string; fromDate: string; toDate: string; reason: string }) => void;
@@ -50,6 +61,7 @@ interface DataContextType extends BootstrapData {
   resetPassword: (userId: string, role: 'teacher' | 'student' | 'parent') => Promise<string | null>;
   changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<boolean>;
   setFeeDue: (studentId: string, due: boolean) => void;
+  sendFeeReminder: (studentId: string) => void;
   markTeacherPresent: (teacherId: string) => void;
   markNotificationRead: (id: string) => void;
   findUser: (userId: string, role: Role) => Teacher | Student | Parent | Admin | undefined;
@@ -80,6 +92,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [dailyWork, setDailyWork] = useState<DailyWork[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [liveClass, setLiveClass] = useState<LiveClassSession>(EMPTY_LIVE_CLASS);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
 
   const applyBootstrap = useCallback((data: BootstrapData) => {
     setAdmins(data.admins);
@@ -107,17 +122,77 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [applyBootstrap]);
 
+  const loadFeedbacks = useCallback(async () => {
+    try {
+      const path = role === 'admin' ? '/admin/feedback'
+        : role === 'teacher' ? '/teachers/feedback'
+        : role === 'student' ? '/students/feedback/mine'
+        : null;
+      if (!path) { setFeedbacks([]); return; }
+      const res = await apiGet<{ feedbacks: FeedbackItem[] }>(path);
+      setFeedbacks(res.feedbacks);
+    } catch (err) {
+      console.error('Failed to load feedback:', err);
+    }
+  }, [role]);
+
+  const applyAssignmentsPayload = useCallback((
+    list: (Assignment & { submissions?: Submission[] })[],
+  ) => {
+    const flat: Submission[] = [];
+    const cleaned: Assignment[] = list.map(a => {
+      if (a.submissions) flat.push(...a.submissions);
+      const { submissions: _subs, ...rest } = a;
+      return rest as Assignment;
+    });
+    setAssignments(cleaned);
+    setSubmissions(flat);
+  }, []);
+
+  const loadAssignments = useCallback(async () => {
+    try {
+      if (role === 'teacher') {
+        const res = await apiGet<{ assignments: (Assignment & { submissions?: Submission[] })[] }>('/teachers/assignments');
+        applyAssignmentsPayload(res.assignments);
+      } else if (role === 'admin') {
+        const res = await apiGet<{ assignments: (Assignment & { submissions?: Submission[] })[] }>('/admin/assignments');
+        applyAssignmentsPayload(res.assignments);
+      } else if (role === 'student') {
+        const res = await apiGet<{ assignments: Assignment[]; submissions: Submission[] }>('/students/assignments');
+        setAssignments(res.assignments);
+        setSubmissions(res.submissions);
+      } else {
+        setAssignments([]);
+        setSubmissions([]);
+      }
+    } catch (err) {
+      console.error('Failed to load assignments:', err);
+    }
+  }, [role, applyAssignmentsPayload]);
+
   // Hydrate from the API once authenticated.
   useEffect(() => {
     if (!isAuthenticated || !token) return;
     let cancelled = false;
     setLoading(true);
-    apiGet<BootstrapData>('/bootstrap')
-      .then(data => { if (!cancelled) applyBootstrap(data); })
+    const fbPath = role === 'admin' ? '/admin/feedback'
+      : role === 'teacher' ? '/teachers/feedback'
+      : role === 'student' ? '/students/feedback/mine'
+      : null;
+    Promise.all([
+      apiGet<BootstrapData>('/bootstrap'),
+      fbPath ? apiGet<{ feedbacks: FeedbackItem[] }>(fbPath) : Promise.resolve({ feedbacks: [] as FeedbackItem[] }),
+    ])
+      .then(([data, fb]) => {
+        if (cancelled) return;
+        applyBootstrap(data);
+        setFeedbacks(fb.feedbacks);
+      })
       .catch(err => console.error('Bootstrap failed:', err))
       .finally(() => { if (!cancelled) setLoading(false); });
+    loadAssignments();
     return () => { cancelled = true; };
-  }, [isAuthenticated, token, applyBootstrap]);
+  }, [isAuthenticated, token, role, applyBootstrap, loadAssignments]);
 
   // Display-parity: derive auto-absent for teachers locally (server derives it on read too).
   useEffect(() => {
@@ -179,6 +254,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: todayISO(),
     }, ...prev]);
     persist(() => apiPost('/tests', testData));
+  };
+
+  const saveTestResults = (testId: string, results: { studentId: string; marksObtained: number; grade: TestResult['grade']; milestoneStatus?: TestResult['milestoneStatus']; teacherComment?: string }[]) => {
+    persist(() => apiPost(`/tests/${testId}/results`, { results }));
   };
 
   const markDailyAttendance = (newRecords: { studentId: string; date: string; status: AttendanceRecord['status'] }[], markedBy = 'system') => {
@@ -337,6 +416,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persist(() => apiPatch(`/admin/students/${studentId}/fee-due`, { due }));
   };
 
+  const sendFeeReminder = (studentId: string) => {
+    persist(() => apiPost(`/admin/students/${studentId}/fee-reminder`));
+  };
+
+  const addFeedback = async (teacherId: string, content: string) => {
+    await apiPost('/students/feedback', { teacherId, content });
+    await loadFeedbacks();
+  };
+
+  const markFeedbackRead = (feedbackId: string) => {
+    setFeedbacks(prev => prev.map(f => f.id === feedbackId ? { ...f, readByTeacher: true } : f));
+    apiPatch(`/teachers/feedback/${feedbackId}/read`).catch(err => console.error('Failed to mark feedback read:', err));
+  };
+
+  const addAssignment = async (input: { title: string; class: string; subject: string; instructions: string; dueAt: string }) => {
+    await apiPost('/teachers/assignments', input);
+    await loadAssignments();
+  };
+
+  const deleteAssignment = async (assignmentId: string) => {
+    await apiDelete(`/teachers/assignments/${assignmentId}`);
+    await loadAssignments();
+  };
+
+  const submitAssignment = async (assignmentId: string, payload: { text?: string; fileName?: string; filePath?: string }) => {
+    await apiPost(`/students/assignments/${assignmentId}/submit`, payload);
+    await loadAssignments();
+  };
+
+  const gradeSubmission = async (submissionId: string, grade: number, feedback?: string) => {
+    await apiPatch(`/teachers/assignments/submissions/${submissionId}/grade`, { grade, feedback });
+    await loadAssignments();
+  };
+
   const markTeacherPresent = (teacherId: string) => {
     const today = todayISO();
     setTeacherAttendance(prev => {
@@ -384,10 +497,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         admins, students, teachers, parents, notifications, teacherAttendance,
         lessons, tests, testResults, attendance, leaveRequests, remarks, dailyWork, schedules, liveClass,
-        addLesson, deleteLesson, addTest, markDailyAttendance, applyLeave, applyTeacherLeave, updateLeaveStatus,
+        feedbacks, addFeedback, markFeedbackRead,
+        assignments, submissions, addAssignment, deleteAssignment, submitAssignment, gradeSubmission,
+        addLesson, deleteLesson, addTest, saveTestResults, markDailyAttendance, applyLeave, applyTeacherLeave, updateLeaveStatus,
         addRemark, addDailyWork, toggleDailyWorkDone, addScheduleItem, deleteScheduleItem,
         startLiveClass, endLiveClass, createTeacher, createStudentWithParent, resetPassword, changePassword,
-        setFeeDue, markTeacherPresent, markNotificationRead, findUser,
+        setFeeDue, sendFeeReminder, markTeacherPresent, markNotificationRead, findUser,
       }}
     >
       {children}

@@ -25,10 +25,10 @@ export const AdminReportsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
             <Printer size={15} /> Print Summary
           </Button>
-          <Button size="sm" className="gap-1.5 text-xs">
+          <Button size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
             <Download size={15} /> Export PDF
           </Button>
         </div>

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label';
 import { useData } from '@/context/DataContext';
 import { MONTESSORI_CLASSES, TEACHER_SUBJECTS, todayISO, isWeekend, getInitials, avatarColors, cn } from '@/lib/utils';
-import type { IssuedCredentials, Student, Teacher, Parent } from '@/types';
+import type { IssuedCredentials, Student, Teacher, Parent, TeacherAttendanceRecord } from '@/types';
 
 type TabId = 'teacher' | 'student' | 'parent';
 
@@ -328,7 +328,7 @@ const AddStudentModal: React.FC<{
 export const AdminUsersPage: React.FC = () => {
   const {
     teachers, students, parents, teacherAttendance,
-    resetPassword, setFeeDue, findUser,
+    resetPassword, setFeeDue, sendFeeReminder, findUser,
   } = useData();
   const [activeTab, setActiveTab] = useState<TabId>('teacher');
   const [searchQuery, setSearchQuery] = useState('');
@@ -340,8 +340,8 @@ export const AdminUsersPage: React.FC = () => {
   const weekend = isWeekend(today);
   const q = searchQuery.trim().toLowerCase();
 
-  const teacherStatus = (t: Teacher) =>
-    teacherAttendance.find(r => r.teacherId === t.id && r.date === today)?.status;
+  const teacherRecord = (t: Teacher) =>
+    teacherAttendance.find(r => r.teacherId === t.id && r.date === today);
 
   const handleResetPassword = async (userId: string, role: 'teacher' | 'student' | 'parent') => {
     const user = findUser(userId, role);
@@ -365,11 +365,15 @@ export const AdminUsersPage: React.FC = () => {
     p.name.toLowerCase().includes(q) || p.email.includes(q)
   );
 
-  const statusBadge = (status?: 'present' | 'absent' | 'leave' | 'holiday') => {
+  const statusBadge = (record?: TeacherAttendanceRecord) => {
     if (weekend) return <span className="text-[10px] font-semibold text-slate-400">Weekend</span>;
-    switch (status) {
+    switch (record?.status) {
       case 'present':
-        return <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px]">Present</span>;
+        return (
+          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px]">
+            Present{record.checkInTime ? ` · ${record.checkInTime}` : ''}
+          </span>
+        );
       case 'leave':
         return <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px]">On Leave</span>;
       case 'absent':
@@ -473,7 +477,7 @@ export const AdminUsersPage: React.FC = () => {
                     <td className="p-3.5 text-slate-600">{t.classes.join(', ')}</td>
                     <td className="p-3.5 text-slate-600">{t.qualification}</td>
                     <td className="p-3.5 text-slate-600 font-mono text-[11px]">{t.phone}</td>
-                    <td className="p-3.5">{statusBadge(teacherStatus(t))}</td>
+                    <td className="p-3.5">{statusBadge(teacherRecord(t))}</td>
                     <td className="p-3.5 pr-5 text-right">
                       <Button
                         variant="ghost"
@@ -543,6 +547,16 @@ export const AdminUsersPage: React.FC = () => {
                       >
                         {s.feeDue ? 'Mark Paid' : 'Mark Fee Due'}
                       </Button>
+                      {s.feeDue && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-[10px] text-amber-600 hover:text-amber-700 gap-1"
+                          onClick={() => sendFeeReminder(s.id)}
+                        >
+                          <AlertCircle size={12} /> Remind
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

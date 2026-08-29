@@ -58,7 +58,8 @@ export interface Lesson {
   class: string;
   teacherId: string;
   teacherName: string;
-  youtubeId: string;
+  youtubeId?: string;
+  videoUrl?: string; // uploaded personal recording
   description: string;
   notes?: string;
   duration: string;
@@ -112,6 +113,7 @@ export interface TeacherAttendanceRecord {
   teacherId: string;
   date: string;
   status: AttendanceStatus;
+  checkInTime?: string;
   leaveRequestId?: string;
 }
 
@@ -231,8 +233,69 @@ export interface Notification {
   type: 'info' | 'success' | 'warning' | 'error';
   read: boolean;
   createdAt: string;
-  kind?: 'fee_due' | 'fee_cleared' | 'general';
+  kind?: 'fee_due' | 'fee_cleared' | 'absence' | 'general';
   relatedStudentId?: string;
+}
+
+// ─── Anonymous Student Feedback ──────────────────────────────────────────────
+export interface FeedbackItem {
+  id: string;
+  content: string;
+  createdAt: string;
+  readByTeacher?: boolean;
+  studentName?: string; // admin view only
+  teacherName?: string; // student + admin views
+}
+
+// ─── Assignments & Submissions (GC-style) ────────────────────────────────────
+export interface Assignment {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  title: string;
+  class: string;
+  subject: string;
+  instructions: string;
+  dueAt: string; // ISO datetime
+  createdAt: string;
+}
+
+export interface Submission {
+  id: string;
+  assignmentId: string;
+  studentId: string;
+  studentName: string;
+  text?: string;
+  fileName?: string;
+  filePath?: string;
+  submittedAt: string;
+  isLate: boolean;
+  grade?: number;
+  feedback?: string;
+}
+
+// ─── Parent ↔ Teacher Chat ───────────────────────────────────────────────────
+export interface ChatMessage {
+  id: string;
+  parentId: string;
+  parentName: string;
+  teacherId: string;
+  teacherName: string;
+  senderRole: 'parent' | 'teacher';
+  content: string;
+  createdAt: string;
+  readByParent: boolean;
+  readByTeacher: boolean;
+}
+
+export interface MessageThread {
+  parentId?: string;
+  parentName?: string;
+  teacherId?: string;
+  teacherName?: string;
+  lastMessage: string;
+  lastAt: string;
+  unread: number;
 }
 
 // ─── Chart Data ───────────────────────────────────────────────────────────────

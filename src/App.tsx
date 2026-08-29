@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 // Auth Pages
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
 
 // Teacher Pages
@@ -19,6 +20,9 @@ import { ReportsPage as TeacherReportsPage } from '@/pages/teacher/ReportsPage';
 import { RemarksPage as TeacherRemarksPage } from '@/pages/teacher/RemarksPage';
 import { DailyWorkPage as TeacherDailyWorkPage } from '@/pages/teacher/DailyWorkPage';
 import { StudentsPage as TeacherStudentsPage } from '@/pages/teacher/StudentsPage';
+import { TeacherFeedbackPage } from '@/pages/teacher/FeedbackPage';
+import { TeacherAssignmentsPage } from '@/pages/teacher/AssignmentsPage';
+import { TeacherMessagesPage } from '@/pages/teacher/MessagesPage';
 
 // Student Pages
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
@@ -28,6 +32,8 @@ import { StudentLecturesPage } from '@/pages/student/LecturesPage';
 import { StudentTestsPage } from '@/pages/student/TestsPage';
 import { StudentReportsPage } from '@/pages/student/ReportsPage';
 import { StudentDailyWorkPage } from '@/pages/student/DailyWorkPage';
+import { StudentFeedbackPage } from '@/pages/student/FeedbackPage';
+import { StudentAssignmentsPage } from '@/pages/student/AssignmentsPage';
 
 // Parent Pages
 import { ParentDashboard } from '@/pages/parent/ParentDashboard';
@@ -36,12 +42,15 @@ import { ParentRemarksPage } from '@/pages/parent/RemarksPage';
 import { ParentAttendancePage } from '@/pages/parent/AttendancePage';
 import { ParentDailyWorkPage } from '@/pages/parent/DailyWorkPage';
 import { ParentTeachersPage } from '@/pages/parent/TeachersPage';
+import { ParentMessageThreadPage } from '@/pages/parent/MessageThreadPage';
 
 // Admin Pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import { AdminUsersPage } from '@/pages/admin/UsersPage';
 import { AdminClassesPage } from '@/pages/admin/ClassesPage';
 import { AdminReportsPage } from '@/pages/admin/ReportsPage';
+import { AdminTeacherReportsPage } from '@/pages/admin/TeacherReportsPage';
+import { AdminFeedbackPage } from '@/pages/admin/FeedbackPage';
 
 import type { Role } from '@/types';
 
@@ -76,6 +85,7 @@ export default function App() {
             {/* Public Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Authenticated Dashboard Base */}
             <Route
@@ -100,6 +110,9 @@ export default function App() {
                 <Route path="reports" element={<ProtectedRoute allowedRole="teacher"><TeacherReportsPage /></ProtectedRoute>} />
                 <Route path="remarks" element={<ProtectedRoute allowedRole="teacher"><TeacherRemarksPage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="teacher"><TeacherDailyWorkPage /></ProtectedRoute>} />
+                <Route path="assignments" element={<ProtectedRoute allowedRole="teacher"><TeacherAssignmentsPage /></ProtectedRoute>} />
+                <Route path="messages" element={<ProtectedRoute allowedRole="teacher"><TeacherMessagesPage /></ProtectedRoute>} />
+                <Route path="feedback" element={<ProtectedRoute allowedRole="teacher"><TeacherFeedbackPage /></ProtectedRoute>} />
               </Route>
 
               {/* Student Sub-routes */}
@@ -111,6 +124,8 @@ export default function App() {
                 <Route path="tests" element={<ProtectedRoute allowedRole="student"><StudentTestsPage /></ProtectedRoute>} />
                 <Route path="reports" element={<ProtectedRoute allowedRole="student"><StudentReportsPage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="student"><StudentDailyWorkPage /></ProtectedRoute>} />
+                <Route path="assignments" element={<ProtectedRoute allowedRole="student"><StudentAssignmentsPage /></ProtectedRoute>} />
+                <Route path="feedback" element={<ProtectedRoute allowedRole="student"><StudentFeedbackPage /></ProtectedRoute>} />
               </Route>
 
               {/* Parent Sub-routes */}
@@ -121,6 +136,7 @@ export default function App() {
                 <Route path="attendance" element={<ProtectedRoute allowedRole="parent"><ParentAttendancePage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="parent"><ParentDailyWorkPage /></ProtectedRoute>} />
                 <Route path="teachers" element={<ProtectedRoute allowedRole="parent"><ParentTeachersPage /></ProtectedRoute>} />
+                <Route path="messages/:teacherId" element={<ProtectedRoute allowedRole="parent"><ParentMessageThreadPage /></ProtectedRoute>} />
               </Route>
 
               {/* Admin Sub-routes */}
@@ -129,6 +145,8 @@ export default function App() {
                 <Route path="users" element={<ProtectedRoute allowedRole="admin"><AdminUsersPage /></ProtectedRoute>} />
                 <Route path="classes" element={<ProtectedRoute allowedRole="admin"><AdminClassesPage /></ProtectedRoute>} />
                 <Route path="reports" element={<ProtectedRoute allowedRole="admin"><AdminReportsPage /></ProtectedRoute>} />
+                <Route path="teacher-reports" element={<ProtectedRoute allowedRole="admin"><AdminTeacherReportsPage /></ProtectedRoute>} />
+                <Route path="feedback" element={<ProtectedRoute allowedRole="admin"><AdminFeedbackPage /></ProtectedRoute>} />
                 <Route path="settings" element={<ProtectedRoute allowedRole="admin"><ChangePasswordPage /></ProtectedRoute>} />
               </Route>
             </Route>

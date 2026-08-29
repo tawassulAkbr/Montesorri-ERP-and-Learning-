@@ -61,13 +61,13 @@ export function notificationToFrontend(n: Notification) {
     id: n.id, userId: n.userId, title: n.title, message: n.message,
     type: n.type.toLowerCase() as 'info' | 'success' | 'warning' | 'error',
     read: n.read, createdAt: n.createdAt.toISOString(),
-    kind: n.kind.toLowerCase() as 'fee_due' | 'fee_cleared' | 'general',
+    kind: n.kind.toLowerCase() as 'fee_due' | 'fee_cleared' | 'absence' | 'general',
     relatedStudentId: n.relatedStudentId ?? undefined,
   };
 }
 
 export function lessonToFrontend(l: Lesson) {
-  return { ...l, notes: l.notes ?? undefined };
+  return { ...l, youtubeId: l.youtubeId ?? undefined, videoUrl: l.videoUrl ?? undefined, notes: l.notes ?? undefined };
 }
 
 export function testToFrontend(t: Test) {
@@ -99,6 +99,7 @@ export function teacherAttendanceToFrontend(a: TeacherAttendanceRecord) {
     ...a,
     status: a.status.toLowerCase() as 'present' | 'absent' | 'leave' | 'holiday',
     leaveRequestId: a.leaveRequestId ?? undefined,
+    checkInTime: a.checkInTime ?? undefined,
   };
 }
 

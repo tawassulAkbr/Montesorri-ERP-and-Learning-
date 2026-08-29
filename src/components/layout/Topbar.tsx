@@ -17,7 +17,16 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   reports: 'Reports', remarks: 'Remarks', 'daily-work': 'Daily Work', lectures: 'Lectures',
   teachers: 'Teachers', users: 'Users', classes: 'Classes', settings: 'Settings',
   students: 'Students', 'live-class': 'Live Class', schedule: 'Schedule',
+  messages: 'Messages', feedback: 'Feedback', assignments: 'Assignments',
+  'teacher-reports': 'Teacher Reports',
 };
+
+function crumbLabel(crumb: string): string {
+  if (BREADCRUMB_LABELS[crumb]) return BREADCRUMB_LABELS[crumb];
+  // Dynamic route params (e.g. a teacher id in /parent/messages/:teacherId)
+  if (/^[a-z0-9]{10,}$/i.test(crumb)) return 'Chat';
+  return crumb.charAt(0).toUpperCase() + crumb.slice(1);
+}
 
 export const Topbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
@@ -56,7 +65,7 @@ export const Topbar: React.FC = () => {
           <span key={crumb} className="flex items-center gap-1.5">
             {i > 0 && <ChevronRight size={12} className="text-slate-300" />}
             <span className={`text-sm ${i === crumbs.length - 1 ? 'font-semibold text-slate-800' : 'text-slate-400'}`}>
-              {BREADCRUMB_LABELS[crumb] || crumb.charAt(0).toUpperCase() + crumb.slice(1)}
+              {crumbLabel(crumb)}
             </span>
           </span>
         ))}

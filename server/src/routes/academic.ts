@@ -35,11 +35,12 @@ const lessonSchema = z.object({
   title: z.string().min(2),
   subject: z.string().min(2),
   class: z.string().min(2),
-  youtubeId: z.string().min(3),
+  youtubeId: z.string().min(3).optional(),
+  videoUrl: z.string().min(3).optional(),
   description: z.string().min(2),
   notes: z.string().optional(),
   duration: z.string().min(3),
-});
+}).refine(d => d.youtubeId || d.videoUrl, { message: 'Provide youtubeId or videoUrl' });
 
 lessonRouter.post('/', requireRole('teacher'), async (req, res) => {
   const input = lessonSchema.parse(req.body);
@@ -47,8 +48,14 @@ lessonRouter.post('/', requireRole('teacher'), async (req, res) => {
   if (!teacher) throw notFound('Teacher record not found');
   const lesson = await prisma.lesson.create({
     data: {
-      ...input,
+      title: input.title,
+      subject: input.subject,
+      class: input.class,
+      youtubeId: input.youtubeId ?? null,
+      videoUrl: input.videoUrl ?? null,
+      description: input.description,
       notes: input.notes ?? null,
+      duration: input.duration,
       teacherId: teacher.id,
       teacherName: teacher.name,
       uploadedAt: todayISO(),
@@ -327,6 +334,31 @@ liveClassRouter.put('/start', requireRole('teacher', 'admin'), async (req, res) 
     update: { isActive: true, ...input, teacherName, startedAt: new Date().toISOString(), participantsCount: 1 },
     create: { id: 'singleton', isActive: true, ...input, teacherName, startedAt: new Date().toISOString(), participantsCount: 1 },
   });
+
+  // Alert students of the class and their parents that the live class is starting.
+  const classStudents = await prisma.student.findMany({ where: { class: input.class } });
+  if (classStudents.length > 0) {
+    const notifOps = classStudents.flatMap(s => [
+      prisma.notification.create({
+        data: {
+          userId: s.id, role: 'STUDENT',
+          title: 'Live class starting',
+          message: `${teacherName} is starting "${input.topic}" now. Join the live classroom!`,
+          type: 'INFO', kind: 'GENERAL',
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: s.parentId, role: 'PARENT',
+          title: 'Live class starting',
+          message: `A live class ("${input.topic}") is starting now for ${s.class}.`,
+          type: 'INFO', kind: 'GENERAL',
+        },
+      }),
+    ]);
+    await prisma.$transaction(notifOps);
+  }
+
   res.json({ liveClass: liveClassToFrontend(session) });
 });
 

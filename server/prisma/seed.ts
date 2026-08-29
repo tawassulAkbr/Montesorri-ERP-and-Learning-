@@ -258,6 +258,89 @@ async function main() {
     create: { id: 'singleton', isActive: true, topic: 'Interactive Phonics & Letter Sound Recognition Circle', subject: 'Phonics & Language', class: CLASSES.junior, teacherName: 'Maria Montessori', startedAt: isoNow(), participantsCount: 8 },
   });
 
+  // ─── Assignments & submissions (GC-style) ──────────────────────────────────
+  const futureDue = new Date(Date.now() + 3 * 86400000);
+  futureDue.setHours(23, 59, 0, 0);
+  const pastDue = new Date(Date.now() - 1 * 86400000);
+  pastDue.setHours(20, 0, 0, 0);
+
+  await prisma.assignment.create({
+    data: {
+      teacherId: mariaId, teacherName: 'Maria Montessori',
+      title: 'Sandpaper Letters Practice — /s/ /a/ /t/',
+      class: CLASSES.junior, subject: 'Phonics & Language',
+      instructions: 'Trace each sandpaper letter three times while saying the sound aloud. Ask a parent to note which letter felt easiest.',
+      dueAt: futureDue.toISOString(), createdAt: daysAgo(1),
+    },
+  });
+
+  const pastAssignment = await prisma.assignment.create({
+    data: {
+      teacherId: mariaId, teacherName: 'Maria Montessori',
+      title: 'Color Box Matching Activity',
+      class: CLASSES.junior, subject: 'Sensorial & Practical Life',
+      instructions: 'Match the color tablets in pairs and take a photo of your completed board.',
+      dueAt: pastDue.toISOString(), createdAt: daysAgo(3),
+    },
+  });
+
+  await prisma.submission.create({
+    data: {
+      assignmentId: pastAssignment.id, studentId: aliId, studentName: 'Ali Hassan',
+      text: 'I matched all the colors! The blue ones were my favorite.',
+      submittedAt: new Date(pastDue.getTime() - 3600000).toISOString(),
+      isLate: false, grade: 95, feedback: 'Wonderful focus, Ali!',
+    },
+  });
+  await prisma.submission.create({
+    data: {
+      assignmentId: pastAssignment.id, studentId: zaraId, studentName: 'Zara Ahmed',
+      text: 'Done with help from my mom.',
+      submittedAt: new Date(pastDue.getTime() + 5 * 3600000).toISOString(),
+      isLate: true, grade: 80, feedback: 'Good effort — try to submit before the deadline next time.',
+    },
+  });
+
+  // ─── Anonymous feedback ────────────────────────────────────────────────────
+  await prisma.feedback.create({
+    data: {
+      studentId: aliId, studentName: 'Ali Hassan',
+      teacherId: mariaId, teacherName: 'Maria Montessori',
+      content: 'I really enjoy the phonics songs! Can we sing the alphabet song more often?',
+    },
+  });
+
+  // ─── Parent-teacher message thread ─────────────────────────────────────────
+  const hassanId = parents['hassan.ahmed@parent.com'];
+  await prisma.message.createMany({
+    data: [
+      {
+        parentId: hassanId, parentName: 'Mr. Hassan Ahmed',
+        teacherId: mariaId, teacherName: 'Maria Montessori',
+        senderRole: 'PARENT',
+        content: 'Assalam-o-Alaikum, how is Ali doing with his letter sounds this week?',
+        readByTeacher: true, readByParent: true,
+        createdAt: new Date(Date.now() - 2 * 86400000),
+      },
+      {
+        parentId: hassanId, parentName: 'Mr. Hassan Ahmed',
+        teacherId: mariaId, teacherName: 'Maria Montessori',
+        senderRole: 'TEACHER',
+        content: 'He is doing wonderfully! He recognized /s/, /a/ and /t/ instantly today. Keep practicing at home.',
+        readByTeacher: true, readByParent: true,
+        createdAt: new Date(Date.now() - 1 * 86400000),
+      },
+      {
+        parentId: hassanId, parentName: 'Mr. Hassan Ahmed',
+        teacherId: mariaId, teacherName: 'Maria Montessori',
+        senderRole: 'PARENT',
+        content: 'JazakAllah! We will practice every evening.',
+        readByTeacher: false, readByParent: true,
+        createdAt: new Date(Date.now() - 3600000),
+      },
+    ],
+  });
+
   console.log('Seed complete.');
   console.log('Demo accounts:');
   console.log('  admin:   admin@kinderguide.edu / admin123');

@@ -3,10 +3,13 @@ import { BookOpen, Paperclip, Calendar, CheckSquare, Search, Sparkles } from 'lu
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDateTime } from '@/lib/utils';
 
 export const StudentDailyWorkPage: React.FC = () => {
   const { dailyWork, toggleDailyWorkDone } = useData();
+  const { currentUser } = useAuth();
+  const myId = currentUser?.id ?? '';
 
   return (
     <div className="space-y-6">
@@ -17,7 +20,7 @@ export const StudentDailyWorkPage: React.FC = () => {
 
       <div className="space-y-4">
         {dailyWork.map(work => {
-          const isDone = (work.completedByStudentIds || []).includes('s1');
+          const isDone = (work.completedByStudentIds || []).includes(myId);
           return (
             <Card key={work.id} className={`overflow-hidden border transition-all ${isDone ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-100 shadow-sm'}`}>
               <CardHeader className="p-4 bg-slate-50/70 border-b border-slate-100 flex flex-row items-center justify-between">
@@ -41,7 +44,7 @@ export const StudentDailyWorkPage: React.FC = () => {
                     {formatDateTime(work.postedAt)}
                   </span>
                   <button
-                    onClick={() => toggleDailyWorkDone(work.id, 's1')}
+                    onClick={() => toggleDailyWorkDone(work.id, myId)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                       isDone
                         ? 'bg-emerald-500 text-white shadow-sm'

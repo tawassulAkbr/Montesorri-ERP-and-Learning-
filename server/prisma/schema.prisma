@@ -52,6 +52,7 @@ enum NotificationType {
 enum NotificationKind {
   FEE_DUE
   FEE_CLEARED
+  ABSENCE
   GENERAL
 }
 
@@ -184,7 +185,8 @@ model Lesson {
   class       String
   teacherId   String
   teacherName String
-  youtubeId   String
+  youtubeId   String?
+  videoUrl    String?
   description String
   notes       String?
   duration    String
@@ -252,6 +254,7 @@ model TeacherAttendanceRecord {
   teacherId      String
   date           String
   status         AttendanceStatus
+  checkInTime    String?
   leaveRequestId String?
 
   teacher Teacher @relation(fields: [teacherId], references: [id])
@@ -345,4 +348,69 @@ model LiveClassSession {
   participantsCount Int      @default(0)
 
   @@map("live_class_session")
+}
+
+model Feedback {
+  id            String   @id @default(cuid())
+  studentId     String
+  studentName   String
+  teacherId     String
+  teacherName   String
+  content       String
+  readByTeacher Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([teacherId, readByTeacher])
+  @@map("feedbacks")
+}
+
+model Assignment {
+  id           String       @id @default(cuid())
+  teacherId    String
+  teacherName  String
+  title        String
+  class        String
+  subject      String
+  instructions String
+  dueAt        String
+  createdAt    String
+
+  submissions Submission[]
+
+  @@map("assignments")
+}
+
+model Submission {
+  id           String      @id @default(cuid())
+  assignmentId String
+  studentId    String
+  studentName  String
+  text         String?
+  fileName     String?
+  filePath     String?
+  submittedAt  String
+  isLate       Boolean     @default(false)
+  grade        Int?
+  feedback     String?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  parentId     String
+  parentName   String
+  teacherId    String
+  teacherName  String
+  senderRole   Role
+  content      String
+  readByParent Boolean  @default(false)
+  readByTeacher Boolean @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([parentId, teacherId, createdAt])
+  @@map("messages")
 }

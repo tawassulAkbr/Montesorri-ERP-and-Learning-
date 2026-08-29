@@ -7,13 +7,31 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDate } from '@/lib/utils';
-import type { Test } from '@/types';
+import type { Test, TestResult } from '@/types';
+
+function gradeFromPercent(pct: number): TestResult['grade'] {
+  if (pct >= 90) return 'A+';
+  if (pct >= 80) return 'A';
+  if (pct >= 70) return 'B';
+  if (pct >= 60) return 'C';
+  if (pct >= 50) return 'D';
+  return 'F';
+}
+
+function milestoneFromPercent(pct: number): TestResult['milestoneStatus'] {
+  if (pct >= 85) return 'Mastered';
+  if (pct >= 60) return 'Developing';
+  return 'Emerging';
+}
 
 export const TestsPage: React.FC = () => {
-  const { tests, students, testResults, addTest } = useData();
+  const { tests, students, testResults, addTest, saveTestResults } = useData();
+  const { currentUser } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  const [evalScores, setEvalScores] = useState<Record<string, string>>({});
 
   // Form State
   const [title, setTitle] = useState('');
@@ -31,7 +49,7 @@ export const TestsPage: React.FC = () => {
       title,
       subject,
       class: targetClass,
-      teacherId: 't1',
+      teacherId: currentUser?.id ?? '',
       date,
       maxMarks,
       instructions,
@@ -41,6 +59,36 @@ export const TestsPage: React.FC = () => {
     setTitle('');
     setDate('');
     setInstructions('');
+  };
+
+  const openEvaluation = (test: Test) => {
+    const existing = Object.fromEntries(
+      testResults
+        .filter(r => r.testId === test.id)
+        .map(r => [r.studentId, String(r.marksObtained)])
+    );
+    setEvalScores(existing);
+    setSelectedTest(test);
+  };
+
+  const handleSaveResults = () => {
+    if (!selectedTest) return;
+    const classStudents = students.filter(s => s.class === selectedTest.class);
+    const results = classStudents
+      .filter(s => evalScores[s.id] !== undefined && evalScores[s.id] !== '')
+      .map(s => {
+        const marks = Math.max(0, Math.min(selectedTest.maxMarks, Number(evalScores[s.id])));
+        const pct = (marks / selectedTest.maxMarks) * 100;
+        return {
+          studentId: s.id,
+          marksObtained: marks,
+          grade: gradeFromPercent(pct),
+          milestoneStatus: milestoneFromPercent(pct),
+        };
+      });
+    if (results.length === 0) return;
+    saveTestResults(selectedTest.id, results);
+    setSelectedTest(null);
   };
 
   const getStatusBadge = (status: Test['status']) => {
@@ -104,7 +152,7 @@ export const TestsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedTest(test)}
+                      onClick={() => openEvaluation(test)}
                       className="text-xs text-indigo-600 hover:text-indigo-700"
                     >
                       Evaluation Details
@@ -245,7 +293,7 @@ export const TestsPage: React.FC = () => {
 
               <div>
                 <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-                  Toddler Milestone Observations
+                  Toddler Milestone Observations — {selectedTest.class}
                 </h4>
                 <div className="max-h-60 overflow-y-auto border border-slate-100 rounded-xl">
                   <table className="w-full text-left text-xs">
@@ -253,23 +301,44 @@ export const TestsPage: React.FC = () => {
                       <tr>
                         <th className="p-2.5 pl-4">Child</th>
                         <th className="p-2.5">Roll No</th>
-                        <th className="p-2.5">Score</th>
-                        <th className="p-2.5 pr-4 text-right">Status</th>
+                        <th className="p-2.5">Score (/{selectedTest.maxMarks})</th>
+                        <th className="p-2.5 pr-4 text-right">Milestone Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {students.slice(0, 5).map((stu, i) => (
-                        <tr key={stu.id} className="hover:bg-slate-50">
-                          <td className="p-2.5 pl-4 font-medium text-slate-800">{stu.name}</td>
-                          <td className="p-2.5 text-slate-500 font-mono">#{stu.rollNo}</td>
-                          <td className="p-2.5 font-semibold text-indigo-600">18 / {selectedTest.maxMarks}</td>
-                          <td className="p-2.5 pr-4 text-right">
-                            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
-                              Mastered 🌟
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {students.filter(s => s.class === selectedTest.class).map(stu => {
+                        const val = evalScores[stu.id] ?? '';
+                        const pct = val !== '' ? (Number(val) / selectedTest.maxMarks) * 100 : null;
+                        return (
+                          <tr key={stu.id} className="hover:bg-slate-50">
+                            <td className="p-2.5 pl-4 font-medium text-slate-800">{stu.name}</td>
+                            <td className="p-2.5 text-slate-500 font-mono">#{stu.rollNo}</td>
+                            <td className="p-2.5">
+                              <input
+                                type="number"
+                                min={0}
+                                max={selectedTest.maxMarks}
+                                value={val}
+                                onChange={e => setEvalScores(prev => ({ ...prev, [stu.id]: e.target.value }))}
+                                className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </td>
+                            <td className="p-2.5 pr-4 text-right">
+                              {pct === null ? (
+                                <span className="text-slate-400 text-[10px]">Not entered</span>
+                              ) : (
+                                <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                                  pct >= 85 ? 'bg-emerald-50 text-emerald-700'
+                                  : pct >= 60 ? 'bg-amber-50 text-amber-700'
+                                  : 'bg-red-50 text-red-600'
+                                }`}>
+                                  {milestoneFromPercent(pct)} · {gradeFromPercent(pct)}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -277,7 +346,8 @@ export const TestsPage: React.FC = () => {
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setSelectedTest(null)}>Close</Button>
+              <Button variant="outline" onClick={() => setSelectedTest(null)}>Close</Button>
+              <Button onClick={handleSaveResults}>Save Evaluation</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

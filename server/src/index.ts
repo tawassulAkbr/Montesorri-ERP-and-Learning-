@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
 import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
 import { config } from './config';
@@ -14,11 +15,17 @@ import {
 } from './routes/academic';
 import { notificationRouter } from './routes/notifications';
 import { bootstrapRouter } from './routes/bootstrap';
+import { studentFeedbackRouter, teacherFeedbackRouter, adminFeedbackRouter } from './routes/feedback';
+import { teacherAssignmentRouter, studentAssignmentRouter, adminAssignmentRouter } from './routes/assignments';
+import { uploadRouter } from './routes/upload';
+import { parentMessageRouter, teacherMessageRouter } from './routes/messages';
+import { teacherReportRouter } from './routes/teacher-reports';
 
 const app = express();
 
 app.use(cors({ origin: config.FRONTEND_URL }));
 app.use(express.json({ limit: '1mb' }));
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -34,10 +41,20 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/bootstrap', bootstrapRouter);
+app.use('/api/admin/feedback', adminFeedbackRouter);
+app.use('/api/admin/assignments', adminAssignmentRouter);
+app.use('/api/admin/teacher-reports', teacherReportRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/teachers/messages', teacherMessageRouter);
+app.use('/api/teachers/feedback', teacherFeedbackRouter);
+app.use('/api/teachers/assignments', teacherAssignmentRouter);
 app.use('/api/teachers', teacherRouter);
+app.use('/api/students/feedback', studentFeedbackRouter);
+app.use('/api/students/assignments', studentAssignmentRouter);
 app.use('/api/students', studentRouter);
+app.use('/api/parents/messages', parentMessageRouter);
 app.use('/api/parents', parentRouter);
+app.use('/api/upload', uploadRouter);
 app.use('/api/lessons', lessonRouter);
 app.use('/api/tests', testRouter);
 app.use('/api/remarks', remarkRouter);

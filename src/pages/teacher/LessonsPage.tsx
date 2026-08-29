@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Plus, Search, Filter, Play, ExternalLink } from 'lucide-react';
+import { Video, Plus, Search, Filter, Play, Upload } from 'lucide-react';
 import { VideoCard } from '@/components/shared/VideoCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useData } from '@/context/DataContext';
-import type { Lesson } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
+import { uploadFile } from '@/lib/api';
 
 function extractYouTubeId(url: string): string {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -17,42 +18,76 @@ function extractYouTubeId(url: string): string {
 
 export const LessonsPage: React.FC = () => {
   const { lessons, addLesson } = useData();
+  const { currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string>('All');
   const [openModal, setOpenModal] = useState(false);
 
   // Form State
+  const [sourceMode, setSourceMode] = useState<'youtube' | 'upload'>('youtube');
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('Phonics & Language');
   const [targetClass, setTargetClass] = useState('Junior Montessori (Nursery)');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [duration, setDuration] = useState('08:00');
   const [description, setDescription] = useState('');
+  const [publishing, setPublishing] = useState(false);
+  const [error, setError] = useState('');
 
-  const extractedId = extractYouTubeId(youtubeUrl);
+  const extractedId = sourceMode === 'youtube' ? extractYouTubeId(youtubeUrl) : null;
   const previewThumbnail = extractedId && extractedId.length === 11
     ? `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`
     : null;
 
-  const handleCreateLesson = (e: React.FormEvent) => {
+  const handleCreateLesson = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !youtubeUrl) return;
+    setError('');
+    if (!title) return;
 
-    addLesson({
-      title,
-      subject,
-      class: targetClass,
-      teacherId: 't1',
-      teacherName: 'Maria Montessori',
-      youtubeId: extractedId,
-      description,
-      duration,
-    });
+    if (sourceMode === 'youtube' && !youtubeUrl) {
+      setError('Please provide a YouTube link.');
+      return;
+    }
+    if (sourceMode === 'upload' && !videoFile) {
+      setError('Please choose a video file to upload.');
+      return;
+    }
 
-    setOpenModal(false);
-    setTitle('');
-    setYoutubeUrl('');
-    setDescription('');
+    setPublishing(true);
+    try {
+      let youtubeId: string | undefined;
+      let videoUrl: string | undefined;
+
+      if (sourceMode === 'youtube') {
+        youtubeId = extractedId ?? undefined;
+      } else if (videoFile) {
+        const uploaded = await uploadFile(videoFile);
+        videoUrl = uploaded.url;
+      }
+
+      await addLesson({
+        title,
+        subject,
+        class: targetClass,
+        teacherId: currentUser?.id ?? '',
+        teacherName: currentUser?.name ?? '',
+        youtubeId,
+        videoUrl,
+        description,
+        duration,
+      });
+
+      setOpenModal(false);
+      setTitle('');
+      setYoutubeUrl('');
+      setVideoFile(null);
+      setDescription('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to publish lesson.');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const filteredLessons = lessons.filter(l => {
@@ -173,28 +208,74 @@ export const LessonsPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">YouTube Video Link or ID</Label>
-              <Input
-                value={youtubeUrl}
-                onChange={e => setYoutubeUrl(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=... or 11-char ID"
-                className="mt-1 text-xs"
-                required
-              />
+              <Label className="text-xs font-medium text-slate-600">Video Source</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setSourceMode('youtube')}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                    sourceMode === 'youtube'
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  YouTube Link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSourceMode('upload')}
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                    sourceMode === 'upload'
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  Upload My Video
+                </button>
+              </div>
             </div>
 
-            {previewThumbnail && (
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                <p className="text-[11px] font-semibold text-slate-700 flex items-center gap-1">
-                  <Play size={12} className="text-indigo-600" /> Video Thumbnail Detected
-                </p>
-                <div className="aspect-video w-full rounded-lg overflow-hidden relative shadow-inner">
-                  <img
-                    src={previewThumbnail}
-                    alt="Thumbnail Preview"
-                    className="w-full h-full object-cover"
+            {sourceMode === 'youtube' ? (
+              <>
+                <div>
+                  <Label className="text-xs font-medium text-slate-600">YouTube Video Link or ID</Label>
+                  <Input
+                    value={youtubeUrl}
+                    onChange={e => setYoutubeUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=... or 11-char ID"
+                    className="mt-1 text-xs"
+                    required
                   />
                 </div>
+
+                {previewThumbnail && (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                    <p className="text-[11px] font-semibold text-slate-700 flex items-center gap-1">
+                      <Play size={12} className="text-indigo-600" /> Video Thumbnail Detected
+                    </p>
+                    <div className="aspect-video w-full rounded-lg overflow-hidden relative shadow-inner">
+                      <img
+                        src={previewThumbnail}
+                        alt="Thumbnail Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div>
+                <Label className="text-xs font-medium text-slate-600">Your Recorded Video (max 25 MB)</Label>
+                <label className="mt-1 flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl p-4 text-xs text-slate-500 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all">
+                  <Upload size={15} className="text-indigo-500" />
+                  {videoFile ? videoFile.name : 'Click to choose a video file (mp4, webm...)'}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={e => setVideoFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
               </div>
             )}
 
@@ -221,11 +302,15 @@ export const LessonsPage: React.FC = () => {
               />
             </div>
 
+            {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => setOpenModal(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Publish to Portal</Button>
+              <Button type="submit" disabled={publishing}>
+                {publishing ? 'Publishing...' : 'Publish to Portal'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

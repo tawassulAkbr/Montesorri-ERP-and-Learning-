@@ -18,21 +18,34 @@ async function getTeacher(userId: string) {
   return teacher;
 }
 
+function rec_date(records: { studentId: string; date: string }[], studentId: string): string {
+  return records.find(r => r.studentId === studentId)?.date ?? todayISO();
+}
+
 // ─── Self attendance ──────────────────────────────────────────────────────────
 teacherRouter.get('/today-status', async (req, res) => {
   await getTeacher(req.user!.id);
   const date = todayISO();
-  res.json({ date, status: await deriveTeacherStatus(req.user!.id, date) });
+  const record = await prisma.teacherAttendanceRecord.findUnique({
+    where: { teacherId_date: { teacherId: req.user!.id, date } },
+  });
+  res.json({
+    date,
+    status: await deriveTeacherStatus(req.user!.id, date),
+    checkInTime: record?.checkInTime ?? null,
+  });
 });
 
 teacherRouter.post('/mark-present', async (req, res) => {
   const teacherId = req.user!.id;
   await getTeacher(teacherId);
   const date = todayISO();
+  const now = new Date();
+  const checkInTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const record = await prisma.teacherAttendanceRecord.upsert({
     where: { teacherId_date: { teacherId, date } },
-    update: { status: 'PRESENT', leaveRequestId: null },
-    create: { teacherId, date, status: 'PRESENT' },
+    update: { status: 'PRESENT', leaveRequestId: null, checkInTime },
+    create: { teacherId, date, status: 'PRESENT', checkInTime },
   });
   res.json({ attendance: { ...record, status: 'present' } });
 });
@@ -109,6 +122,32 @@ teacherRouter.post('/attendance', async (req, res) => {
     }),
   );
   await prisma.$transaction(ops);
+
+  // Absence alerts to the student and their parent
+  const absentIds = records.filter(r => r.status === 'absent').map(r => r.studentId);
+  if (absentIds.length > 0) {
+    const absentStudents = await prisma.student.findMany({ where: { id: { in: absentIds } } });
+    const notifOps = absentStudents.flatMap(s => [
+      prisma.notification.create({
+        data: {
+          userId: s.id, role: 'STUDENT',
+          title: 'Marked absent',
+          message: `You were marked absent on ${rec_date(records, s.id)}. If this is a mistake, talk to your teacher.`,
+          type: 'WARNING', kind: 'ABSENCE', relatedStudentId: s.id,
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: s.parentId, role: 'PARENT',
+          title: 'Absence alert',
+          message: `${s.name} was marked absent on ${rec_date(records, s.id)}.`,
+          type: 'WARNING', kind: 'ABSENCE', relatedStudentId: s.id,
+        },
+      }),
+    ]);
+    await prisma.$transaction(notifOps);
+  }
+
   res.json({ ok: true, count: records.length });
 });
 
