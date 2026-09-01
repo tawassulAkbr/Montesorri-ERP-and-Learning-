@@ -39,6 +39,11 @@ async function main() {
     prisma.admin.deleteMany(),
     prisma.credential.deleteMany(),
     prisma.passwordResetToken.deleteMany(),
+    prisma.studentBadge.deleteMany(),
+    prisma.badge.deleteMany(),
+    prisma.learningSession.deleteMany(),
+    prisma.studentStreak.deleteMany(),
+    prisma.learningQuestion.deleteMany(),
   ]);
 
   // ─── Users ─────────────────────────────────────────────────────────────────
@@ -339,6 +344,90 @@ async function main() {
         createdAt: new Date(Date.now() - 3600000),
       },
     ],
+  });
+
+  // ─── Gamified Learning: question bank (per grade) ──────────────────────────
+  const q = (gradeClass: string, area: string, emoji: string, question: string, options: string[], correctIndex: number) =>
+    ({ gradeClass, area, emoji, question, options, correctIndex });
+
+  const questionBank = [
+    // Toddler (Playgroup, 2-3y): colors, animals, sizes, counting 1-3, shapes
+    q(CLASSES.toddler, 'Colors', '🍎', 'Which one is RED?', ['🍎 Apple', '🥦 Broccoli', '🌼 Flower', '🌊 Water'], 0),
+    q(CLASSES.toddler, 'Colors', '🌼', 'Which one is YELLOW?', ['🌼 Sunflower', '🍇 Grapes', '🥬 Leaf', '🍊 Orange'], 0),
+    q(CLASSES.toddler, 'Colors', '🌊', 'Which one is BLUE?', ['🌊 Sea', '🍓 Strawberry', '🌻 Sunflower', '🥕 Carrot'], 0),
+    q(CLASSES.toddler, 'Animals', '🐶', 'Which animal says "Woof"?', ['🐶 Dog', '🐱 Cat', '🐮 Cow', '🐔 Hen'], 0),
+    q(CLASSES.toddler, 'Animals', '🐱', 'Which animal says "Meow"?', ['🐱 Cat', '🐶 Dog', '🐑 Sheep', '🐴 Horse'], 0),
+    q(CLASSES.toddler, 'Animals', '🐮', 'Which animal gives us milk?', ['🐮 Cow', '🐶 Dog', '🐔 Hen', '🐟 Fish'], 0),
+    q(CLASSES.toddler, 'Sizes', '🐘', 'Which animal is BIG?', ['🐘 Elephant', '🐜 Ant', '🐭 Mouse', '🐦 Bird'], 0),
+    q(CLASSES.toddler, 'Sizes', '🐜', 'Which one is SMALL?', ['🐜 Ant', '🐘 Elephant', '🚗 Car', '🏠 House'], 0),
+    q(CLASSES.toddler, 'Counting', '🔢', 'How many apples? 🍎🍎', ['1', '2', '3', '4'], 1),
+    q(CLASSES.toddler, 'Counting', '🔢', 'How many balls? ⚽⚽⚽', ['2', '3', '1', '4'], 1),
+    q(CLASSES.toddler, 'Shapes', '🔵', 'Which shape is a CIRCLE?', ['🔵 Round ball', '🟥 Box', '🔺 Triangle', '📦 Cube'], 0),
+    q(CLASSES.toddler, 'Shapes', '🟥', 'Which shape is a SQUARE?', ['🟥 Square block', '🔵 Ball', '🔺 Party hat', '🥚 Egg'], 0),
+
+    // Junior (Nursery, 3-4y): first sounds, counting 1-10, colors, shapes, opposites
+    q(CLASSES.junior, 'Letters', '🔤', 'Which letter does "Sun" start with?', ['S', 'A', 'M', 'T'], 0),
+    q(CLASSES.junior, 'Letters', '🔤', 'Which letter does "Ball" start with?', ['B', 'D', 'P', 'T'], 0),
+    q(CLASSES.junior, 'Letters', '🔤', 'Which letter does "Cat" start with?', ['C', 'S', 'K', 'G'], 0),
+    q(CLASSES.junior, 'Letters', '🐘', '"Elephant" starts with which sound?', ['E', 'A', 'O', 'I'], 0),
+    q(CLASSES.junior, 'Counting', '🔢', 'What comes after 4?', ['5', '3', '6', '2'], 0),
+    q(CLASSES.junior, 'Counting', '🔢', 'What comes before 7?', ['6', '8', '5', '9'], 0),
+    q(CLASSES.junior, 'Counting', '🧮', '2 + 1 = ?', ['3', '2', '4', '1'], 0),
+    q(CLASSES.junior, 'Counting', '🧮', '3 + 2 = ?', ['5', '4', '6', '3'], 0),
+    q(CLASSES.junior, 'Colors', '🟣', 'Which one is PURPLE?', ['🟣 Purple', '🟠 Orange', '🟢 Green', '🟤 Brown'], 0),
+    q(CLASSES.junior, 'Shapes', '🔺', 'Which shape has 3 sides?', ['🔺 Triangle', '🔵 Circle', '🟥 Square', '⬭ Oval'], 0),
+    q(CLASSES.junior, 'Opposites', '🌞', 'What is the opposite of DAY?', ['Night', 'Morning', 'Sun', 'Noon'], 0),
+    q(CLASSES.junior, 'Opposites', '🔥', 'What is the opposite of HOT?', ['Cold', 'Warm', 'Sunny', 'Dry'], 0),
+    q(CLASSES.junior, 'Opposites', '🐘', 'What is the opposite of BIG?', ['Small', 'Tall', 'Long', 'Wide'], 0),
+
+    // Senior (Prep, 4-5y): CVC words, addition to 10, patterns, letter names, rhymes
+    q(CLASSES.senior, 'Reading', '🐱', 'Read the word: C - A - T', ['Cat', 'Car', 'Cup', 'Cow'], 0),
+    q(CLASSES.senior, 'Reading', '🐶', 'Read the word: D - O - G', ['Dog', 'Dig', 'Dot', 'Duck'], 0),
+    q(CLASSES.senior, 'Reading', '☀️', 'Read the word: S - U - N', ['Sun', 'Sit', 'Sad', 'Six'], 0),
+    q(CLASSES.senior, 'Reading', '🛏️', 'Read the word: B - E - D', ['Bed', 'Bad', 'Big', 'Bus'], 0),
+    q(CLASSES.senior, 'Maths', '🧮', '4 + 3 = ?', ['7', '6', '8', '5'], 0),
+    q(CLASSES.senior, 'Maths', '🧮', '5 + 5 = ?', ['10', '9', '8', '11'], 0),
+    q(CLASSES.senior, 'Maths', '🧮', '6 + 2 = ?', ['8', '7', '9', '6'], 0),
+    q(CLASSES.senior, 'Maths', '🍎', 'You have 5 apples and eat 2. How many left?', ['3', '2', '4', '1'], 0),
+    q(CLASSES.senior, 'Patterns', '🔷', 'What comes next? 🔴 🔵 🔴 🔵 …', ['🔴 Red', '🔵 Blue', '🟢 Green', '🟡 Yellow'], 0),
+    q(CLASSES.senior, 'Patterns', '⭐', 'What comes next? ⭐ ⭐ 🌙 ⭐ ⭐ …', ['🌙 Moon', '⭐ Star', '☀️ Sun', '☁️ Cloud'], 0),
+    q(CLASSES.senior, 'Letters', '🔤', 'Which letter comes after M?', ['N', 'L', 'O', 'K'], 0),
+    q(CLASSES.senior, 'Rhymes', '🐑', '"Baa baa black ___"', ['Sheep', 'Cow', 'Goat', 'Horse'], 0),
+    q(CLASSES.senior, 'Rhymes', '⭐', '"Twinkle twinkle little ___"', ['Star', 'Moon', 'Sun', 'Sky'], 0),
+  ];
+
+  await prisma.learningQuestion.createMany({ data: questionBank });
+
+  // ─── Badge catalog ─────────────────────────────────────────────────────────
+  const badges = [
+    { code: 'first-task', name: 'First Steps', emoji: '🌱', description: 'Complete your first learning task', criterionType: 'first', criterionValue: 1 },
+    { code: 'streak-3', name: 'Warming Up', emoji: '🔥', description: 'Reach a 3-day learning streak', criterionType: 'streak', criterionValue: 3 },
+    { code: 'streak-7', name: 'One Week Star', emoji: '⭐', description: 'Reach a 7-day learning streak', criterionType: 'streak', criterionValue: 7 },
+    { code: 'streak-14', name: 'Fortnight Fighter', emoji: '🏆', description: 'Reach a 14-day learning streak', criterionType: 'streak', criterionValue: 14 },
+    { code: 'streak-30', name: 'Streak Champion', emoji: '👑', description: 'Reach a 30-day learning streak', criterionType: 'streak', criterionValue: 30 },
+    { code: 'perfect-1', name: 'Perfect Round', emoji: '🎯', description: 'Get a perfect score on a task', criterionType: 'perfect', criterionValue: 1 },
+    { code: 'perfect-5', name: 'Sharp Mind', emoji: '🧠', description: 'Get 5 perfect scores', criterionType: 'perfect', criterionValue: 5 },
+    { code: 'xp-100', name: 'Century Club', emoji: '💯', description: 'Earn 100 XP', criterionType: 'xp', criterionValue: 100 },
+    { code: 'xp-300', name: 'Rocket Learner', emoji: '🚀', description: 'Earn 300 XP', criterionType: 'xp', criterionValue: 300 },
+    { code: 'xp-500', name: 'Super Star', emoji: '🌟', description: 'Earn 500 XP', criterionType: 'xp', criterionValue: 500 },
+  ];
+  await prisma.badge.createMany({ data: badges });
+
+  // ─── Demo streak for Ali ───────────────────────────────────────────────────
+  await prisma.studentStreak.create({
+    data: {
+      studentId: aliId,
+      currentStreak: 4,
+      longestStreak: 6,
+      totalXp: 220,
+      perfectCount: 2,
+      lastActivityDate: daysAgo(1),
+    },
+  });
+  const demoBadgeCodes = ['first-task', 'streak-3', 'perfect-1', 'xp-100'];
+  const demoBadges = await prisma.badge.findMany({ where: { code: { in: demoBadgeCodes } } });
+  await prisma.studentBadge.createMany({
+    data: demoBadges.map(b => ({ studentId: aliId, badgeId: b.id, earnedAt: new Date(Date.now() - 3 * 86400000) })),
   });
 
   console.log('Seed complete.');

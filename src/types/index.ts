@@ -318,3 +318,68 @@ export interface ClassPerformancePoint {
   value: number;
   color: string;
 }
+
+// ─── Gamified Learning / Micro-Learning ──────────────────────────────────────
+export interface DailyQuestion {
+  id: string;
+  area: string;
+  emoji?: string;
+  question: string;
+  options: string[];
+}
+
+export interface DailyTask {
+  date: string;
+  questionSeconds: number;
+  todayCompleted: boolean;
+  todayResult: { correct: number; total: number; xpEarned: number } | null;
+  questions: DailyQuestion[];
+}
+
+export interface BadgeInfo {
+  id: string;
+  code: string;
+  name: string;
+  emoji: string;
+  description: string;
+  earnedAt?: string;
+}
+
+export interface SubmitResult {
+  alreadyCompleted: boolean;
+  correct: number;
+  total: number;
+  perfect?: boolean;
+  xpEarned: number;
+  currentStreak: number;
+  longestStreak?: number;
+  totalXp?: number;
+  level?: number;
+  newBadges: BadgeInfo[];
+}
+
+export interface LearningProgress {
+  currentStreak: number;
+  longestStreak: number;
+  totalXp: number;
+  level: number;
+  perfectCount: number;
+  lastActivityDate: string | null;
+  todayCompleted: boolean;
+  badges: BadgeInfo[];
+  sessions: { date: string; correct: number; total: number; xpEarned: number }[];
+}
+
+export interface StudentStreakSummary {
+  studentId: string;
+  name: string;
+  class: string;
+  rollNo: string;
+  currentStreak: number;
+  longestStreak: number;
+  totalXp: number;
+  level: number;
+  badgeCount: number;
+  lastActivityDate: string | null;
+  atRisk: boolean;
+}

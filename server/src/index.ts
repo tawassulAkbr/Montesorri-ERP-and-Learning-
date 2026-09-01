@@ -20,6 +20,9 @@ import { teacherAssignmentRouter, studentAssignmentRouter, adminAssignmentRouter
 import { uploadRouter } from './routes/upload';
 import { parentMessageRouter, teacherMessageRouter } from './routes/messages';
 import { teacherReportRouter } from './routes/teacher-reports';
+import { studentLearningRouter, teacherStreakRouter } from './routes/learning';
+import { aiRouter } from './routes/ai';
+import { prisma } from './db';
 
 const app = express();
 
@@ -48,9 +51,11 @@ app.use('/api/admin', adminRouter);
 app.use('/api/teachers/messages', teacherMessageRouter);
 app.use('/api/teachers/feedback', teacherFeedbackRouter);
 app.use('/api/teachers/assignments', teacherAssignmentRouter);
+app.use('/api/teachers/streaks', teacherStreakRouter);
 app.use('/api/teachers', teacherRouter);
 app.use('/api/students/feedback', studentFeedbackRouter);
 app.use('/api/students/assignments', studentAssignmentRouter);
+app.use('/api/students/learning', studentLearningRouter);
 app.use('/api/students', studentRouter);
 app.use('/api/parents/messages', parentMessageRouter);
 app.use('/api/parents', parentRouter);
@@ -62,6 +67,7 @@ app.use('/api/daily-work', dailyWorkRouter);
 app.use('/api/schedule', scheduleRouter);
 app.use('/api/live-class', liveClassRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/ai', aiRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
@@ -87,3 +93,13 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 app.listen(config.PORT, () => {
   console.log(`KinderGuide API running on http://localhost:${config.PORT} (${config.NODE_ENV})`);
 });
+
+// Warm the Neon connection immediately on startup, then keep it warm every 2
+// minutes so the free-tier compute doesn't auto-suspend and cause cold-start
+// connection timeouts (Prisma P2024) on the next request.
+prisma.$queryRaw`SELECT 1`
+  .then(() => console.log('Database connection warm'))
+  .catch(() => { /* retried by keep-alive */ });
+setInterval(() => {
+  prisma.$queryRaw`SELECT 1`.catch(() => { /* keep-alive only */ });
+}, 2 * 60 * 1000);

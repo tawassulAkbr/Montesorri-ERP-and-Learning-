@@ -44,7 +44,7 @@ bootstrapRouter.get('/', requireAuth, async (req, res) => {
       prisma.teacherAttendanceRecord.findMany(),
       prisma.attendanceRecord.findMany(),
       prisma.testResult.findMany({ orderBy: { date: 'desc' } }),
-      prisma.leaveRequest.findMany({ orderBy: { submittedAt: 'desc' } }),
+      prisma.leaveRequest.findMany({ where: { kind: 'TEACHER' }, orderBy: { submittedAt: 'desc' } }),
       prisma.remark.findMany({ orderBy: { createdAt: 'desc' } }),
     ]);
   } else if (role === 'teacher') {

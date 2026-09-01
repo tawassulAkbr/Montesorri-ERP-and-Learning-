@@ -3,15 +3,27 @@ import { MessageSquare, Heart, Sparkles, Filter } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDate } from '@/lib/utils';
 import type { RemarkType } from '@/types';
 
 export const ParentRemarksPage: React.FC = () => {
   const { students, remarks } = useData();
-  const myChildren = students.filter(s => s.parentId === 'p1');
-  const [selectedChildId, setSelectedChildId] = useState<string>(myChildren[0]?.id || 's1');
+  const { currentUser } = useAuth();
+  const myChildren = students.filter(s => s.parentId === currentUser?.id);
+  const [selectedChildId, setSelectedChildId] = useState<string>(myChildren[0]?.id || '');
 
   const selectedChild = myChildren.find(c => c.id === selectedChildId) || myChildren[0];
+
+  if (!selectedChild) {
+    return (
+      <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
+        <p className="text-sm font-semibold text-slate-700">No children are linked to this account yet.</p>
+        <p className="text-xs text-slate-400 mt-1">Please contact the school administrator.</p>
+      </div>
+    );
+  }
+
   const childRemarks = remarks.filter(r => r.studentId === selectedChild.id);
 
   const typeConfig: Record<RemarkType, { label: string; border: string; bg: string; text: string }> = {

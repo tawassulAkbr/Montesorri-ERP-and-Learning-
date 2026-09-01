@@ -97,6 +97,7 @@ model Admin {
   name      String
   email     String   @unique
   adminCode String   @unique
+  avatarUrl String?
   createdAt DateTime @default(now())
 
   @@map("admins")
@@ -111,6 +112,7 @@ model Teacher {
   qualification String
   phone         String
   classes       String[]
+  avatarUrl     String?
   createdAt     DateTime @default(now())
 
   lessons          Lesson[]
@@ -128,6 +130,7 @@ model Parent {
   name      String
   email     String   @unique
   phone     String
+  avatarUrl String?
   createdAt DateTime @default(now())
 
   children      Student[]
@@ -150,6 +153,7 @@ model Student {
   guardianName String
   feeAmount    Int
   feeDue       Boolean  @default(false)
+  avatarUrl    String?
   createdAt    DateTime @default(now())
 
   parent           Parent             @relation(fields: [parentId], references: [id])
@@ -413,4 +417,66 @@ model Message {
 
   @@index([parentId, teacherId, createdAt])
   @@map("messages")
+}
+
+// ─── Gamified Learning / Micro-Learning ──────────────────────────────────────
+
+model LearningQuestion {
+  id           String   @id @default(cuid())
+  gradeClass   String
+  area         String
+  emoji        String?
+  question     String
+  options      String[]
+  correctIndex Int
+
+  @@index([gradeClass])
+  @@map("learning_questions")
+}
+
+model StudentStreak {
+  studentId        String  @id
+  currentStreak    Int     @default(0)
+  longestStreak    Int     @default(0)
+  totalXp          Int     @default(0)
+  perfectCount     Int     @default(0)
+  lastActivityDate String?
+
+  @@map("student_streaks")
+}
+
+model LearningSession {
+  id          String   @id @default(cuid())
+  studentId   String
+  date        String
+  correct     Int
+  total       Int
+  xpEarned    Int
+  durationSec Int      @default(0)
+  completedAt DateTime @default(now())
+
+  @@unique([studentId, date])
+  @@map("learning_sessions")
+}
+
+model Badge {
+  id             String @id @default(cuid())
+  code           String @unique
+  name           String
+  emoji          String
+  description    String
+  criterionType  String
+  criterionValue Int    @default(0)
+
+  @@map("badges")
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  @@unique([studentId, badgeId])
+  @@map("student_badges")
 }

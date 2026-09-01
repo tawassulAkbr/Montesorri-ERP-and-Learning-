@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Hand, MessageSquare, Sparkles, Heart, Smile,
-  Send, Users, Video, Mic
+  Send, Users, Video, VideoOff, Mic, MicOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Whiteboard } from '@/components/shared/Whiteboard';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserMedia } from '@/hooks/useUserMedia';
 
 interface ReactionParticle {
   id: number;
@@ -17,6 +19,9 @@ interface ReactionParticle {
 
 export const StudentLiveClassPage: React.FC = () => {
   const { liveClass } = useData();
+  const { currentUser } = useAuth();
+  const studentName = currentUser?.name || 'Student';
+  const { videoRef, hasStream, micOn, camOn, error: mediaError, requesting, start, toggleMic, toggleCam } = useUserMedia();
   const [handRaised, setHandRaised] = useState(false);
   const [reactions, setReactions] = useState<ReactionParticle[]>([]);
   const [chatMessages, setChatMessages] = useState<{ sender: string; text: string; isMe?: boolean }[]>([
@@ -24,6 +29,11 @@ export const StudentLiveClassPage: React.FC = () => {
     { sender: 'Zara Ahmed', text: 'Hi Ali! 🌟' },
   ]);
   const [newMsg, setNewMsg] = useState('');
+
+  // Open the student's camera + microphone when joining the live lesson.
+  useEffect(() => {
+    start();
+  }, [start]);
 
   const triggerReaction = (emoji: string) => {
     const newReaction: ReactionParticle = {
@@ -40,7 +50,7 @@ export const StudentLiveClassPage: React.FC = () => {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMsg) return;
-    setChatMessages(prev => [...prev, { sender: 'Ali Hassan', text: newMsg, isMe: true }]);
+    setChatMessages(prev => [...prev, { sender: studentName, text: newMsg, isMe: true }]);
     setNewMsg('');
   };
 
@@ -80,7 +90,23 @@ export const StudentLiveClassPage: React.FC = () => {
         </div>
 
         {/* Student Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            size="sm"
+            onClick={toggleMic}
+            className={`font-bold text-xs gap-1.5 ${micOn && hasStream ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
+          >
+            {micOn && hasStream ? <Mic size={15} /> : <MicOff size={15} />}
+            {micOn && hasStream ? 'Mic On' : 'Muted'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={toggleCam}
+            className={`font-bold text-xs gap-1.5 ${camOn && hasStream ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
+          >
+            {camOn && hasStream ? <Video size={15} /> : <VideoOff size={15} />}
+            {camOn && hasStream ? 'Cam On' : 'Cam Off'}
+          </Button>
           <Button
             size="sm"
             onClick={() => setHandRaised(!handRaised)}
@@ -116,6 +142,44 @@ export const StudentLiveClassPage: React.FC = () => {
         </div>
 
         <div className="space-y-4">
+          {/* Student Self-View (real camera + mic via getUserMedia) */}
+          <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-video relative border border-slate-800 shadow-sm">
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              className={`w-full h-full object-cover ${camOn && hasStream ? '' : 'invisible'}`}
+            />
+            {hasStream && !camOn && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1 bg-slate-900">
+                <VideoOff size={20} />
+                <span>Your camera is off</span>
+              </div>
+            )}
+            {!hasStream && requesting && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 text-xs gap-2">
+                <Sparkles size={20} className="animate-pulse" />
+                <span>Starting your camera…</span>
+              </div>
+            )}
+            {!hasStream && !requesting && mediaError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-2">
+                <VideoOff size={20} className="text-red-400" />
+                <span className="text-[11px] text-red-300 leading-snug">{mediaError}</span>
+                <Button size="sm" onClick={start} className="h-7 text-[10px] px-3 mt-1">Try Again</Button>
+              </div>
+            )}
+            {!hasStream && !requesting && !mediaError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1">
+                <VideoOff size={20} />
+                <span>Camera is off</span>
+              </div>
+            )}
+            <div className="absolute top-2 left-2 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded font-mono">
+              You {hasStream ? '• Live' : ''}
+            </div>
+          </div>
+
           {/* Teacher Stream */}
           <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-video relative flex items-center justify-center border border-slate-800 shadow-sm">
             <div className="w-full h-full bg-gradient-to-tr from-indigo-900 to-purple-900 flex flex-col items-center justify-center text-white">

@@ -5,7 +5,7 @@ import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { generatePassword, hashPassword } from '../services/password';
 import { sendCredentialsEmail } from '../services/mail';
-import { nextEmployeeId, nextEnrollmentId, nextRollNo, slugEmail } from '../services/ids';
+import { nextEmployeeId, nextEnrollmentId, nextRollNo } from '../services/ids';
 import { deriveTeacherStatus, todayISO, eachWeekday } from '../services/attendance';
 import { conflict, notFound, badRequest } from '../utils/errors';
 import {
@@ -22,7 +22,7 @@ adminRouter.get('/dashboard', async (_req, res) => {
     prisma.teacher.count(),
     prisma.student.count(),
     prisma.parent.count(),
-    prisma.leaveRequest.findMany({ where: { status: 'PENDING' }, orderBy: { submittedAt: 'desc' } }),
+    prisma.leaveRequest.findMany({ where: { status: 'PENDING', kind: 'TEACHER' }, orderBy: { submittedAt: 'desc' } }),
     prisma.student.count({ where: { feeDue: true } }),
   ]);
   res.json({
@@ -102,11 +102,11 @@ adminRouter.get('/teachers', async (_req, res) => {
 // ─── Students (with automatic parent account) ────────────────────────────────
 const createStudentSchema = z.object({
   name: z.string().min(2),
-  email: z.string().optional(),
+  email: z.string().email('Student email is required'),
   phone: z.string().min(3),
   address: z.string().min(3),
   guardianName: z.string().min(2),
-  guardianEmail: z.string().optional(),
+  guardianEmail: z.string().email('Guardian email is required'),
   guardianPhone: z.string().optional(),
   class: z.string().min(2),
   feeAmount: z.number().int().positive(),
@@ -114,8 +114,8 @@ const createStudentSchema = z.object({
 
 adminRouter.post('/students', async (req, res) => {
   const input = createStudentSchema.parse(req.body);
-  const studentEmail = (input.email || slugEmail(input.name, 'student.edu')).toLowerCase();
-  const guardianEmail = (input.guardianEmail || slugEmail(input.guardianName, 'parent.com')).toLowerCase();
+  const studentEmail = input.email.trim().toLowerCase();
+  const guardianEmail = input.guardianEmail.trim().toLowerCase();
   const guardianPhone = input.guardianPhone || input.phone;
 
   if (await prisma.credential.findUnique({ where: { email: studentEmail } })) {
@@ -187,7 +187,8 @@ adminRouter.post('/students', async (req, res) => {
     return { student, parentName, parentPassword };
   });
 
-  // Email credentials
+  // Email credentials. The student's login goes to the student email, and is
+  // ALSO forwarded to the parent/guardian so they can help the child sign in.
   await sendCredentialsEmail({
     to: studentEmail,
     name: result.student.name,
@@ -195,6 +196,15 @@ adminRouter.post('/students', async (req, res) => {
     email: studentEmail,
     password: studentPassword,
   });
+  if (guardianEmail !== studentEmail) {
+    await sendCredentialsEmail({
+      to: guardianEmail,
+      name: result.student.name,
+      roleLabel: 'Student',
+      email: studentEmail,
+      password: studentPassword,
+    });
+  }
   if (result.parentPassword) {
     await sendCredentialsEmail({
       to: guardianEmail,
@@ -327,7 +337,7 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
 // ─── Leave review ─────────────────────────────────────────────────────────────
 adminRouter.get('/leaves', async (req, res) => {
   const status = z.enum(['pending', 'accepted', 'rejected', 'all']).default('pending').parse(req.query.status ?? 'pending');
-  const where = status === 'all' ? {} : { status: status.toUpperCase() as any };
+  const where = { kind: 'TEACHER' as const, ...(status === 'all' ? {} : { status: status.toUpperCase() as any }) };
   const leaves = await prisma.leaveRequest.findMany({
     where,
     orderBy: { submittedAt: 'desc' },
@@ -339,6 +349,7 @@ adminRouter.patch('/leaves/:id', async (req, res) => {
   const { status } = z.object({ status: z.enum(['accepted', 'rejected']) }).parse(req.body);
   const leave = await prisma.leaveRequest.findUnique({ where: { id: String(req.params.id) } });
   if (!leave) throw notFound('Leave request not found');
+  if (leave.kind !== 'TEACHER') throw badRequest('Student leave requests are reviewed by the class teacher');
   if (leave.status !== 'PENDING') throw badRequest('Leave request already reviewed');
 
   const ops: any[] = [

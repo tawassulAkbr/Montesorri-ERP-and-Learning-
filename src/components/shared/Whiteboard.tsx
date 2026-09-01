@@ -176,40 +176,34 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
         {/* Drawing Tools */}
         <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('pen')}
-                className={`p-2 rounded-lg transition-all ${tool === 'pen' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Pen size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('pen')}
+              className={`p-2 rounded-lg transition-all ${tool === 'pen' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Pen size={16} />
             </TooltipTrigger>
             <TooltipContent>Crayon / Pen</TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('highlighter')}
-                className={`p-2 rounded-lg transition-all ${tool === 'highlighter' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Highlighter size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('highlighter')}
+              className={`p-2 rounded-lg transition-all ${tool === 'highlighter' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Highlighter size={16} />
             </TooltipTrigger>
             <TooltipContent>Translucent Highlighter</TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('eraser')}
-                className={`p-2 rounded-lg transition-all ${tool === 'eraser' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Eraser size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('eraser')}
+              className={`p-2 rounded-lg transition-all ${tool === 'eraser' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Eraser size={16} />
             </TooltipTrigger>
             <TooltipContent>Eraser</TooltipContent>
           </Tooltip>
@@ -217,40 +211,34 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
           <div className="h-4 w-px bg-slate-200 mx-0.5" />
 
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('circle')}
-                className={`p-2 rounded-lg transition-all ${tool === 'circle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Circle size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('circle')}
+              className={`p-2 rounded-lg transition-all ${tool === 'circle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Circle size={16} />
             </TooltipTrigger>
             <TooltipContent>Circle / Ring</TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('rectangle')}
-                className={`p-2 rounded-lg transition-all ${tool === 'rectangle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Square size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('rectangle')}
+              className={`p-2 rounded-lg transition-all ${tool === 'rectangle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Square size={16} />
             </TooltipTrigger>
             <TooltipContent>Box / Rectangle</TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger>
-              <button
-                type="button"
-                onClick={() => setTool('line')}
-                className={`p-2 rounded-lg transition-all ${tool === 'line' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                <Minus size={16} />
-              </button>
+            <TooltipTrigger
+              type="button"
+              onClick={() => setTool('line')}
+              className={`p-2 rounded-lg transition-all ${tool === 'line' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Minus size={16} />
             </TooltipTrigger>
             <TooltipContent>Line</TooltipContent>
           </Tooltip>

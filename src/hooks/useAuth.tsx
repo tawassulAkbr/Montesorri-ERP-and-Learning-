@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { User, Role } from '../types';
-import { apiPost, setToken, clearToken, getToken } from '@/lib/api';
+import { apiGet, apiPost, setToken, clearToken, getToken } from '@/lib/api';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -8,6 +8,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string, role: Role) => Promise<boolean>;
   logout: () => void;
+  applyUser: (user: User) => void;
   isAuthenticated: boolean;
 }
 
@@ -51,8 +52,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem('kg_role');
   }, []);
 
+  const applyUser = useCallback((user: User) => {
+    setCurrentUser(user);
+    sessionStorage.setItem('kg_user', JSON.stringify(user));
+  }, []);
+
+  // Refresh the stored user from the server on load so profile edits
+  // (avatar, name, details) made earlier are never stale after a reload.
+  useEffect(() => {
+    if (!getToken()) return;
+    apiGet<{ user: User }>('/auth/me')
+      .then(res => applyUser(res.user))
+      .catch(err => {
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+          clearToken();
+          setTokenState(null);
+          setCurrentUser(null);
+          setRole(null);
+          sessionStorage.removeItem('kg_user');
+          sessionStorage.removeItem('kg_role');
+        }
+      });
+  }, [applyUser]);
+
   return (
-    <AuthContext.Provider value={{ currentUser, role, token, login, logout, isAuthenticated: !!currentUser && !!token }}>
+    <AuthContext.Provider value={{ currentUser, role, token, login, logout, applyUser, isAuthenticated: !!currentUser && !!token }}>
       {children}
     </AuthContext.Provider>
   );

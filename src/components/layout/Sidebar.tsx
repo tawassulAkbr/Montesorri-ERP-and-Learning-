@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Video, ClipboardList, CalendarCheck, BarChart3,
   MessageSquare, BookOpen, Users, GraduationCap, Heart, ShieldCheck,
   LogOut, ChevronLeft, ChevronRight, Settings, BookMarked, Radio, Calendar,
-  MessageSquareHeart
+  MessageSquareHeart, Flame, Sparkles
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +22,7 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Daily Activities', to: '/teacher/daily-work', icon: <BookOpen size={18} /> },
     { label: 'Attendance', to: '/teacher/attendance', icon: <CalendarCheck size={18} /> },
     { label: 'My Students', to: '/teacher/students', icon: <Users size={18} /> },
+    { label: 'Streak Progress', to: '/teacher/streaks', icon: <Flame size={18} className="text-orange-500" /> },
     { label: 'Milestones & Tests', to: '/teacher/tests', icon: <ClipboardList size={18} /> },
     { label: 'Assignments & Tasks', to: '/teacher/assignments', icon: <ClipboardList size={18} /> },
     { label: 'Observations & Remarks', to: '/teacher/remarks', icon: <MessageSquare size={18} /> },
@@ -31,6 +32,7 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
   ],
   student: [
     { label: 'Dashboard', to: '/student/dashboard', icon: <LayoutDashboard size={18} /> },
+    { label: 'My Learning', to: '/student/learning', icon: <Sparkles size={18} className="text-orange-500" /> },
     { label: 'Live Classroom', to: '/student/live-class', icon: <Radio size={18} className="text-red-500" />, isLive: true },
     { label: 'My Daily Routine', to: '/student/schedule', icon: <Calendar size={18} /> },
     { label: 'Video Lectures', to: '/student/lectures', icon: <Video size={18} /> },
@@ -47,6 +49,7 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Attendance & Leaves', to: '/parent/attendance', icon: <CalendarCheck size={18} /> },
     { label: 'Daily Work & Lessons', to: '/parent/daily-work', icon: <BookOpen size={18} /> },
     { label: 'Montessori Guides', to: '/parent/teachers', icon: <GraduationCap size={18} /> },
+    { label: 'Messages', to: '/parent/messages', icon: <MessageSquare size={18} /> },
   ],
   admin: [
     { label: 'Dashboard', to: '/admin/dashboard', icon: <LayoutDashboard size={18} /> },

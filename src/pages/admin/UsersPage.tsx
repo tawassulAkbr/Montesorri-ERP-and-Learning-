@@ -140,7 +140,7 @@ const AddTeacherModal: React.FC<{
         <DialogHeader>
           <DialogTitle>Add New Teacher</DialogTitle>
           <DialogDescription>
-            A login account with a generated password will be created automatically.
+            A login account is created and the generated credentials are emailed to the teacher automatically.
           </DialogDescription>
         </DialogHeader>
 
@@ -214,6 +214,7 @@ const AddStudentModal: React.FC<{
 }> = ({ open, onClose, onCreated }) => {
   const { createStudentWithParent } = useData();
   const [name, setName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [guardianName, setGuardianName] = useState('');
   const [guardianEmail, setGuardianEmail] = useState('');
@@ -223,7 +224,7 @@ const AddStudentModal: React.FC<{
   const [feeAmount, setFeeAmount] = useState('');
 
   const reset = () => {
-    setName(''); setPhone(''); setGuardianName(''); setGuardianEmail('');
+    setName(''); setStudentEmail(''); setPhone(''); setGuardianName(''); setGuardianEmail('');
     setGuardianPhone(''); setAddress(''); setCls(MONTESSORI_CLASSES[1]); setFeeAmount('');
   };
 
@@ -234,10 +235,11 @@ const AddStudentModal: React.FC<{
     try {
       const creds = await createStudentWithParent({
         name: name.trim(),
+        email: studentEmail.trim().toLowerCase(),
         phone: phone.trim(),
         address: address.trim(),
         guardianName: guardianName.trim(),
-        guardianEmail: guardianEmail.trim() || undefined,
+        guardianEmail: guardianEmail.trim().toLowerCase(),
         guardianPhone: guardianPhone.trim() || undefined,
         class: cls,
         feeAmount: fee,
@@ -256,7 +258,7 @@ const AddStudentModal: React.FC<{
         <DialogHeader>
           <DialogTitle>Enroll New Student</DialogTitle>
           <DialogDescription>
-            Login accounts are created for both the child and the parent/guardian.
+            Login accounts are created for the child and the guardian, and both sets of credentials are emailed automatically.
           </DialogDescription>
         </DialogHeader>
 
@@ -273,14 +275,20 @@ const AddStudentModal: React.FC<{
           </div>
 
           <div>
+            <Label className="text-xs font-medium text-slate-600">Child's Email (student login) <span className="text-red-500">*</span></Label>
+            <Input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} placeholder="student@kinderguide.edu" className="mt-1 text-xs" required />
+            <p className="text-[10px] text-slate-400 mt-1">The child's login credentials are emailed here and also to the guardian below.</p>
+          </div>
+
+          <div>
             <Label className="text-xs font-medium text-slate-600">Parent / Guardian Name</Label>
             <Input value={guardianName} onChange={e => setGuardianName(e.target.value)} placeholder="e.g. Mr. Ahmed Raza" className="mt-1 text-xs" required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Guardian Email <span className="text-slate-400">(optional)</span></Label>
-              <Input type="email" value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} placeholder="auto-generated if blank" className="mt-1 text-xs" />
+              <Label className="text-xs font-medium text-slate-600">Guardian Email <span className="text-red-500">*</span></Label>
+              <Input type="email" value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} placeholder="parent@kinderguide.edu" className="mt-1 text-xs" required />
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-600">Guardian Phone <span className="text-slate-400">(optional)</span></Label>

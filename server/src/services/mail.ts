@@ -54,11 +54,17 @@ export async function sendPasswordResetEmail(to: string, rawToken: string): Prom
 
 async function deliver(opts: { to: string; subject: string; html: string }): Promise<void> {
   if (!resend) {
-    // Dev fallback: no RESEND_API_KEY configured — log instead of sending.
-    console.log('\n[email disabled — no RESEND_API_KEY] would send:');
+    // Dev fallback: no RESEND_API_KEY configured — print the full email to the
+    // server console instead of sending. Set RESEND_API_KEY in server/.env to
+    // deliver for real (free key at https://resend.com).
+    console.log('\n────────────────────────────────────────────────────────────');
+    console.log('[EMAIL NOT SENT — no RESEND_API_KEY configured]');
     console.log(`  To:      ${opts.to}`);
     console.log(`  Subject: ${opts.subject}`);
-    console.log('  (HTML body omitted)\n');
+    console.log('  Body (HTML):');
+    console.log(opts.html);
+    console.log('  → Add RESEND_API_KEY to server/.env to send real emails.');
+    console.log('────────────────────────────────────────────────────────────\n');
     return;
   }
   const { error } = await resend.emails.send({

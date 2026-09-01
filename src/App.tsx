@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 
 // Teacher Pages
 import { TeacherDashboard } from '@/pages/teacher/TeacherDashboard';
@@ -23,6 +24,7 @@ import { StudentsPage as TeacherStudentsPage } from '@/pages/teacher/StudentsPag
 import { TeacherFeedbackPage } from '@/pages/teacher/FeedbackPage';
 import { TeacherAssignmentsPage } from '@/pages/teacher/AssignmentsPage';
 import { TeacherMessagesPage } from '@/pages/teacher/MessagesPage';
+import { TeacherStreaksPage } from '@/pages/teacher/StreaksPage';
 
 // Student Pages
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
@@ -34,6 +36,7 @@ import { StudentReportsPage } from '@/pages/student/ReportsPage';
 import { StudentDailyWorkPage } from '@/pages/student/DailyWorkPage';
 import { StudentFeedbackPage } from '@/pages/student/FeedbackPage';
 import { StudentAssignmentsPage } from '@/pages/student/AssignmentsPage';
+import { StudentLearningPage } from '@/pages/student/LearningPage';
 
 // Parent Pages
 import { ParentDashboard } from '@/pages/parent/ParentDashboard';
@@ -43,6 +46,7 @@ import { ParentAttendancePage } from '@/pages/parent/AttendancePage';
 import { ParentDailyWorkPage } from '@/pages/parent/DailyWorkPage';
 import { ParentTeachersPage } from '@/pages/parent/TeachersPage';
 import { ParentMessageThreadPage } from '@/pages/parent/MessageThreadPage';
+import { ParentMessagesPage } from '@/pages/parent/MessagesPage';
 
 // Admin Pages
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
@@ -97,6 +101,7 @@ export default function App() {
             >
               {/* Global Settings */}
               <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
 
               {/* Teacher Sub-routes */}
               <Route path="/teacher">
@@ -107,6 +112,7 @@ export default function App() {
                 <Route path="tests" element={<ProtectedRoute allowedRole="teacher"><TeacherTestsPage /></ProtectedRoute>} />
                 <Route path="attendance" element={<ProtectedRoute allowedRole="teacher"><TeacherAttendancePage /></ProtectedRoute>} />
                 <Route path="students" element={<ProtectedRoute allowedRole="teacher"><TeacherStudentsPage /></ProtectedRoute>} />
+                <Route path="streaks" element={<ProtectedRoute allowedRole="teacher"><TeacherStreaksPage /></ProtectedRoute>} />
                 <Route path="reports" element={<ProtectedRoute allowedRole="teacher"><TeacherReportsPage /></ProtectedRoute>} />
                 <Route path="remarks" element={<ProtectedRoute allowedRole="teacher"><TeacherRemarksPage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="teacher"><TeacherDailyWorkPage /></ProtectedRoute>} />
@@ -118,6 +124,7 @@ export default function App() {
               {/* Student Sub-routes */}
               <Route path="/student">
                 <Route path="dashboard" element={<ProtectedRoute allowedRole="student"><StudentDashboard /></ProtectedRoute>} />
+                <Route path="learning" element={<ProtectedRoute allowedRole="student"><StudentLearningPage /></ProtectedRoute>} />
                 <Route path="live-class" element={<ProtectedRoute allowedRole="student"><StudentLiveClassPage /></ProtectedRoute>} />
                 <Route path="schedule" element={<ProtectedRoute allowedRole="student"><StudentSchedulePage /></ProtectedRoute>} />
                 <Route path="lectures" element={<ProtectedRoute allowedRole="student"><StudentLecturesPage /></ProtectedRoute>} />
@@ -136,6 +143,7 @@ export default function App() {
                 <Route path="attendance" element={<ProtectedRoute allowedRole="parent"><ParentAttendancePage /></ProtectedRoute>} />
                 <Route path="daily-work" element={<ProtectedRoute allowedRole="parent"><ParentDailyWorkPage /></ProtectedRoute>} />
                 <Route path="teachers" element={<ProtectedRoute allowedRole="parent"><ParentTeachersPage /></ProtectedRoute>} />
+                <Route path="messages" element={<ProtectedRoute allowedRole="parent"><ParentMessagesPage /></ProtectedRoute>} />
                 <Route path="messages/:teacherId" element={<ProtectedRoute allowedRole="parent"><ParentMessageThreadPage /></ProtectedRoute>} />
               </Route>
 

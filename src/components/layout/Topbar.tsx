@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Menu, ChevronRight, Lock, LogOut, User } from 'lucide-react';
+import { Bell, Menu, ChevronRight, Lock, LogOut, User, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -18,7 +18,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   teachers: 'Teachers', users: 'Users', classes: 'Classes', settings: 'Settings',
   students: 'Students', 'live-class': 'Live Class', schedule: 'Schedule',
   messages: 'Messages', feedback: 'Feedback', assignments: 'Assignments',
-  'teacher-reports': 'Teacher Reports',
+  'teacher-reports': 'Teacher Reports', profile: 'My Profile',
 };
 
 function crumbLabel(crumb: string): string {
@@ -30,7 +30,7 @@ function crumbLabel(crumb: string): string {
 
 export const Topbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
-  const { notifications, markNotificationRead } = useData();
+  const { notifications, markNotificationRead, aiEnabled, toggleAi } = useData();
   const { openMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,6 +70,20 @@ export const Topbar: React.FC = () => {
           </span>
         ))}
       </div>
+
+      {/* AI features toggle */}
+      <button
+        onClick={toggleAi}
+        title={aiEnabled ? 'Hide AI assistant & insights' : 'Show AI assistant & insights'}
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          aiEnabled
+            ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+            : 'text-slate-400 bg-slate-100 hover:bg-slate-200'
+        }`}
+      >
+        <Sparkles size={14} />
+        <span>AI {aiEnabled ? 'ON' : 'OFF'}</span>
+      </button>
 
       {/* Notifications */}
       <div className="relative">
@@ -132,8 +146,14 @@ export const Topbar: React.FC = () => {
 
       {/* User Menu */}
       <DropdownMenu>
-        <DropdownMenuTrigger className={`w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center cursor-pointer ${avatarCls}`}>
-          {initials}
+        <DropdownMenuTrigger
+          className={`w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center cursor-pointer overflow-hidden ${avatarCls}`}
+        >
+          {currentUser?.avatar ? (
+            <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+          ) : (
+            initials
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <div className="px-3 py-2">
@@ -141,6 +161,9 @@ export const Topbar: React.FC = () => {
             <p className="text-xs text-slate-400 truncate">{currentUser?.email}</p>
           </div>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
+            <User size={14} className="text-slate-400" /> My Profile
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/change-password')} className="gap-2 cursor-pointer">
             <Lock size={14} className="text-slate-400" /> Change Password
           </DropdownMenuItem>

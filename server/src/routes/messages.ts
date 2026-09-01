@@ -136,6 +136,32 @@ teacherMessageRouter.get('/threads', async (req, res) => {
   res.json({ threads });
 });
 
+// Parents the teacher can start a NEW conversation with (parents of students in
+// the teacher's classes). Must be declared before the /:parentId catch-all.
+teacherMessageRouter.get('/contacts', async (req, res) => {
+  const teacher = await prisma.teacher.findUnique({ where: { id: req.user!.id } });
+  if (!teacher) throw notFound('Teacher record not found');
+
+  const students = await prisma.student.findMany({
+    where: { class: { in: teacher.classes } },
+    include: { parent: true },
+  });
+
+  const seen = new Map<string, { parentId: string; parentName: string; studentName: string; className: string }>();
+  for (const s of students) {
+    if (!seen.has(s.parentId)) {
+      seen.set(s.parentId, {
+        parentId: s.parentId,
+        parentName: s.parent.name,
+        studentName: s.name,
+        className: s.class,
+      });
+    }
+  }
+
+  res.json({ contacts: [...seen.values()] });
+});
+
 teacherMessageRouter.get('/:parentId', async (req, res) => {
   const parentId = String(req.params.parentId);
   const messages = await prisma.message.findMany({

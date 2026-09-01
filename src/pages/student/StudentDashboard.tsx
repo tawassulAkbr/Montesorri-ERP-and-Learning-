@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Video, CalendarCheck, ClipboardList, TrendingUp, BookOpen, Award, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Video, CalendarCheck, ClipboardList, TrendingUp, BookOpen, Award, ArrowUpRight, Sparkles, Flame, Trophy, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
+import { AiInsightsSection } from '@/components/ai/AiInsightsSection';
 import { VideoCard } from '@/components/shared/VideoCard';
 import { TestScoreBarChart, RadialProgress } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -12,6 +13,8 @@ import { LiveClassBanner } from '@/components/shared/LiveClassBanner';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/hooks/useAuth';
 import { buildScoreChartData, formatDate } from '@/lib/utils';
+import { apiGet } from '@/lib/api';
+import type { LearningProgress } from '@/types';
 
 export const StudentDashboard: React.FC = () => {
   const { lessons, tests, dailyWork, testResults, attendance, students } = useData();
@@ -26,6 +29,13 @@ export const StudentDashboard: React.FC = () => {
     ? Math.round((myAttendance.filter(a => a.status === 'present').length / myAttendance.length) * 100)
     : 100;
   const scoreChart = useMemo(() => buildScoreChartData(testResults, currentUser?.id), [testResults, currentUser?.id]);
+
+  const [streakInfo, setStreakInfo] = useState<LearningProgress | null>(null);
+  useEffect(() => {
+    apiGet<LearningProgress>('/students/learning/progress')
+      .then(setStreakInfo)
+      .catch(() => setStreakInfo(null));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -51,6 +61,39 @@ export const StudentDashboard: React.FC = () => {
           <Link to="/student/schedule">
             <Button variant="outline" size="sm" className="gap-1.5 shadow-sm text-xs border-white/30 text-white hover:bg-white/10">
               <Sparkles size={15} /> Daily Routine
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Gamified Learning Streak Widget */}
+      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+            <Flame size={30} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">{streakInfo?.currentStreak ?? 0}-day streak</span>
+              {streakInfo && streakInfo.todayCompleted && (
+                <span className="text-[10px] font-bold bg-white/25 px-2 py-0.5 rounded-full">DONE TODAY ✓</span>
+              )}
+            </div>
+            <p className="text-xs text-orange-100 mt-0.5">
+              Level {streakInfo?.level ?? 1} · {streakInfo?.totalXp ?? 0} XP · {streakInfo?.badges.length ?? 0} badge{(streakInfo?.badges.length ?? 0) !== 1 ? 's' : ''} earned
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {streakInfo && streakInfo.badges.slice(0, 3).map(b => (
+            <span key={b.id} title={b.name} className="w-9 h-9 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-lg">
+              {b.emoji}
+            </span>
+          ))}
+          <Link to="/student/learning">
+            <Button size="sm" className="gap-1.5 shadow-sm text-xs font-bold bg-white text-orange-600 hover:bg-orange-50">
+              {streakInfo?.todayCompleted ? <><Trophy size={14} /> View Progress</> : <><Play size={14} /> Play Today's Task</>}
             </Button>
           </Link>
         </div>
@@ -88,6 +131,8 @@ export const StudentDashboard: React.FC = () => {
           iconBg="bg-amber-50"
         />
       </div>
+
+      <AiInsightsSection />
 
       {/* Visual Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

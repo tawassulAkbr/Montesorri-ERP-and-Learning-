@@ -61,6 +61,73 @@ authRouter.get('/me', requireAuth, async (req, res) => {
   res.json({ user });
 });
 
+const profileSchema = z.object({
+  name: z.string().min(2).optional(),
+  phone: z.string().min(3).optional(),
+  avatarUrl: z.string().max(500).optional(),
+  qualification: z.string().optional(),
+  subject: z.string().optional(),
+  address: z.string().optional(),
+  guardianName: z.string().optional(),
+});
+
+authRouter.put('/profile', requireAuth, async (req, res) => {
+  const input = profileSchema.parse(req.body);
+  const { id, role } = req.user!;
+  // '' clears the avatar, undefined leaves it unchanged.
+  const avatarUrl = input.avatarUrl === undefined ? undefined : (input.avatarUrl === '' ? null : input.avatarUrl);
+
+  if (role === 'teacher') {
+    const t = await prisma.teacher.update({
+      where: { id },
+      data: {
+        ...(input.name && { name: input.name }),
+        ...(input.phone && { phone: input.phone }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
+        ...(input.qualification && { qualification: input.qualification }),
+        ...(input.subject && { subject: input.subject }),
+      },
+    });
+    res.json({ user: teacherToFrontend(t) });
+    return;
+  }
+  if (role === 'student') {
+    const s = await prisma.student.update({
+      where: { id },
+      data: {
+        ...(input.name && { name: input.name }),
+        ...(input.phone && { phone: input.phone }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
+        ...(input.address && { address: input.address }),
+        ...(input.guardianName && { guardianName: input.guardianName }),
+      },
+    });
+    res.json({ user: studentToFrontend(s, { includeFeeAmount: false }) });
+    return;
+  }
+  if (role === 'parent') {
+    const p = await prisma.parent.update({
+      where: { id },
+      include: { children: { select: { id: true } } },
+      data: {
+        ...(input.name && { name: input.name }),
+        ...(input.phone && { phone: input.phone }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
+      },
+    });
+    res.json({ user: parentToFrontend(p, p.children.map(c => c.id)) });
+    return;
+  }
+  const a = await prisma.admin.update({
+    where: { id },
+    data: {
+      ...(input.name && { name: input.name }),
+      ...(avatarUrl !== undefined && { avatarUrl }),
+    },
+  });
+  res.json({ user: adminToFrontend(a) });
+});
+
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1),
   newPassword: z.string().min(6, 'New password must be at least 6 characters'),

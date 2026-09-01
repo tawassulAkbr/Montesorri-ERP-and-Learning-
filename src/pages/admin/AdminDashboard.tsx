@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
-import { Users, GraduationCap, Heart, BookMarked, UserPlus, AlertCircle } from 'lucide-react';
+import { Users, GraduationCap, Heart, BookMarked, UserPlus, AlertCircle, CheckCircle2, XCircle, CalendarOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
+import { AiInsightsSection } from '@/components/ai/AiInsightsSection';
 import { AttendanceAreaChart, ClassPerformancePieChart } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LeaveRequestCard } from '@/components/shared/LeaveModal';
 import { useData } from '@/context/DataContext';
-import { buildAttendanceChartData, buildClassPerformanceData, MONTESSORI_CLASSES } from '@/lib/utils';
+import { buildAttendanceChartData, buildClassPerformanceData, formatDate, MONTESSORI_CLASSES } from '@/lib/utils';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -20,11 +21,28 @@ export const AdminDashboard: React.FC = () => {
   const performanceChart = useMemo(() => buildClassPerformanceData(testResults), [testResults]);
 
   const adminNotifications = notifications.filter(n => n.userId === 'a1').slice(0, 6);
-  const pendingLeaves = leaveRequests
-    .filter(l => l.status === 'pending')
-    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'teacher' ? -1 : 1));
+  const pendingLeaves = leaveRequests.filter(l => l.status === 'pending' && l.kind === 'teacher');
   const feeDueCount = students.filter(s => s.feeDue).length;
   const activeClasses = MONTESSORI_CLASSES.filter(c => students.some(s => s.class === c));
+
+  // P/A/L attendance report: latest recorded day's status for every enrolled student.
+  const palReport = useMemo(() => {
+    if (attendance.length === 0 || students.length === 0) return null;
+    const dates = [...new Set(attendance.map(a => a.date))].sort();
+    const date = dates[dates.length - 1];
+    const statusByStudent = new Map(attendance.filter(a => a.date === date).map(a => [a.studentId, a.status]));
+    let present = 0, absent = 0, leave = 0;
+    const absentees: string[] = [];
+    const onLeave: string[] = [];
+    for (const s of students) {
+      const status = statusByStudent.get(s.id);
+      if (status === 'present') present += 1;
+      else if (status === 'absent') { absent += 1; absentees.push(s.name); }
+      else if (status === 'leave') { leave += 1; onLeave.push(s.name); }
+    }
+    const unmarked = students.length - present - absent - leave;
+    return { date, present, absent, leave, unmarked, absentees, onLeave };
+  }, [attendance, students]);
 
   return (
     <div className="space-y-6">
@@ -76,37 +94,103 @@ export const AdminDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Pending Leave Requests */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            Leave Requests
-            {pendingLeaves.length > 0 && (
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                {pendingLeaves.length} pending
-              </Badge>
+      <AiInsightsSection />
+
+      {/* Teacher Leaves + Student Attendance (P/A/L) Report */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Teacher Leave Requests */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              Teacher Leave Requests
+              {pendingLeaves.length > 0 && (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                  {pendingLeaves.length} pending
+                </Badge>
+              )}
+            </CardTitle>
+            <p className="text-xs text-slate-400 text-right">Approving marks the teacher's attendance as leave</p>
+          </CardHeader>
+          <CardContent>
+            {pendingLeaves.length === 0 ? (
+              <p className="text-xs text-slate-400 py-6 text-center">No pending teacher leave requests. All caught up!</p>
+            ) : (
+              <div className="space-y-3">
+                {pendingLeaves.map(leave => (
+                  <LeaveRequestCard
+                    key={leave.id}
+                    leave={leave}
+                    showActions
+                    onAccept={id => updateLeaveStatus(id, 'accepted', 'a1')}
+                    onReject={id => updateLeaveStatus(id, 'rejected', 'a1')}
+                  />
+                ))}
+              </div>
             )}
-          </CardTitle>
-          <p className="text-xs text-slate-400">Teacher & student leaves — accepting marks attendance as leave</p>
-        </CardHeader>
-        <CardContent>
-          {pendingLeaves.length === 0 ? (
-            <p className="text-xs text-slate-400 py-6 text-center">No pending leave requests. All caught up!</p>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              {pendingLeaves.map(leave => (
-                <LeaveRequestCard
-                  key={leave.id}
-                  leave={leave}
-                  showActions
-                  onAccept={id => updateLeaveStatus(id, 'accepted', 'a1')}
-                  onReject={id => updateLeaveStatus(id, 'rejected', 'a1')}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="text-[11px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
+              Student leave applications submitted by parents are reviewed by the class teacher in the Attendance portal.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Student Attendance Report (P/A/L) */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base font-semibold">Student Attendance Report (P · A · L)</CardTitle>
+            <p className="text-xs text-slate-400 text-right">
+              {palReport ? formatDate(palReport.date) : 'No data yet'}
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!palReport ? (
+              <p className="text-xs text-slate-400 py-6 text-center">No attendance has been recorded yet.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-center">
+                    <CheckCircle2 className="mx-auto text-emerald-600" size={20} />
+                    <p className="text-2xl font-bold text-emerald-700 mt-1">{palReport.present}</p>
+                    <p className="text-[11px] font-semibold text-emerald-600">Present</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-red-50 border border-red-100 text-center">
+                    <XCircle className="mx-auto text-red-600" size={20} />
+                    <p className="text-2xl font-bold text-red-700 mt-1">{palReport.absent}</p>
+                    <p className="text-[11px] font-semibold text-red-600">Absent</p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-100 text-center">
+                    <CalendarOff className="mx-auto text-amber-600" size={20} />
+                    <p className="text-2xl font-bold text-amber-700 mt-1">{palReport.leave}</p>
+                    <p className="text-[11px] font-semibold text-amber-600">On Leave</p>
+                  </div>
+                </div>
+
+                {(palReport.absentees.length > 0 || palReport.onLeave.length > 0) && (
+                  <div className="space-y-2">
+                    {palReport.absentees.length > 0 && (
+                      <div className="p-2.5 rounded-lg bg-red-50/50 border border-red-100">
+                        <p className="text-[11px] font-bold text-red-700 mb-1">Absent today</p>
+                        <p className="text-[11px] text-red-600">{palReport.absentees.join(', ')}</p>
+                      </div>
+                    )}
+                    {palReport.onLeave.length > 0 && (
+                      <div className="p-2.5 rounded-lg bg-amber-50/50 border border-amber-100">
+                        <p className="text-[11px] font-bold text-amber-700 mb-1">On approved leave</p>
+                        <p className="text-[11px] text-amber-600">{palReport.onLeave.join(', ')}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-[11px] text-slate-400">
+                  {palReport.unmarked > 0
+                    ? `${palReport.unmarked} student${palReport.unmarked > 1 ? 's' : ''} not yet marked for this day.`
+                    : `All ${students.length} students accounted for on this day.`}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

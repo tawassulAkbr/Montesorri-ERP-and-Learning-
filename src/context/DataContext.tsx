@@ -6,6 +6,7 @@ import type {
   Assignment, Submission,
 } from '@/types';
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/lib/api';
+import { saveSnapshot, loadSnapshot } from '@/lib/offlineCache';
 import { useAuth } from '@/hooks/useAuth';
 import { todayISO, isWeekend, dateInRange } from '@/lib/utils';
 
@@ -28,6 +29,11 @@ interface BootstrapData {
 }
 
 interface DataContextType extends BootstrapData {
+  offlineMode: boolean;
+  isOnline: boolean;
+  lastSyncedAt: string | null;
+  aiEnabled: boolean;
+  toggleAi: () => void;
   feedbacks: FeedbackItem[];
   addFeedback: (teacherId: string, content: string) => Promise<void>;
   markFeedbackRead: (feedbackId: string) => void;
@@ -54,8 +60,8 @@ interface DataContextType extends BootstrapData {
   endLiveClass: () => void;
   createTeacher: (input: { name: string; email: string; phone: string; qualification: string; subject: string; classes: string[] }) => Promise<IssuedCredentials>;
   createStudentWithParent: (input: {
-    name: string; email?: string; phone: string; address: string;
-    guardianName: string; guardianEmail?: string; guardianPhone?: string;
+    name: string; email: string; phone: string; address: string;
+    guardianName: string; guardianEmail: string; guardianPhone?: string;
     class: string; feeAmount: number;
   }) => Promise<IssuedCredentials[]>;
   resetPassword: (userId: string, role: 'teacher' | 'student' | 'parent') => Promise<string | null>;
@@ -74,9 +80,17 @@ const EMPTY_LIVE_CLASS: LiveClassSession = {
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, role, token } = useAuth();
+  const { isAuthenticated, role, token, currentUser } = useAuth();
+  const userId = currentUser?.id ?? 'anon';
 
   const [loading, setLoading] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [offlineMode, setOfflineMode] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+  // AI features are ON by default; preference persists per user.
+  const [aiEnabled, setAiEnabled] = useState<boolean>(() => {
+    try { return localStorage.getItem(`kg_ai:${userId}`) !== 'false'; } catch { return true; }
+  });
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -116,11 +130,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshAll = useCallback(async () => {
     try {
-      applyBootstrap(await apiGet<BootstrapData>('/bootstrap'));
+      const data = await apiGet<BootstrapData>('/bootstrap');
+      applyBootstrap(data);
+      saveSnapshot(userId, 'bootstrap', data);
+      setOfflineMode(false);
+      setLastSyncedAt(new Date().toISOString());
     } catch (err) {
       console.error('Failed to refresh data:', err);
     }
-  }, [applyBootstrap]);
+  }, [applyBootstrap, userId]);
 
   const loadFeedbacks = useCallback(async () => {
     try {
@@ -131,46 +149,95 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!path) { setFeedbacks([]); return; }
       const res = await apiGet<{ feedbacks: FeedbackItem[] }>(path);
       setFeedbacks(res.feedbacks);
+      saveSnapshot(userId, 'feedbacks', res.feedbacks);
     } catch (err) {
       console.error('Failed to load feedback:', err);
+      const cached = loadSnapshot<FeedbackItem[]>(userId, 'feedbacks');
+      if (cached) setFeedbacks(cached);
     }
-  }, [role]);
+  }, [role, userId]);
 
-  const applyAssignmentsPayload = useCallback((
-    list: (Assignment & { submissions?: Submission[] })[],
-  ) => {
-    const flat: Submission[] = [];
-    const cleaned: Assignment[] = list.map(a => {
-      if (a.submissions) flat.push(...a.submissions);
+  const flattenAssignments = (list: (Assignment & { submissions?: Submission[] })[]) => {
+    const submissions: Submission[] = [];
+    const assignments: Assignment[] = list.map(a => {
+      if (a.submissions) submissions.push(...a.submissions);
       const { submissions: _subs, ...rest } = a;
       return rest as Assignment;
     });
-    setAssignments(cleaned);
-    setSubmissions(flat);
-  }, []);
+    return { assignments, submissions };
+  };
 
   const loadAssignments = useCallback(async () => {
     try {
+      let next: { assignments: Assignment[]; submissions: Submission[] };
       if (role === 'teacher') {
         const res = await apiGet<{ assignments: (Assignment & { submissions?: Submission[] })[] }>('/teachers/assignments');
-        applyAssignmentsPayload(res.assignments);
+        next = flattenAssignments(res.assignments);
       } else if (role === 'admin') {
         const res = await apiGet<{ assignments: (Assignment & { submissions?: Submission[] })[] }>('/admin/assignments');
-        applyAssignmentsPayload(res.assignments);
+        next = flattenAssignments(res.assignments);
       } else if (role === 'student') {
         const res = await apiGet<{ assignments: Assignment[]; submissions: Submission[] }>('/students/assignments');
-        setAssignments(res.assignments);
-        setSubmissions(res.submissions);
+        next = { assignments: res.assignments, submissions: res.submissions };
       } else {
         setAssignments([]);
         setSubmissions([]);
+        return;
       }
+      setAssignments(next.assignments);
+      setSubmissions(next.submissions);
+      saveSnapshot(userId, 'assignments', next);
     } catch (err) {
       console.error('Failed to load assignments:', err);
+      const cached = loadSnapshot<{ assignments: Assignment[]; submissions: Submission[] }>(userId, 'assignments');
+      if (cached) {
+        setAssignments(cached.assignments);
+        setSubmissions(cached.submissions);
+      }
     }
-  }, [role, applyAssignmentsPayload]);
+  }, [role, userId]);
 
-  // Hydrate from the API once authenticated.
+  // Re-read the stored AI preference when a different user signs in.
+  useEffect(() => {
+    try { setAiEnabled(localStorage.getItem(`kg_ai:${userId}`) !== 'false'); } catch { setAiEnabled(true); }
+  }, [userId]);
+
+  const toggleAi = useCallback(() => {
+    setAiEnabled(prev => {
+      const next = !prev;
+      try { localStorage.setItem(`kg_ai:${userId}`, next ? 'true' : 'false'); } catch { /* ignore */ }
+      return next;
+    });
+  }, [userId]);
+
+  // Track browser connectivity so the app can switch modes and re-sync.
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
+
+  // While serving cached data, keep probing the server so we auto-recover
+  // as soon as the API is reachable again (no reload needed).
+  useEffect(() => {
+    if (!offlineMode || !isAuthenticated || !token) return;
+    const timer = setInterval(() => {
+      if (!navigator.onLine) return;
+      refreshAll().then(() => {
+        loadFeedbacks();
+        loadAssignments();
+      });
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [offlineMode, isAuthenticated, token, refreshAll, loadFeedbacks, loadAssignments]);
+
+  // Hydrate from the API once authenticated; fall back to the offline cache
+  // when the network or API server is unreachable.
   useEffect(() => {
     if (!isAuthenticated || !token) return;
     let cancelled = false;
@@ -187,12 +254,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (cancelled) return;
         applyBootstrap(data);
         setFeedbacks(fb.feedbacks);
+        saveSnapshot(userId, 'bootstrap', data);
+        saveSnapshot(userId, 'feedbacks', fb.feedbacks);
+        setOfflineMode(false);
+        setLastSyncedAt(new Date().toISOString());
       })
-      .catch(err => console.error('Bootstrap failed:', err))
+      .catch(err => {
+        console.error('Bootstrap failed:', err);
+        if (cancelled) return;
+        const cached = loadSnapshot<BootstrapData>(userId, 'bootstrap');
+        if (cached) {
+          applyBootstrap(cached);
+          setFeedbacks(loadSnapshot<FeedbackItem[]>(userId, 'feedbacks') ?? []);
+        }
+        setOfflineMode(true);
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     loadAssignments();
     return () => { cancelled = true; };
-  }, [isAuthenticated, token, role, applyBootstrap, loadAssignments]);
+  }, [isAuthenticated, token, role, applyBootstrap, loadAssignments, userId, isOnline]);
 
   // Display-parity: derive auto-absent for teachers locally (server derives it on read too).
   useEffect(() => {
@@ -388,8 +468,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createStudentWithParent = async (input: {
-    name: string; email?: string; phone: string; address: string;
-    guardianName: string; guardianEmail?: string; guardianPhone?: string;
+    name: string; email: string; phone: string; address: string;
+    guardianName: string; guardianEmail: string; guardianPhone?: string;
     class: string; feeAmount: number;
   }): Promise<IssuedCredentials[]> => {
     const res = await apiPost<{ student: Student; issued: IssuedCredentials[] }>('/admin/students', input);
@@ -495,6 +575,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider
       value={{
+        offlineMode, isOnline, lastSyncedAt,
+        aiEnabled, toggleAi,
         admins, students, teachers, parents, notifications, teacherAttendance,
         lessons, tests, testResults, attendance, leaveRequests, remarks, dailyWork, schedules, liveClass,
         feedbacks, addFeedback, markFeedbackRead,

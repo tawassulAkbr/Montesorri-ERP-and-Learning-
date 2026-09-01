@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, Video, ClipboardList, TrendingUp, Plus, CalendarCheck, MessageSquare, ArrowUpRight, Radio, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
+import { AiInsightsSection } from '@/components/ai/AiInsightsSection';
 import { AttendanceAreaChart, ClassPerformancePieChart } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,8 @@ export const TeacherDashboard: React.FC = () => {
           iconBg="bg-amber-50"
         />
       </div>
+
+      <AiInsightsSection />
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

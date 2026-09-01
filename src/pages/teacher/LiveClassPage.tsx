@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic, MicOff, Video, VideoOff, Users, Hand, MessageSquare,
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Whiteboard } from '@/components/shared/Whiteboard';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/hooks/useAuth';
-import { getInitials } from '@/lib/utils';
+import { useUserMedia } from '@/hooks/useUserMedia';
 
 interface StudentHand {
   studentId: string;
@@ -22,8 +22,7 @@ export const TeacherLiveClassPage: React.FC = () => {
   const { currentUser } = useAuth();
   const teacherName = currentUser?.name || 'Teacher';
   const participants = students.filter(s => s.class === liveClass.class);
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
+  const { videoRef, hasStream, micOn, camOn, error: mediaError, requesting, start, stop, toggleMic, toggleCam } = useUserMedia();
   const [activeTab, setActiveTab] = useState<'participants' | 'hands' | 'chat'>('participants');
   const [raisedHands, setRaisedHands] = useState<StudentHand[]>(
     participants.slice(0, 2).map((s, i) => ({
@@ -36,6 +35,16 @@ export const TeacherLiveClassPage: React.FC = () => {
     { sender: teacherName, text: 'Good morning little explorers! Today we are learning letter sounds /s/ and /a/.', isTeacher: true },
   ]);
   const [newMsg, setNewMsg] = useState('');
+
+  // Open the real camera + microphone as soon as the live class loads.
+  useEffect(() => {
+    start();
+  }, [start]);
+
+  const handleEndClass = () => {
+    stop();
+    endLiveClass();
+  };
 
   const handleSendMsg = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +78,7 @@ export const TeacherLiveClassPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            onClick={() => setMicOn(!micOn)}
+            onClick={toggleMic}
             className={`h-9 px-3 text-xs gap-1.5 font-bold ${micOn ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
           >
             {micOn ? <Mic size={15} /> : <MicOff size={15} />}
@@ -78,7 +87,7 @@ export const TeacherLiveClassPage: React.FC = () => {
 
           <Button
             size="sm"
-            onClick={() => setCamOn(!camOn)}
+            onClick={toggleCam}
             className={`h-9 px-3 text-xs gap-1.5 font-bold ${camOn ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
           >
             {camOn ? <Video size={15} /> : <VideoOff size={15} />}
@@ -87,7 +96,7 @@ export const TeacherLiveClassPage: React.FC = () => {
 
           <Button
             size="sm"
-            onClick={endLiveClass}
+            onClick={handleEndClass}
             className="h-9 px-4 text-xs font-bold bg-red-600 hover:bg-red-700 text-white gap-1.5"
           >
             <PhoneOff size={15} /> End Class
@@ -104,24 +113,45 @@ export const TeacherLiveClassPage: React.FC = () => {
 
         {/* Right 1 Col: Classroom Side Panels */}
         <div className="space-y-4">
-          {/* Teacher Webcam Simulation */}
-          <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-video relative flex items-center justify-center border border-slate-800 shadow-sm">
-            {camOn ? (
-              <div className="w-full h-full bg-gradient-to-tr from-indigo-900 to-purple-900 flex flex-col items-center justify-center text-white">
-                <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xl mb-1 shadow-md">
-                  {currentUser ? getInitials(currentUser.name) : 'KG'}
-                </div>
-                <span className="text-xs font-bold">{teacherName} (Teacher)</span>
-                <span className="text-[10px] text-emerald-400 font-semibold mt-0.5">● Camera Active</span>
-              </div>
-            ) : (
-              <div className="text-slate-400 text-xs flex flex-col items-center gap-1">
+          {/* Teacher Live Webcam (real camera + mic via getUserMedia) */}
+          <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-video relative border border-slate-800 shadow-sm">
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              className={`w-full h-full object-cover ${camOn && hasStream ? '' : 'invisible'}`}
+            />
+            {hasStream && !camOn && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1 bg-slate-900">
                 <VideoOff size={20} />
                 <span>Camera is Off</span>
               </div>
             )}
+            {!hasStream && requesting && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-300 text-xs gap-2">
+                <Sparkles size={20} className="animate-pulse" />
+                <span>Starting camera &amp; microphone…</span>
+              </div>
+            )}
+            {!hasStream && !requesting && mediaError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-2">
+                <VideoOff size={20} className="text-red-400" />
+                <span className="text-[11px] text-red-300 leading-snug">{mediaError}</span>
+                <Button size="sm" onClick={start} className="h-7 text-[10px] px-3 mt-1">Try Again</Button>
+              </div>
+            )}
+            {!hasStream && !requesting && !mediaError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1">
+                <VideoOff size={20} />
+                <span>Camera is off</span>
+              </div>
+            )}
+            <div className="absolute top-2 left-2 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded font-mono flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${micOn && hasStream ? 'bg-emerald-400' : 'bg-red-500'}`} />
+              {micOn && hasStream ? 'Mic live' : 'Muted'}
+            </div>
             <div className="absolute bottom-2 left-2 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded font-mono">
-              720p HD • 30fps
+              {teacherName} • {hasStream ? 'Live' : 'Offline'}
             </div>
           </div>
 

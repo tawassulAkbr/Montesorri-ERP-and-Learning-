@@ -12,17 +12,19 @@ export const toDate = (d: Date | string) => (typeof d === 'string' ? d : d.toISO
 export interface FrontendTeacher {
   id: string; name: string; email: string; role: 'teacher'; createdAt: string;
   subject: string; employeeId: string; classes: string[]; phone: string; qualification: string;
+  avatar?: string;
 }
 
 export interface FrontendStudent {
   id: string; name: string; email: string; role: 'student'; createdAt: string;
   rollNo: string; class: string; ageGroup?: string; parentId: string; enrollmentId: string;
   phone: string; address: string; guardianName: string; feeAmount?: number; feeDue: boolean;
+  avatar?: string;
 }
 
 export interface FrontendParent {
   id: string; name: string; email: string; role: 'parent'; createdAt: string;
-  childrenIds: string[]; phone: string;
+  childrenIds: string[]; phone: string; avatar?: string;
 }
 
 export function teacherToFrontend(t: Teacher): FrontendTeacher {
@@ -30,6 +32,7 @@ export function teacherToFrontend(t: Teacher): FrontendTeacher {
     id: t.id, name: t.name, email: t.email, role: 'teacher', createdAt: toDate(t.createdAt),
     subject: t.subject, employeeId: t.employeeId, classes: t.classes,
     phone: t.phone, qualification: t.qualification,
+    avatar: t.avatarUrl ?? undefined,
   };
 }
 
@@ -39,6 +42,7 @@ export function studentToFrontend(s: Student, opts: { includeFeeAmount: boolean 
     rollNo: s.rollNo, class: s.class, ageGroup: s.ageGroup ?? undefined, parentId: s.parentId,
     enrollmentId: s.enrollmentId, phone: s.phone, address: s.address, guardianName: s.guardianName,
     feeAmount: opts.includeFeeAmount ? s.feeAmount : undefined, feeDue: s.feeDue,
+    avatar: s.avatarUrl ?? undefined,
   };
 }
 
@@ -46,6 +50,7 @@ export function parentToFrontend(p: Parent, childrenIds: string[]): FrontendPare
   return {
     id: p.id, name: p.name, email: p.email, role: 'parent', createdAt: toDate(p.createdAt),
     childrenIds, phone: p.phone,
+    avatar: p.avatarUrl ?? undefined,
   };
 }
 
@@ -53,6 +58,7 @@ export function adminToFrontend(a: Admin) {
   return {
     id: a.id, name: a.name, email: a.email, role: 'admin' as const, createdAt: toDate(a.createdAt),
     adminCode: a.adminCode,
+    avatar: a.avatarUrl ?? undefined,
   };
 }
 

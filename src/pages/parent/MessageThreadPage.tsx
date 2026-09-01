@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiGet, apiPost } from '@/lib/api';
 import { useData } from '@/context/DataContext';
@@ -15,6 +15,7 @@ export const ParentMessageThreadPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -41,12 +42,14 @@ export const ParentMessageThreadPage: React.FC = () => {
     const content = draft.trim();
     if (!content) return;
     setSending(true);
+    setSendError('');
     try {
       await apiPost(`/parents/messages/${teacherId}`, { content });
       setDraft('');
       await load();
     } catch (err) {
       console.error('Failed to send message:', err);
+      setSendError('Message not sent. Please check your connection and try again.');
     } finally {
       setSending(false);
     }
@@ -91,6 +94,12 @@ export const ParentMessageThreadPage: React.FC = () => {
         </div>
 
         {/* Input */}
+        {sendError && (
+          <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 border-t border-red-100 px-4 py-2">
+            <AlertCircle size={14} className="flex-shrink-0" />
+            {sendError}
+          </div>
+        )}
         <form onSubmit={handleSend} className="border-t border-slate-100 p-3 flex items-center gap-2">
           <input
             type="text"
