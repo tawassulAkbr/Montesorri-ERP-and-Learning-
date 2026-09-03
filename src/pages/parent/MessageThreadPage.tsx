@@ -58,12 +58,12 @@ export const ParentMessageThreadPage: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Link to="/parent/teachers" className="text-slate-400 hover:text-slate-600">
+        <Link to="/parent/teachers" className="text-[#667085] hover:text-[#344054]">
           <ArrowLeft size={18} />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Chat with {teacher?.name ?? 'Teacher'}</h1>
-          <p className="text-xs text-slate-400">{teacher?.subject} · Private conversation about your child</p>
+          <h1 className="text-xl font-bold text-[#101828]">Chat with {teacher?.name ?? 'Teacher'}</h1>
+          <p className="text-xs text-[#667085]">{teacher?.subject} · Private conversation about your child</p>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export const ParentMessageThreadPage: React.FC = () => {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-8">
+            <p className="text-xs text-[#667085] text-center py-8">
               No messages yet. Start the conversation about your child's progress!
             </p>
           ) : (
@@ -79,11 +79,11 @@ export const ParentMessageThreadPage: React.FC = () => {
               <div key={m.id} className={`flex ${m.senderRole === 'parent' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-xs ${
                   m.senderRole === 'parent'
-                    ? 'bg-indigo-600 text-white rounded-br-sm'
-                    : 'bg-slate-100 text-slate-700 rounded-bl-sm'
+                    ? 'bg-[#006B5D] text-white rounded-br-sm'
+                    : 'bg-slate-100 text-[#344054] rounded-bl-sm'
                 }`}>
                   <p className="whitespace-pre-wrap">{m.content}</p>
-                  <p className={`text-[9px] mt-1 ${m.senderRole === 'parent' ? 'text-indigo-200' : 'text-slate-400'}`}>
+                  <p className={`text-[9px] mt-1 ${m.senderRole === 'parent' ? 'text-[#006B5D]' : 'text-[#667085]'}`}>
                     {m.senderRole === 'parent' ? 'You' : m.teacherName} · {formatDateTime(m.createdAt)}
                   </p>
                 </div>
@@ -106,7 +106,7 @@ export const ParentMessageThreadPage: React.FC = () => {
             value={draft}
             onChange={e => setDraft(e.target.value)}
             placeholder="Write a message..."
-            className="flex-1 text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-[#006B5D]"
           />
           <Button type="submit" size="sm" className="gap-1.5" disabled={sending || !draft.trim()}>
             <Send size={13} /> Send

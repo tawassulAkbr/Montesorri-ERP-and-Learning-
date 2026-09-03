@@ -38,7 +38,7 @@ export const AiChart: React.FC<AiChartProps> = ({ spec, height = 220, compact = 
             dataKey="value"
           >
             {spec.data.map((entry, i) => (
-              <Cell key={i} fill={String(entry.color ?? '#4F46E5')} />
+              <Cell key={i} fill={String(entry.color ?? '#006B5D')} />
             ))}
           </Pie>
           <Tooltip contentStyle={tooltipStyle} />
@@ -46,7 +46,7 @@ export const AiChart: React.FC<AiChartProps> = ({ spec, height = 220, compact = 
             iconType="circle"
             iconSize={8}
             wrapperStyle={{ fontSize: compact ? 10 : 11 }}
-            formatter={(value: string) => <span className="text-slate-600">{value}</span>}
+            formatter={(value: string) => <span className="text-[#344054]">{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -55,7 +55,7 @@ export const AiChart: React.FC<AiChartProps> = ({ spec, height = 220, compact = 
 
   const series = spec.series.filter(s => spec.data.some(row => typeof row[s.key] === 'number'));
   if (series.length === 0) {
-    return <p className="text-xs text-slate-400 py-6 text-center">No data to chart yet.</p>;
+    return <p className="text-xs text-[#667085] py-6 text-center">No data to chart yet.</p>;
   }
 
   if (spec.type === 'area') {

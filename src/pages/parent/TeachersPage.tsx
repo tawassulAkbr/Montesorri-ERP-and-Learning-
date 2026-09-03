@@ -23,8 +23,8 @@ export const ParentTeachersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Montessori Guides & Private Chatrooms</h1>
-        <p className="text-sm text-slate-500">Open a private chatroom with any teacher to discuss your child's progress</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Montessori Guides & Private Chatrooms</h1>
+        <p className="text-sm text-[#667085]">Open a private chatroom with any teacher to discuss your child's progress</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -35,13 +35,13 @@ export const ParentTeachersPage: React.FC = () => {
             <Card key={teacher.id} className="border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-base flex-shrink-0 shadow-inner">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E6F4F1] text-[#006B5D] flex items-center justify-center font-bold text-base flex-shrink-0 shadow-inner">
                     {initials}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-800">{teacher.name}</h3>
+                    <h3 className="text-base font-bold text-[#101828]">{teacher.name}</h3>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 text-xs">
+                      <Badge variant="outline" className="bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6] text-xs">
                         {teacher.subject}
                       </Badge>
                       {isMyChildTeacher && (
@@ -53,17 +53,17 @@ export const ParentTeachersPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div className="space-y-1.5 text-xs text-[#667085] bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <div className="flex items-center gap-2">
-                    <Mail size={13} className="text-slate-400" />
+                    <Mail size={13} className="text-[#667085]" />
                     <span className="truncate">{teacher.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone size={13} className="text-slate-400" />
+                    <Phone size={13} className="text-[#667085]" />
                     <span>{teacher.phone}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <GraduationCap size={13} className="text-slate-400" />
+                    <GraduationCap size={13} className="text-[#667085]" />
                     <span>{teacher.qualification}</span>
                   </div>
                 </div>

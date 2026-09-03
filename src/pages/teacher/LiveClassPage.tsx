@@ -122,7 +122,7 @@ export const TeacherLiveClassPage: React.FC = () => {
               className={`w-full h-full object-cover ${camOn && hasStream ? '' : 'invisible'}`}
             />
             {hasStream && !camOn && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1 bg-slate-900">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#667085] text-xs gap-1 bg-slate-900">
                 <VideoOff size={20} />
                 <span>Camera is Off</span>
               </div>
@@ -141,7 +141,7 @@ export const TeacherLiveClassPage: React.FC = () => {
               </div>
             )}
             {!hasStream && !requesting && !mediaError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#667085] text-xs gap-1">
                 <VideoOff size={20} />
                 <span>Camera is off</span>
               </div>
@@ -162,7 +162,7 @@ export const TeacherLiveClassPage: React.FC = () => {
               <button
                 onClick={() => setActiveTab('participants')}
                 className={`py-2.5 flex items-center justify-center gap-1 transition-all ${
-                  activeTab === 'participants' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'
+                  activeTab === 'participants' ? 'bg-white text-[#006B5D] border-b-2 border-[#006B5D]' : 'text-[#667085]'
                 }`}
               >
                 <Users size={13} /> Children ({participants.length})
@@ -170,7 +170,7 @@ export const TeacherLiveClassPage: React.FC = () => {
               <button
                 onClick={() => setActiveTab('hands')}
                 className={`py-2.5 flex items-center justify-center gap-1 relative transition-all ${
-                  activeTab === 'hands' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'
+                  activeTab === 'hands' ? 'bg-white text-[#006B5D] border-b-2 border-[#006B5D]' : 'text-[#667085]'
                 }`}
               >
                 <Hand size={13} /> Hands
@@ -183,7 +183,7 @@ export const TeacherLiveClassPage: React.FC = () => {
               <button
                 onClick={() => setActiveTab('chat')}
                 className={`py-2.5 flex items-center justify-center gap-1 transition-all ${
-                  activeTab === 'chat' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'
+                  activeTab === 'chat' ? 'bg-white text-[#006B5D] border-b-2 border-[#006B5D]' : 'text-[#667085]'
                 }`}
               >
                 <MessageSquare size={13} /> Chat
@@ -197,10 +197,10 @@ export const TeacherLiveClassPage: React.FC = () => {
                   {participants.slice(0, 8).map(stu => (
                     <div key={stu.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
+                        <div className="w-6 h-6 rounded-full bg-[#E6F4F1] text-[#006B5D] flex items-center justify-center font-bold text-[10px]">
                           {stu.name[0]}
                         </div>
-                        <span className="font-semibold text-slate-700">{stu.name}</span>
+                        <span className="font-semibold text-[#344054]">{stu.name}</span>
                       </div>
                       <span className="text-[10px] text-emerald-600 font-bold">Connected</span>
                     </div>
@@ -211,15 +211,15 @@ export const TeacherLiveClassPage: React.FC = () => {
               {activeTab === 'hands' && (
                 <div className="space-y-2">
                   {raisedHands.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-8 text-center">No hands currently raised.</p>
+                    <p className="text-xs text-[#667085] py-8 text-center">No hands currently raised.</p>
                   ) : (
                     raisedHands.map(h => (
                       <div key={h.studentId} className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-800 flex items-center gap-1">
+                          <p className="font-bold text-[#101828] flex items-center gap-1">
                             <Hand size={13} className="text-amber-600" /> {h.name}
                           </p>
-                          <span className="text-[10px] text-slate-400">{h.time}</span>
+                          <span className="text-[10px] text-[#667085]">{h.time}</span>
                         </div>
                         <Button size="sm" onClick={() => dismissHand(h.studentId)} className="h-6 text-[10px] px-2">
                           Unmute
@@ -234,7 +234,7 @@ export const TeacherLiveClassPage: React.FC = () => {
                 <div className="flex flex-col h-full justify-between">
                   <div className="space-y-2 overflow-y-auto max-h-52 pr-1">
                     {chatMessages.map((m, i) => (
-                      <div key={i} className={`p-2 rounded-xl text-xs ${m.isTeacher ? 'bg-indigo-50 text-indigo-900 border border-indigo-100' : 'bg-slate-50 text-slate-700'}`}>
+                      <div key={i} className={`p-2 rounded-xl text-xs ${m.isTeacher ? 'bg-[#E6F4F1] text-[#006B5D] border border-[#B7DDD6]' : 'bg-slate-50 text-[#344054]'}`}>
                         <span className="font-bold text-[11px] block">{m.sender}:</span>
                         <p className="mt-0.5">{m.text}</p>
                       </div>
@@ -247,7 +247,7 @@ export const TeacherLiveClassPage: React.FC = () => {
                       value={newMsg}
                       onChange={e => setNewMsg(e.target.value)}
                       placeholder="Type a message to class..."
-                      className="flex-1 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-[#006B5D]"
                     />
                     <Button type="submit" size="sm" className="h-8 px-2.5">
                       <Send size={13} />

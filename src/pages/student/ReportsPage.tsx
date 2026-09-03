@@ -49,8 +49,8 @@ export const StudentReportsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">My Academic Report Card</h1>
-          <p className="text-sm text-slate-500">Official term performance metrics, subject breakdowns, and attendance summary</p>
+          <h1 className="text-2xl font-bold text-[#101828]">My Academic Report Card</h1>
+          <p className="text-sm text-[#667085]">Official term performance metrics, subject breakdowns, and attendance summary</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -64,23 +64,23 @@ export const StudentReportsPage: React.FC = () => {
       </div>
 
       {/* Hero Card */}
-      <Card className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-0 shadow-sm">
+      <Card className="bg-gradient-to-r from-[#006B5D] to-[#007A6B] text-white border-0 shadow-sm">
         <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs uppercase tracking-wider text-indigo-200 font-bold">Academic Transcript</span>
+            <span className="text-xs uppercase tracking-wider text-[#006B5D] font-bold">Academic Transcript</span>
             <h2 className="text-2xl font-bold mt-1">{currentUser?.name}</h2>
-            <p className="text-xs text-indigo-100 mt-0.5">
+            <p className="text-xs text-[#006B5D] mt-0.5">
               {me?.class} • Roll No #{me?.rollNo} • Enrollment ID {me?.enrollmentId}
             </p>
           </div>
 
           <div className="flex items-center gap-6 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl">
             <div>
-              <span className="text-[10px] text-indigo-200 uppercase font-bold block">Best Grade</span>
+              <span className="text-[10px] text-[#006B5D] uppercase font-bold block">Best Grade</span>
               <span className="text-2xl font-black">{bestGrade ?? '—'}</span>
             </div>
             <div>
-              <span className="text-[10px] text-indigo-200 uppercase font-bold block">Class Rank</span>
+              <span className="text-[10px] text-[#006B5D] uppercase font-bold block">Class Rank</span>
               <span className="text-2xl font-black">
                 {classRank ? `#${classRank.pos} of ${classRank.total}` : '—'}
               </span>
@@ -102,8 +102,8 @@ export const StudentReportsPage: React.FC = () => {
 
         <Card className="flex flex-col items-center justify-center p-6 text-center">
           <RadialProgress value={attendanceRate} label="Roll Call" color="#10B981" />
-          <h4 className="text-sm font-bold text-slate-800 mt-3">Attendance Summary</h4>
-          <p className="text-xs text-slate-400 mt-1">
+          <h4 className="text-sm font-bold text-[#101828] mt-3">Attendance Summary</h4>
+          <p className="text-xs text-[#667085] mt-1">
             {presentDays} days present, {absentDays} absent, {leaveDays} approved leave
           </p>
         </Card>
@@ -116,11 +116,11 @@ export const StudentReportsPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {myResults.length === 0 ? (
-            <p className="text-xs text-slate-400 py-6 text-center">No evaluated milestones yet.</p>
+            <p className="text-xs text-[#667085] py-6 text-center">No evaluated milestones yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+                <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                   <tr>
                     <th className="p-3">Subject</th>
                     <th className="p-3">Assessment Title</th>
@@ -132,15 +132,15 @@ export const StudentReportsPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {myResults.map(res => (
                     <tr key={res.id}>
-                      <td className="p-3 font-semibold text-slate-800">{res.subject}</td>
-                      <td className="p-3 text-slate-600">{res.testTitle}</td>
-                      <td className="p-3 font-bold text-indigo-600">{res.marksObtained} / {res.maxMarks}</td>
+                      <td className="p-3 font-semibold text-[#101828]">{res.subject}</td>
+                      <td className="p-3 text-[#344054]">{res.testTitle}</td>
+                      <td className="p-3 font-bold text-[#006B5D]">{res.marksObtained} / {res.maxMarks}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${getGradeColor(res.grade)}`}>
                           {res.grade}
                         </span>
                       </td>
-                      <td className="p-3 text-slate-500 italic text-[11px]">{res.teacherComment || 'Satisfactory.'}</td>
+                      <td className="p-3 text-[#667085] italic text-[11px]">{res.teacherComment || 'Satisfactory.'}</td>
                     </tr>
                   ))}
                 </tbody>

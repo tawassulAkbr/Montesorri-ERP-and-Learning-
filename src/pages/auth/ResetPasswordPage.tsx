@@ -42,7 +42,7 @@ export const ResetPasswordPage: React.FC = () => {
           <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
             <GraduationCap className="text-white" size={16} />
           </div>
-          <span className="font-bold text-slate-800">KinderGuide</span>
+          <span className="font-bold text-[#101828]">KinderGuide</span>
         </div>
 
         {success ? (
@@ -50,8 +50,8 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Password Reset Successful!</h2>
-            <p className="text-sm text-slate-500 mb-6">You can now sign in with your new password.</p>
+            <h2 className="text-xl font-bold text-[#101828] mb-2">Password Reset Successful!</h2>
+            <p className="text-sm text-[#667085] mb-6">You can now sign in with your new password.</p>
             <Link to="/login">
               <Button className="w-full">Sign In Now</Button>
             </Link>
@@ -61,8 +61,8 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle size={32} />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Invalid Reset Link</h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <h2 className="text-xl font-bold text-[#101828] mb-2">Invalid Reset Link</h2>
+            <p className="text-sm text-[#667085] mb-6">
               This link is missing its token. Please request a new reset link.
             </p>
             <Link to="/forgot-password">
@@ -71,13 +71,13 @@ export const ResetPasswordPage: React.FC = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h2 className="text-xl font-bold text-slate-800 mb-1">Create New Password</h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <h2 className="text-xl font-bold text-[#101828] mb-1">Create New Password</h2>
+            <p className="text-sm text-[#667085] mb-6">
               Choose a new password for your account (at least 6 characters).
             </p>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">New Password</Label>
+              <Label className="text-xs font-medium text-[#344054]">New Password</Label>
               <Input
                 type="password"
                 value={newPassword}
@@ -90,7 +90,7 @@ export const ResetPasswordPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Confirm Password</Label>
+              <Label className="text-xs font-medium text-[#344054]">Confirm Password</Label>
               <Input
                 type="password"
                 value={confirmPassword}
@@ -117,7 +117,7 @@ export const ResetPasswordPage: React.FC = () => {
         )}
 
         <div className="text-center mt-6">
-          <Link to="/login" className="text-xs text-slate-500 hover:text-indigo-600 font-medium">
+          <Link to="/login" className="text-xs text-[#667085] hover:text-[#006B5D] font-medium">
             Back to Sign In
           </Link>
         </div>

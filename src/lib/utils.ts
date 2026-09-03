@@ -34,7 +34,7 @@ export function getGradeColor(grade: string): string {
   switch (grade) {
     case 'A+': return 'text-emerald-600 bg-emerald-50';
     case 'A': return 'text-emerald-600 bg-emerald-50';
-    case 'B': return 'text-indigo-600 bg-indigo-50';
+    case 'B': return 'text-[#006B5D] bg-[#E6F4F1]';
     case 'C': return 'text-amber-600 bg-amber-50';
     case 'D': return 'text-orange-600 bg-orange-50';
     case 'F': return 'text-red-600 bg-red-50';
@@ -112,7 +112,7 @@ export const TEACHER_SUBJECTS = [
 
 export function avatarColors(name: string): string {
   const colors = [
-    'bg-violet-100 text-violet-700',
+    'bg-[#E6F4F1] text-[#006B5D]',
     'bg-blue-100 text-blue-700',
     'bg-emerald-100 text-emerald-700',
     'bg-amber-100 text-amber-700',
@@ -167,7 +167,7 @@ export function buildScoreChartData(results: TestResult[], studentId?: string): 
 export function buildClassPerformanceData(results: TestResult[]): ClassPerformancePoint[] {
   const buckets: { name: string; color: string; grades: string[] }[] = [
     { name: 'Excellent (A+/A)', color: '#10B981', grades: ['A+', 'A'] },
-    { name: 'Good (B)', color: '#4F46E5', grades: ['B'] },
+    { name: 'Good (B)', color: '#006B5D', grades: ['B'] },
     { name: 'Average (C)', color: '#F59E0B', grades: ['C'] },
     { name: 'Below Avg (D/F)', color: '#EF4444', grades: ['D', 'F'] },
   ];

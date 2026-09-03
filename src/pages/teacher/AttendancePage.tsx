@@ -80,15 +80,15 @@ export const AttendancePage: React.FC = () => {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Montessori Attendance & Leave Portal</h1>
-          <p className="text-sm text-slate-500">Mark your own presence, record roll calls, and manage leaves</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Montessori Attendance & Leave Portal</h1>
+          <p className="text-sm text-[#667085]">Mark your own presence, record roll calls, and manage leaves</p>
         </div>
 
         <div className="flex items-center gap-2">
           <select
             value={selectedClass}
             onChange={e => setSelectedClass(e.target.value)}
-            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
             <option>Montessori Toddler (Playgroup)</option>
             <option>Junior Montessori (Nursery)</option>
@@ -99,7 +99,7 @@ export const AttendancePage: React.FC = () => {
             type="date"
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
-            className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+            className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           />
         </div>
       </div>
@@ -108,18 +108,18 @@ export const AttendancePage: React.FC = () => {
       <Card className={
         myRecord?.status === 'present'
           ? 'border-emerald-200 bg-emerald-50/50'
-          : 'border-indigo-200 bg-indigo-50/40'
+          : 'border-[#B7DDD6] bg-[#E6F4F1]/40'
       }>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                myRecord?.status === 'present' ? 'bg-emerald-600' : 'bg-indigo-600'
+                myRecord?.status === 'present' ? 'bg-emerald-600' : 'bg-[#006B5D]'
               } text-white`}>
                 {myRecord?.status === 'present' ? <CheckCircle2 size={20} /> : <Clock size={20} />}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-[#101828]">
                   {weekend
                     ? 'It\'s the weekend'
                     : myRecord?.status === 'present'
@@ -128,7 +128,7 @@ export const AttendancePage: React.FC = () => {
                         ? 'You are on approved leave today'
                         : 'Mark your presence for today'}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5 max-w-md">
+                <p className="text-xs text-[#667085] mt-0.5 max-w-md">
                   {weekend
                     ? 'No attendance is required on Saturday and Sunday.'
                     : myRecord?.status === 'present'
@@ -168,8 +168,8 @@ export const AttendancePage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
               activeTab === tab.id
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                ? 'bg-[#006B5D] text-white shadow-sm'
+                : 'text-[#667085] hover:text-[#101828] hover:bg-slate-100'
             }`}
           >
             {tab.label}
@@ -190,8 +190,8 @@ export const AttendancePage: React.FC = () => {
               <p className="text-xs font-medium text-red-600 mt-0.5">Absent (Red)</p>
             </div>
             <div className="p-3 bg-slate-100 border border-slate-200 rounded-xl text-center">
-              <span className="text-xl font-bold text-slate-700">{leaveCount}</span>
-              <p className="text-xs font-medium text-slate-600 mt-0.5">Approved Leave (Grey)</p>
+              <span className="text-xl font-bold text-[#344054]">{leaveCount}</span>
+              <p className="text-xs font-medium text-[#344054] mt-0.5">Approved Leave (Grey)</p>
             </div>
           </div>
 
@@ -220,11 +220,11 @@ export const AttendancePage: React.FC = () => {
                   return (
                     <div key={student.id} className="py-3 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 text-[#344054] flex items-center justify-center font-bold text-xs">
                           {student.rollNo}
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                          <p className="text-xs font-semibold text-[#101828] flex items-center gap-1.5">
                             {student.name}
                             {student.feeDue && (
                               <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded-full">
@@ -232,7 +232,7 @@ export const AttendancePage: React.FC = () => {
                               </span>
                             )}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-mono">{student.enrollmentId} • {student.ageGroup}</p>
+                          <p className="text-[10px] text-[#667085] font-mono">{student.enrollmentId} • {student.ageGroup}</p>
                         </div>
                       </div>
 
@@ -242,7 +242,7 @@ export const AttendancePage: React.FC = () => {
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                             status === 'present'
                               ? 'bg-emerald-500 text-white shadow-sm'
-                              : 'text-slate-500 hover:text-slate-800'
+                              : 'text-[#667085] hover:text-[#101828]'
                           }`}
                         >
                           Present
@@ -252,7 +252,7 @@ export const AttendancePage: React.FC = () => {
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                             status === 'absent'
                               ? 'bg-red-500 text-white shadow-sm'
-                              : 'text-slate-500 hover:text-slate-800'
+                              : 'text-[#667085] hover:text-[#101828]'
                           }`}
                         >
                           Absent
@@ -262,7 +262,7 @@ export const AttendancePage: React.FC = () => {
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                             status === 'leave'
                               ? 'bg-slate-500 text-white shadow-sm'
-                              : 'text-slate-500 hover:text-slate-800'
+                              : 'text-[#667085] hover:text-[#101828]'
                           }`}
                         >
                           Leave
@@ -302,7 +302,7 @@ export const AttendancePage: React.FC = () => {
             </CardHeader>
             <CardContent>
               {myLeaves.length === 0 ? (
-                <p className="text-xs text-slate-400 py-4 text-center">You have not applied for any leave yet.</p>
+                <p className="text-xs text-[#667085] py-4 text-center">You have not applied for any leave yet.</p>
               ) : (
                 <div className="space-y-3">
                   {myLeaves.map(leave => (
@@ -315,10 +315,10 @@ export const AttendancePage: React.FC = () => {
 
           {/* Student / parent leaves to review */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700">Student Leave Requests to Review</h3>
+            <h3 className="text-sm font-semibold text-[#344054]">Student Leave Requests to Review</h3>
             {leaveRequests.filter(l => l.kind === 'student').length === 0 ? (
               <div className="text-center py-12 bg-white rounded-xl border border-slate-100">
-                <p className="text-sm font-semibold text-slate-700">No student leave requests found</p>
+                <p className="text-sm font-semibold text-[#344054]">No student leave requests found</p>
               </div>
             ) : (
               leaveRequests.filter(l => l.kind === 'student').map(leave => (

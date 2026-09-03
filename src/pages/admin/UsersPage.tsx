@@ -32,7 +32,7 @@ const CredentialsDialog: React.FC<{
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <KeyRound size={16} className="text-indigo-600" />
+            <KeyRound size={16} className="text-[#006B5D]" />
             Account Credentials
           </DialogTitle>
           <DialogDescription>
@@ -45,28 +45,28 @@ const CredentialsDialog: React.FC<{
             <div key={i} className="p-3 rounded-xl border border-slate-200 bg-slate-50">
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline" className="capitalize">{cred.role}</Badge>
-                <span className="text-xs font-semibold text-slate-700">{cred.name}</span>
+                <span className="text-xs font-semibold text-[#344054]">{cred.name}</span>
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Email</span>
-                  <span className="flex items-center gap-1.5 font-mono font-medium text-slate-800">
+                  <span className="text-[#667085]">Email</span>
+                  <span className="flex items-center gap-1.5 font-mono font-medium text-[#101828]">
                     {cred.email}
                     <button
                       onClick={() => copy(cred.email, `email-${i}`)}
-                      className="text-slate-400 hover:text-indigo-600"
+                      className="text-[#667085] hover:text-[#006B5D]"
                     >
                       {copied === `email-${i}` ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                     </button>
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Password</span>
-                  <span className="flex items-center gap-1.5 font-mono font-bold text-indigo-700">
+                  <span className="text-[#667085]">Password</span>
+                  <span className="flex items-center gap-1.5 font-mono font-bold text-[#006B5D]">
                     {cred.password}
                     <button
                       onClick={() => copy(cred.password, `pw-${i}`)}
-                      className="text-slate-400 hover:text-indigo-600"
+                      className="text-[#667085] hover:text-[#006B5D]"
                     >
                       {copied === `pw-${i}` ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                     </button>
@@ -147,41 +147,41 @@ const AddTeacherModal: React.FC<{
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Full Name</Label>
+              <Label className="text-xs font-medium text-[#344054]">Full Name</Label>
               <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Ayesha Khan" className="mt-1 text-xs" required />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-600">Contact Number</Label>
+              <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
               <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 300 0000000" className="mt-1 text-xs" required />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Email Address (login)</Label>
+            <Label className="text-xs font-medium text-[#344054]">Email Address (login)</Label>
             <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="teacher@kinderguide.edu" className="mt-1 text-xs" required />
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Qualification</Label>
+            <Label className="text-xs font-medium text-[#344054]">Qualification</Label>
             <Input value={qualification} onChange={e => setQualification(e.target.value)} placeholder="e.g. AMI Montessori Diploma" className="mt-1 text-xs" required />
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Subject Area</Label>
+            <Label className="text-xs font-medium text-[#344054]">Subject Area</Label>
             <select
               value={subject}
               onChange={e => setSubject(e.target.value)}
-              className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
             >
               {TEACHER_SUBJECTS.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Assigned Classes</Label>
+            <Label className="text-xs font-medium text-[#344054]">Assigned Classes</Label>
             <div className="mt-1.5 space-y-1.5">
               {MONTESSORI_CLASSES.map(cls => (
-                <label key={cls} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                <label key={cls} className="flex items-center gap-2 text-xs text-[#344054] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={classes.includes(cls)}
@@ -265,60 +265,60 @@ const AddStudentModal: React.FC<{
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Child's Full Name</Label>
+              <Label className="text-xs font-medium text-[#344054]">Child's Full Name</Label>
               <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Noor Fatima" className="mt-1 text-xs" required />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-600">Contact Number</Label>
+              <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
               <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 310 0000000" className="mt-1 text-xs" required />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Child's Email (student login) <span className="text-red-500">*</span></Label>
+            <Label className="text-xs font-medium text-[#344054]">Child's Email (student login) <span className="text-red-500">*</span></Label>
             <Input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} placeholder="student@kinderguide.edu" className="mt-1 text-xs" required />
-            <p className="text-[10px] text-slate-400 mt-1">The child's login credentials are emailed here and also to the guardian below.</p>
+            <p className="text-[10px] text-[#667085] mt-1">The child's login credentials are emailed here and also to the guardian below.</p>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Parent / Guardian Name</Label>
+            <Label className="text-xs font-medium text-[#344054]">Parent / Guardian Name</Label>
             <Input value={guardianName} onChange={e => setGuardianName(e.target.value)} placeholder="e.g. Mr. Ahmed Raza" className="mt-1 text-xs" required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Guardian Email <span className="text-red-500">*</span></Label>
+              <Label className="text-xs font-medium text-[#344054]">Guardian Email <span className="text-red-500">*</span></Label>
               <Input type="email" value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} placeholder="parent@kinderguide.edu" className="mt-1 text-xs" required />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-600">Guardian Phone <span className="text-slate-400">(optional)</span></Label>
+              <Label className="text-xs font-medium text-[#344054]">Guardian Phone <span className="text-[#667085]">(optional)</span></Label>
               <Input value={guardianPhone} onChange={e => setGuardianPhone(e.target.value)} placeholder="defaults to contact above" className="mt-1 text-xs" />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-slate-600">Home Address</Label>
+            <Label className="text-xs font-medium text-[#344054]">Home Address</Label>
             <Input value={address} onChange={e => setAddress(e.target.value)} placeholder="House, street, city" className="mt-1 text-xs" required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Grade / Class</Label>
+              <Label className="text-xs font-medium text-[#344054]">Grade / Class</Label>
               <select
                 value={cls}
                 onChange={e => setCls(e.target.value)}
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
               >
                 {MONTESSORI_CLASSES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-600">Monthly Fee (PKR)</Label>
+              <Label className="text-xs font-medium text-[#344054]">Monthly Fee (PKR)</Label>
               <Input type="number" min="1" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} placeholder="e.g. 12000" className="mt-1 text-xs" required />
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+          <p className="text-[11px] text-[#667085] flex items-center gap-1.5">
             <AlertCircle size={12} /> Fee details are visible to the admin only.
           </p>
 
@@ -374,7 +374,7 @@ export const AdminUsersPage: React.FC = () => {
   );
 
   const statusBadge = (record?: TeacherAttendanceRecord) => {
-    if (weekend) return <span className="text-[10px] font-semibold text-slate-400">Weekend</span>;
+    if (weekend) return <span className="text-[10px] font-semibold text-[#667085]">Weekend</span>;
     switch (record?.status) {
       case 'present':
         return (
@@ -383,7 +383,7 @@ export const AdminUsersPage: React.FC = () => {
           </span>
         );
       case 'leave':
-        return <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px]">On Leave</span>;
+        return <span className="px-2 py-0.5 rounded-full bg-slate-100 text-[#344054] font-bold text-[10px]">On Leave</span>;
       case 'absent':
       default:
         return <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-bold text-[10px]">Absent</span>;
@@ -395,8 +395,8 @@ export const AdminUsersPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">User Management Directory</h1>
-          <p className="text-sm text-slate-500">Only the admin can create teacher and student accounts</p>
+          <h1 className="text-2xl font-bold text-[#101828]">User Management Directory</h1>
+          <p className="text-sm text-[#667085]">Only the admin can create teacher and student accounts</p>
         </div>
 
         {activeTab === 'teacher' && (
@@ -424,8 +424,8 @@ export const AdminUsersPage: React.FC = () => {
             className={cn(
               'px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all',
               activeTab === tab.id
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                ? 'bg-[#006B5D] text-white shadow-sm'
+                : 'text-[#667085] hover:text-[#101828] hover:bg-slate-100'
             )}
           >
             {tab.icon}
@@ -437,7 +437,7 @@ export const AdminUsersPage: React.FC = () => {
       {/* Search Bar */}
       <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-2.5 text-[#667085]" />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -452,7 +452,7 @@ export const AdminUsersPage: React.FC = () => {
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                 <tr>
                   <th className="p-3.5 pl-5">Teacher</th>
                   <th className="p-3.5">Subject</th>
@@ -472,25 +472,25 @@ export const AdminUsersPage: React.FC = () => {
                           {getInitials(t.name)}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800">{t.name}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{t.email}</p>
+                          <p className="font-semibold text-[#101828]">{t.name}</p>
+                          <p className="text-[10px] text-[#667085] font-mono">{t.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="p-3.5">
-                      <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 whitespace-nowrap">
+                      <Badge variant="outline" className="bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6] whitespace-nowrap">
                         {t.subject}
                       </Badge>
                     </td>
-                    <td className="p-3.5 text-slate-600">{t.classes.join(', ')}</td>
-                    <td className="p-3.5 text-slate-600">{t.qualification}</td>
-                    <td className="p-3.5 text-slate-600 font-mono text-[11px]">{t.phone}</td>
+                    <td className="p-3.5 text-[#344054]">{t.classes.join(', ')}</td>
+                    <td className="p-3.5 text-[#344054]">{t.qualification}</td>
+                    <td className="p-3.5 text-[#344054] font-mono text-[11px]">{t.phone}</td>
                     <td className="p-3.5">{statusBadge(teacherRecord(t))}</td>
                     <td className="p-3.5 pr-5 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-[10px] text-slate-500 hover:text-indigo-600 gap-1"
+                        className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
                         onClick={() => handleResetPassword(t.id, 'teacher')}
                       >
                         <KeyRound size={12} /> Reset Password
@@ -509,7 +509,7 @@ export const AdminUsersPage: React.FC = () => {
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                 <tr>
                   <th className="p-3.5 pl-5">Student</th>
                   <th className="p-3.5">Roll No</th>
@@ -529,18 +529,18 @@ export const AdminUsersPage: React.FC = () => {
                           {getInitials(s.name)}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                          <p className="font-semibold text-[#101828] flex items-center gap-1.5">
                             {s.name}
                             {s.feeDue && <AlertCircle size={12} className="text-red-500" />}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-mono">{s.enrollmentId}</p>
+                          <p className="text-[10px] text-[#667085] font-mono">{s.enrollmentId}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-3.5 text-slate-700 font-mono">#{s.rollNo}</td>
-                    <td className="p-3.5 text-slate-600">{s.class}</td>
-                    <td className="p-3.5 text-slate-600">{s.guardianName}</td>
-                    <td className="p-3.5 text-slate-700 font-mono">Rs {s.feeAmount.toLocaleString()}</td>
+                    <td className="p-3.5 text-[#344054] font-mono">#{s.rollNo}</td>
+                    <td className="p-3.5 text-[#344054]">{s.class}</td>
+                    <td className="p-3.5 text-[#344054]">{s.guardianName}</td>
+                    <td className="p-3.5 text-[#344054] font-mono">Rs {s.feeAmount.toLocaleString()}</td>
                     <td className="p-3.5">
                       {s.feeDue
                         ? <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]">Fee Due</span>
@@ -568,7 +568,7 @@ export const AdminUsersPage: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-[10px] text-slate-500 hover:text-indigo-600 gap-1"
+                        className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
                         onClick={() => handleResetPassword(s.id, 'student')}
                       >
                         <KeyRound size={12} /> Reset
@@ -587,7 +587,7 @@ export const AdminUsersPage: React.FC = () => {
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                 <tr>
                   <th className="p-3.5 pl-5">Parent / Guardian</th>
                   <th className="p-3.5">Contact Phone</th>
@@ -604,20 +604,20 @@ export const AdminUsersPage: React.FC = () => {
                           {getInitials(p.name)}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800">{p.name}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{p.email}</p>
+                          <p className="font-semibold text-[#101828]">{p.name}</p>
+                          <p className="text-[10px] text-[#667085] font-mono">{p.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-3.5 text-slate-600 font-mono text-[11px]">{p.phone}</td>
-                    <td className="p-3.5 text-slate-600">
+                    <td className="p-3.5 text-[#344054] font-mono text-[11px]">{p.phone}</td>
+                    <td className="p-3.5 text-[#344054]">
                       {p.childrenIds.map(id => students.find(s => s.id === id)?.name).filter(Boolean).join(', ') || '—'}
                     </td>
                     <td className="p-3.5 pr-5 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-[10px] text-slate-500 hover:text-indigo-600 gap-1"
+                        className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
                         onClick={() => handleResetPassword(p.id, 'parent')}
                       >
                         <KeyRound size={12} /> Reset Password
@@ -628,7 +628,7 @@ export const AdminUsersPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <p className="px-5 py-3 text-[11px] text-slate-400 border-t border-slate-100">
+          <p className="px-5 py-3 text-[11px] text-[#667085] border-t border-slate-100">
             Parent accounts are created automatically when a student is enrolled.
           </p>
         </div>

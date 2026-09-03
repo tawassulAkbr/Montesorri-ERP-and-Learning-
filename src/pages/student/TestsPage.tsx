@@ -18,8 +18,8 @@ export const StudentTestsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tests & Evaluations</h1>
-        <p className="text-sm text-slate-500">Track your exam schedules, check grading results, and view teacher feedback</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Tests & Evaluations</h1>
+        <p className="text-sm text-[#667085]">Track your exam schedules, check grading results, and view teacher feedback</p>
       </div>
 
       {/* Tab Switcher */}
@@ -28,8 +28,8 @@ export const StudentTestsPage: React.FC = () => {
           onClick={() => setTab('upcoming')}
           className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
             tab === 'upcoming'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'bg-[#006B5D] text-white shadow-sm'
+              : 'text-[#667085] hover:text-[#101828] hover:bg-slate-100'
           }`}
         >
           Upcoming Tests ({upcomingTests.length})
@@ -38,8 +38,8 @@ export const StudentTestsPage: React.FC = () => {
           onClick={() => setTab('results')}
           className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
             tab === 'results'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              ? 'bg-[#006B5D] text-white shadow-sm'
+              : 'text-[#667085] hover:text-[#101828] hover:bg-slate-100'
           }`}
         >
           Evaluated Results ({myResults.length})
@@ -52,20 +52,20 @@ export const StudentTestsPage: React.FC = () => {
             <Card key={test.id} className="p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                  <Badge variant="outline" className="bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]">
                     {test.subject}
                   </Badge>
-                  <span className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                  <span className="text-xs font-bold text-[#006B5D] flex items-center gap-1">
                     <Calendar size={13} /> {formatDate(test.date)}
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-slate-800 mb-1">{test.title}</h3>
-                <p className="text-xs text-slate-500 mb-3">{test.instructions || 'Review syllabus chapters thoroughly.'}</p>
+                <h3 className="text-base font-bold text-[#101828] mb-1">{test.title}</h3>
+                <p className="text-xs text-[#667085] mb-3">{test.instructions || 'Review syllabus chapters thoroughly.'}</p>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#667085]">
                 <span>Class: {test.class}</span>
-                <span className="font-semibold text-slate-700">Max Score: {test.maxMarks} pts</span>
+                <span className="font-semibold text-[#344054]">Max Score: {test.maxMarks} pts</span>
               </div>
             </Card>
           ))}
@@ -81,11 +81,11 @@ export const StudentTestsPage: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-[10px]">{res.subject}</Badge>
-                    <span className="text-xs text-slate-400">{formatDate(res.date)}</span>
+                    <span className="text-xs text-[#667085]">{formatDate(res.date)}</span>
                   </div>
-                  <h3 className="text-base font-bold text-slate-800">{res.testTitle}</h3>
+                  <h3 className="text-base font-bold text-[#101828]">{res.testTitle}</h3>
                   {res.teacherComment && (
-                    <p className="text-xs text-slate-500 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <p className="text-xs text-[#667085] italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
                       "{res.teacherComment}"
                     </p>
                   )}
@@ -93,8 +93,8 @@ export const StudentTestsPage: React.FC = () => {
 
                 <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <div className="text-right">
-                    <span className="text-lg font-bold text-slate-800">{res.marksObtained} / {res.maxMarks}</span>
-                    <span className="text-xs text-slate-400 block">{percentage}% Score</span>
+                    <span className="text-lg font-bold text-[#101828]">{res.marksObtained} / {res.maxMarks}</span>
+                    <span className="text-xs text-[#667085] block">{percentage}% Score</span>
                   </div>
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${getGradeColor(res.grade)}`}>
                     {res.grade}

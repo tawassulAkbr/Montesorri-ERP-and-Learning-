@@ -39,7 +39,7 @@ export const ParentAttendancePage: React.FC = () => {
       case 'pending':
         return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">Pending Teacher Review</Badge>;
       case 'accepted':
-        return <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-300">Accepted (Marked Grey Leave)</Badge>;
+        return <Badge variant="outline" className="bg-slate-100 text-[#344054] border-slate-300">Accepted (Marked Grey Leave)</Badge>;
       case 'rejected':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">Rejected</Badge>;
     }
@@ -48,8 +48,8 @@ export const ParentAttendancePage: React.FC = () => {
   if (!selectedChild) {
     return (
       <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
-        <p className="text-sm font-semibold text-slate-700">No children are linked to this account yet.</p>
-        <p className="text-xs text-slate-400 mt-1">Please contact the school administrator.</p>
+        <p className="text-sm font-semibold text-[#344054]">No children are linked to this account yet.</p>
+        <p className="text-xs text-[#667085] mt-1">Please contact the school administrator.</p>
       </div>
     );
   }
@@ -59,15 +59,15 @@ export const ParentAttendancePage: React.FC = () => {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Child Attendance & Leave Portal</h1>
-          <p className="text-sm text-slate-500">Monitor monthly circle presence, review roll calls, and apply for leaves</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Child Attendance & Leave Portal</h1>
+          <p className="text-sm text-[#667085]">Monitor monthly circle presence, review roll calls, and apply for leaves</p>
         </div>
 
         <div className="flex items-center gap-3">
           <select
             value={selectedChildId}
             onChange={e => setSelectedChildId(e.target.value)}
-            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
             {myChildren.map(c => (
               <option key={c.id} value={c.id}>{c.name} ({c.class})</option>
@@ -98,26 +98,26 @@ export const ParentAttendancePage: React.FC = () => {
           <CardTitle className="text-base font-semibold">
             Submitted Leave Requests ({childLeaves.length})
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => setOpenModal(true)} className="text-xs text-indigo-600">
+          <Button variant="ghost" size="sm" onClick={() => setOpenModal(true)} className="text-xs text-[#006B5D]">
             + New Request
           </Button>
         </CardHeader>
         <CardContent>
           {childLeaves.length === 0 ? (
-            <p className="text-xs text-slate-400 py-6 text-center">No leave requests submitted yet.</p>
+            <p className="text-xs text-[#667085] py-6 text-center">No leave requests submitted yet.</p>
           ) : (
             <div className="divide-y divide-slate-100">
               {childLeaves.map(leave => (
                 <div key={leave.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-800">
+                      <span className="text-xs font-bold text-[#101828]">
                         {formatDate(leave.fromDate)} {leave.fromDate !== leave.toDate && `– ${formatDate(leave.toDate)}`}
                       </span>
                       {getStatusBadge(leave.status)}
                     </div>
-                    <p className="text-xs text-slate-600 mt-1">{leave.reason}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Submitted on {formatDate(leave.submittedAt)}</p>
+                    <p className="text-xs text-[#344054] mt-1">{leave.reason}</p>
+                    <p className="text-[10px] text-[#667085] mt-0.5">Submitted on {formatDate(leave.submittedAt)}</p>
                   </div>
                 </div>
               ))}

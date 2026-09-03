@@ -10,7 +10,7 @@ import { useData } from '@/context/DataContext';
 const severityIcon = (sev: AiInsight['severity']) => {
   if (sev === 'critical') return <AlertOctagon size={16} className="text-red-500" />;
   if (sev === 'warning') return <AlertTriangle size={16} className="text-amber-500" />;
-  return <Info size={16} className="text-sky-500" />;
+  return <Info size={16} className="text-[#006B5D]" />;
 };
 
 const severityBorder = (sev: AiInsight['severity']) =>
@@ -53,8 +53,8 @@ export const AiInsightsSection: React.FC = () => {
           <span className="gradient-primary w-7 h-7 rounded-lg flex items-center justify-center text-white">
             <Sparkles size={14} />
           </span>
-          <h2 className="text-sm font-semibold text-slate-800">AI Insights</h2>
-          <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5">
+          <h2 className="text-sm font-semibold text-[#101828]">AI Insights</h2>
+          <span className="text-[10px] font-semibold text-[#006B5D] bg-[#E6F4F1] rounded-full px-2 py-0.5">
             Auto-analysis
           </span>
         </div>
@@ -66,7 +66,7 @@ export const AiInsightsSection: React.FC = () => {
         ) : (
           <button
             onClick={() => { clearInsightsCache(userId); setRefreshKey(k => k + 1); }}
-            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-indigo-600 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#006B5D] transition-colors"
           >
             <RefreshCw size={13} />
             Refresh
@@ -76,7 +76,7 @@ export const AiInsightsSection: React.FC = () => {
 
       {insights === null && !error ? (
         offlineMode ? (
-          <p className="text-xs text-slate-400 bg-white border border-slate-200 rounded-xl px-4 py-3">
+          <p className="text-xs text-[#667085] bg-white border border-slate-200 rounded-xl px-4 py-3">
             AI insights weren't cached before you went offline. Reconnect to load them.
           </p>
         ) : (
@@ -91,11 +91,11 @@ export const AiInsightsSection: React.FC = () => {
           </div>
         )
       ) : error ? (
-        <p className="text-xs text-slate-400 bg-white border border-slate-200 rounded-xl px-4 py-3">
+        <p className="text-xs text-[#667085] bg-white border border-slate-200 rounded-xl px-4 py-3">
           AI insights couldn't be loaded right now.
         </p>
       ) : insights && insights.length === 0 ? (
-        <p className="text-xs text-slate-400 bg-white border border-slate-200 rounded-xl px-4 py-3">
+        <p className="text-xs text-[#667085] bg-white border border-slate-200 rounded-xl px-4 py-3">
           Not enough data to generate insights yet — keep using the app and check back soon.
         </p>
       ) : (
@@ -107,9 +107,9 @@ export const AiInsightsSection: React.FC = () => {
             >
               <div className="flex items-start gap-2 mb-1.5">
                 <span className="mt-0.5 flex-shrink-0">{severityIcon(ins.severity)}</span>
-                <p className="text-[13px] font-semibold text-slate-800 leading-snug">{ins.title}</p>
+                <p className="text-[13px] font-semibold text-[#101828] leading-snug">{ins.title}</p>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-2">{ins.detail}</p>
+              <p className="text-xs text-[#667085] leading-relaxed mb-2">{ins.detail}</p>
               {ins.chart && (
                 <div className="mt-2">
                   <AiChart spec={ins.chart} height={110} compact />

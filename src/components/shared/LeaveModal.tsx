@@ -35,45 +35,45 @@ export const SubmitLeaveModal: React.FC<SubmitLeaveModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar className="text-indigo-600" size={18} />
+            <Calendar className="text-[#006B5D]" size={18} />
             Apply for Leave
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="bg-indigo-50 rounded-lg p-3 text-sm text-indigo-700">
+          <div className="bg-[#E6F4F1] rounded-lg p-3 text-sm text-[#006B5D]">
             {applicantLabel}: <strong>{applicantName}</strong>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1 block">From Date</label>
+              <label className="text-xs font-medium text-[#344054] mb-1 block">From Date</label>
               <input
                 type="date"
                 value={fromDate}
                 onChange={e => setFromDate(e.target.value)}
-                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#006B5D]"
                 required
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 mb-1 block">To Date</label>
+              <label className="text-xs font-medium text-[#344054] mb-1 block">To Date</label>
               <input
                 type="date"
                 value={toDate}
                 onChange={e => setToDate(e.target.value)}
                 min={fromDate}
-                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#006B5D]"
                 required
               />
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600 mb-1 block">Reason</label>
+            <label className="text-xs font-medium text-[#344054] mb-1 block">Reason</label>
             <textarea
               value={reason}
               onChange={e => setReason(e.target.value)}
               rows={3}
               placeholder="Please provide the reason for leave..."
-              className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
               required
             />
           </div>
@@ -107,27 +107,27 @@ export const LeaveRequestCard: React.FC<LeaveRequestCardProps> = ({
   const cfg = statusConfig[leave.status];
   return (
     <div className="flex items-start gap-3 p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
-      <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
-        <FileText className="text-indigo-600" size={16} />
+      <div className="w-10 h-10 bg-[#E6F4F1] rounded-xl flex items-center justify-center flex-shrink-0">
+        <FileText className="text-[#006B5D]" size={16} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <span className="font-semibold text-sm text-slate-800">
+          <span className="font-semibold text-sm text-[#101828]">
             {leave.kind === 'teacher' ? leave.teacherName : leave.studentName}
             {leave.kind === 'teacher' && (
-              <span className="ml-2 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full">Teacher</span>
+              <span className="ml-2 text-[10px] font-bold text-[#006B5D] bg-[#E6F4F1] px-1.5 py-0.5 rounded-full">Teacher</span>
             )}
           </span>
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.className}`}>
             {cfg.label}
           </span>
         </div>
-        <p className="text-xs text-slate-500 mb-1">
+        <p className="text-xs text-[#667085] mb-1">
           {formatDate(leave.fromDate)} {leave.fromDate !== leave.toDate && `– ${formatDate(leave.toDate)}`}
         </p>
-        <p className="text-xs text-slate-600 line-clamp-2">{leave.reason}</p>
+        <p className="text-xs text-[#344054] line-clamp-2">{leave.reason}</p>
         {leave.kind !== 'teacher' && (
-          <p className="text-xs text-slate-400 mt-1">by {leave.parentName}</p>
+          <p className="text-xs text-[#667085] mt-1">by {leave.parentName}</p>
         )}
         {showActions && leave.status === 'pending' && (
           <div className="flex gap-2 mt-2">

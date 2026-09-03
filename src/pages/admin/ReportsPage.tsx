@@ -20,8 +20,8 @@ export const AdminReportsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Institution Performance Reports</h1>
-          <p className="text-sm text-slate-500">School-wide academic metrics, milestone standings, and enrollment overview</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Institution Performance Reports</h1>
+          <p className="text-sm text-[#667085]">School-wide academic metrics, milestone standings, and enrollment overview</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export const AdminReportsPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Milestone Grade Distribution</CardTitle>
-            <p className="text-xs text-slate-400">Overall performance breakdown across all evaluated milestones</p>
+            <p className="text-xs text-[#667085]">Overall performance breakdown across all evaluated milestones</p>
           </CardHeader>
           <CardContent>
             <ClassPerformancePieChart data={performanceChart} height={240} />
@@ -48,7 +48,7 @@ export const AdminReportsPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">School-Wide Attendance Volume</CardTitle>
-            <p className="text-xs text-slate-400">Daily student presence numbers across campus (30 days)</p>
+            <p className="text-xs text-[#667085]">Daily student presence numbers across campus (30 days)</p>
           </CardHeader>
           <CardContent>
             <AttendanceAreaChart data={attendanceChart} height={240} />
@@ -59,14 +59,14 @@ export const AdminReportsPage: React.FC = () => {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">Enrollment by Class</CardTitle>
-          <p className="text-xs text-slate-400">Current student distribution across Montessori cohorts</p>
+          <p className="text-xs text-[#667085]">Current student distribution across Montessori cohorts</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {classDistribution.map(item => (
               <div key={item.month} className="p-4 rounded-xl border border-slate-100 bg-slate-50 text-center">
-                <p className="text-2xl font-bold text-indigo-700">{item.students}</p>
-                <p className="text-xs font-semibold text-slate-600 mt-1">{item.month}</p>
+                <p className="text-2xl font-bold text-[#006B5D]">{item.students}</p>
+                <p className="text-xs font-semibold text-[#344054] mt-1">{item.month}</p>
               </div>
             ))}
           </div>

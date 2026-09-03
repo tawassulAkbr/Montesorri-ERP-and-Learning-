@@ -8,8 +8,8 @@ const SCALE = 2;
 const MARGIN = 44;
 
 const COLORS = {
-  indigo: '#4F46E5',
-  violet: '#7C3AED',
+  indigo: '#006B5D',
+  violet: '#007A6B',
   slate800: '#1E293B',
   slate600: '#475569',
   slate400: '#94A3B8',

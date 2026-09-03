@@ -14,8 +14,8 @@ export const StudentDailyWorkPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Montessori Daily Work & Activity Feed</h1>
-        <p className="text-sm text-slate-500">Track classroom activities, sensorial mat tasks, and fun homework exercises</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Montessori Daily Work & Activity Feed</h1>
+        <p className="text-sm text-[#667085]">Track classroom activities, sensorial mat tasks, and fun homework exercises</p>
       </div>
 
       <div className="space-y-4">
@@ -25,22 +25,22 @@ export const StudentDailyWorkPage: React.FC = () => {
             <Card key={work.id} className={`overflow-hidden border transition-all ${isDone ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-100 shadow-sm'}`}>
               <CardHeader className="p-4 bg-slate-50/70 border-b border-slate-100 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                  <div className="w-9 h-9 rounded-xl bg-[#006B5D] text-white flex items-center justify-center font-bold text-xs">
                     {work.teacherSubject.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-slate-800">{work.teacherSubject}</h3>
+                      <h3 className="text-sm font-bold text-[#101828]">{work.teacherSubject}</h3>
                       <Badge variant="outline" className="text-[10px] bg-white border-slate-200">
                         {work.class}
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-slate-400">Assigned by {work.teacherName}</p>
+                    <p className="text-[11px] text-[#667085]">Assigned by {work.teacherName}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                  <span className="text-[11px] text-[#667085] font-medium hidden sm:inline">
                     {formatDateTime(work.postedAt)}
                   </span>
                   <button
@@ -48,7 +48,7 @@ export const StudentDailyWorkPage: React.FC = () => {
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                       isDone
                         ? 'bg-emerald-500 text-white shadow-sm'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'bg-white border border-slate-200 text-[#344054] hover:bg-slate-50'
                     }`}
                   >
                     <CheckSquare size={13} /> {isDone ? 'Completed 🌟' : 'Mark Done'}
@@ -58,12 +58,12 @@ export const StudentDailyWorkPage: React.FC = () => {
 
               <CardContent className="p-5 space-y-3">
                 <div
-                  className="text-xs text-slate-700 leading-relaxed"
+                  className="text-xs text-[#344054] leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: work.content }}
                 />
 
                 {work.attachmentName && (
-                  <div className="flex items-center gap-2 pt-2 text-xs text-indigo-600 bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 w-fit">
+                  <div className="flex items-center gap-2 pt-2 text-xs text-[#006B5D] bg-[#E6F4F1]/60 p-2.5 rounded-lg border border-[#B7DDD6] w-fit">
                     <Paperclip size={14} />
                     <span className="font-semibold">{work.attachmentName}</span>
                   </div>

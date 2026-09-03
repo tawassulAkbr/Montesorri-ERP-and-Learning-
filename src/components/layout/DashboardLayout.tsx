@@ -12,31 +12,32 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen bg-slate-50 overflow-hidden">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Topbar />
-          {offlineMode && (
-            <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-xs font-medium px-4 py-2 flex items-center gap-2">
-              <WifiOff size={14} className="flex-shrink-0" />
-              <span>
-                You're offline — showing data saved from your last visit
-                {lastSyncedAt ? ` (${new Date(lastSyncedAt).toLocaleString()})` : ''}.
-                Changes can't be saved until the connection is restored.
-              </span>
-            </div>
-          )}
-          <main className="flex-1 overflow-y-auto">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="p-6 max-w-7xl mx-auto w-full"
-            >
-              <Outlet />
-            </motion.div>
-          </main>
+      <div className="h-screen w-screen overflow-hidden bg-white p-0 m-0 text-[#101828]">
+        <div className="flex h-full w-full overflow-hidden bg-white">
+          <Sidebar />
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+            <Topbar />
+            {offlineMode && (
+              <div className="mx-5 flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-800">
+                <WifiOff size={14} className="flex-shrink-0" />
+                <span>
+                  You're offline. Showing data saved from your last visit
+                  {lastSyncedAt ? ` (${new Date(lastSyncedAt).toLocaleString()})` : ''}.
+                </span>
+              </div>
+            )}
+            <main className="flex-1 overflow-y-auto bg-[#FBFEFD]">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="mx-auto w-full max-w-7xl p-5 lg:p-7"
+              >
+                <Outlet />
+              </motion.div>
+            </main>
+          </div>
         </div>
         {aiEnabled && <AssistantPanel />}
       </div>

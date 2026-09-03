@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Menu, ChevronRight, Lock, LogOut, User, Sparkles } from 'lucide-react';
+import { Bell, Menu, Lock, LogOut, User, Sparkles, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -41,7 +41,7 @@ export const Topbar: React.FC = () => {
   const crumbs = location.pathname.split('/').filter(Boolean);
 
   const initials = currentUser ? getInitials(currentUser.name) : 'KG';
-  const avatarCls = currentUser ? avatarColors(currentUser.name) : 'bg-indigo-100 text-indigo-700';
+  const avatarCls = currentUser ? avatarColors(currentUser.name) : 'bg-[#E6F4F1] text-[#006B5D]';
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -50,54 +50,63 @@ export const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-sm border-b border-slate-100 flex items-center px-4 gap-3 sticky top-0 z-30">
+    <header className="sticky top-0 z-30 bg-white px-5 py-5 lg:px-7">
       {/* Mobile hamburger */}
-      <button
-        onClick={openMobile}
-        className="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
-      >
-        <Menu size={18} />
-      </button>
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            onClick={openMobile}
+            className="rounded-xl border border-[#EAECF0] p-2 text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D] lg:hidden"
+          >
+            <Menu size={18} />
+          </button>
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-extrabold tracking-normal text-[#101828]">
+              Welcome back, {currentUser?.name?.split(' ')[0] || 'there'}
+            </h1>
+            <p className="mt-1 text-sm font-medium text-[#667085]">
+              {crumbs.map(crumbLabel).join(' / ') || 'Dashboard overview'}
+            </p>
+          </div>
+        </div>
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 flex-1">
-        {crumbs.map((crumb, i) => (
-          <span key={crumb} className="flex items-center gap-1.5">
-            {i > 0 && <ChevronRight size={12} className="text-slate-300" />}
-            <span className={`text-sm ${i === crumbs.length - 1 ? 'font-semibold text-slate-800' : 'text-slate-400'}`}>
-              {crumbLabel(crumb)}
-            </span>
-          </span>
-        ))}
-      </div>
+        <div className="flex min-w-0 flex-1 items-center gap-3 xl:max-w-2xl">
+          <div className="relative min-w-[180px] flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#98A2B3]" size={17} />
+            <input
+              type="search"
+              placeholder="Search dashboard"
+              className="h-11 w-full rounded-full border border-[#EAECF0] bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-[#344054] outline-none transition focus:border-[#006B5D] focus:bg-white focus:ring-4 focus:ring-[#E6F4F1] placeholder:text-[#98A2B3]"
+            />
+          </div>
 
-      {/* AI features toggle */}
-      <button
-        onClick={toggleAi}
-        title={aiEnabled ? 'Hide AI assistant & insights' : 'Show AI assistant & insights'}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-          aiEnabled
-            ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
-            : 'text-slate-400 bg-slate-100 hover:bg-slate-200'
-        }`}
-      >
-        <Sparkles size={14} />
-        <span>AI {aiEnabled ? 'ON' : 'OFF'}</span>
-      </button>
+          {/* AI features toggle */}
+          <button
+            onClick={toggleAi}
+            title={aiEnabled ? 'Hide AI assistant & insights' : 'Show AI assistant & insights'}
+            className={`flex h-11 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-colors ${
+              aiEnabled
+                ? 'border-[#B7DDD6] bg-[#E6F4F1] text-[#006B5D] hover:bg-[#D9EFEB]'
+                : 'border-[#EAECF0] bg-white text-[#667085] hover:bg-[#F9FAFB]'
+            }`}
+          >
+            <Sparkles size={15} />
+            <span>AI</span>
+          </button>
 
-      {/* Notifications */}
-      <div className="relative">
-        <button
-          onClick={() => setNotifOpen(!notifOpen)}
-          className="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
-        >
-          <Bell size={18} />
-          {unread > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-              {unread}
-            </span>
-          )}
-        </button>
+          {/* Notifications */}
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#EAECF0] bg-white text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D]"
+            >
+              <Bell size={18} />
+              {unread > 0 && (
+                <span className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#D9531E] text-[9px] font-bold text-white">
+                  {unread}
+                </span>
+              )}
+            </button>
 
         <AnimatePresence>
           {notifOpen && (
@@ -106,27 +115,27 @@ export const Topbar: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50"
+              className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-[#EAECF0] bg-white shadow-xl"
             >
-              <div className="p-4 border-b border-slate-100">
-                <span className="font-semibold text-sm text-slate-800">Notifications</span>
+              <div className="border-b border-[#EAECF0] p-4">
+                <span className="text-sm font-bold text-[#101828]">Notifications</span>
                 {unread > 0 && <Badge variant="secondary" className="ml-2 text-xs">{unread} new</Badge>}
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {myNotifications.length === 0 ? (
-                  <p className="text-xs text-slate-400 text-center py-6">No notifications yet.</p>
+                  <p className="text-xs text-[#667085] text-center py-6">No notifications yet.</p>
                 ) : (
                   myNotifications.map(n => (
                     <button
                       key={n.id}
                       onClick={() => markNotificationRead(n.id)}
-                      className={`w-full text-left px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${!n.read ? 'bg-indigo-50/40' : ''}`}
+                      className={`w-full cursor-pointer border-b border-[#F2F4F7] px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] ${!n.read ? 'bg-[#E6F4F1]/60' : ''}`}
                     >
                       <div className="flex items-start gap-2">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.type === 'success' ? 'bg-emerald-400' : n.type === 'warning' ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : 'bg-indigo-400'}`} />
+                        <div className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${n.type === 'success' ? 'bg-[#006B5D]' : n.type === 'warning' ? 'bg-amber-400' : n.type === 'error' ? 'bg-red-400' : 'bg-[#006B5D]'}`} />
                         <div>
-                          <p className="text-xs font-semibold text-slate-700">{n.title}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">{n.message}</p>
+                          <p className="text-xs font-semibold text-[#344054]">{n.title}</p>
+                          <p className="text-xs text-[#667085] mt-0.5">{n.message}</p>
                         </div>
                       </div>
                     </button>
@@ -135,44 +144,46 @@ export const Topbar: React.FC = () => {
               </div>
               <button
                 onClick={handleMarkAllRead}
-                className="w-full text-center text-xs text-indigo-600 font-medium py-3 hover:bg-slate-50 transition-colors"
+                className="w-full py-3 text-center text-xs font-bold text-[#006B5D] transition-colors hover:bg-[#F9FAFB]"
               >
                 Mark all as read
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+          </div>
 
-      {/* User Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className={`w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center cursor-pointer overflow-hidden ${avatarCls}`}
-        >
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+          className={`flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl text-sm font-bold ring-2 ring-[#E6F4F1] ${avatarCls}`}
+            >
           {currentUser?.avatar ? (
             <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
           ) : (
             initials
           )}
-        </DropdownMenuTrigger>
+            </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <div className="px-3 py-2">
-            <p className="text-sm font-semibold text-slate-800">{currentUser?.name}</p>
-            <p className="text-xs text-slate-400 truncate">{currentUser?.email}</p>
+            <p className="text-sm font-semibold text-[#101828]">{currentUser?.name}</p>
+            <p className="text-xs text-[#667085] truncate">{currentUser?.email}</p>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
-            <User size={14} className="text-slate-400" /> My Profile
+            <User size={14} className="text-[#667085]" /> My Profile
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/change-password')} className="gap-2 cursor-pointer">
-            <Lock size={14} className="text-slate-400" /> Change Password
+            <Lock size={14} className="text-[#667085]" /> Change Password
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="gap-2 text-red-600 cursor-pointer">
             <LogOut size={14} /> Logout
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenu>
+        </div>
+      </div>
     </header>
   );
 };

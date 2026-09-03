@@ -13,8 +13,8 @@ export const StudentSchedulePage: React.FC = () => {
       <LiveClassBanner />
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">My Daily Montessori Routine 🌟</h1>
-        <p className="text-sm text-slate-500">Here is your fun schedule for today at Junior Montessori</p>
+        <h1 className="text-2xl font-bold text-[#101828]">My Daily Montessori Routine 🌟</h1>
+        <p className="text-sm text-[#667085]">Here is your fun schedule for today at Junior Montessori</p>
       </div>
 
       <Card>

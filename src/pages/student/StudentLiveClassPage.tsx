@@ -151,7 +151,7 @@ export const StudentLiveClassPage: React.FC = () => {
               className={`w-full h-full object-cover ${camOn && hasStream ? '' : 'invisible'}`}
             />
             {hasStream && !camOn && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1 bg-slate-900">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#667085] text-xs gap-1 bg-slate-900">
                 <VideoOff size={20} />
                 <span>Your camera is off</span>
               </div>
@@ -170,7 +170,7 @@ export const StudentLiveClassPage: React.FC = () => {
               </div>
             )}
             {!hasStream && !requesting && !mediaError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs gap-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#667085] text-xs gap-1">
                 <VideoOff size={20} />
                 <span>Camera is off</span>
               </div>
@@ -182,8 +182,8 @@ export const StudentLiveClassPage: React.FC = () => {
 
           {/* Teacher Stream */}
           <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-video relative flex items-center justify-center border border-slate-800 shadow-sm">
-            <div className="w-full h-full bg-gradient-to-tr from-indigo-900 to-purple-900 flex flex-col items-center justify-center text-white">
-              <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xl mb-1 shadow-md">
+            <div className="w-full h-full bg-gradient-to-tr from-[#006B5D] to-[#007A6B] flex flex-col items-center justify-center text-white">
+              <div className="w-14 h-14 rounded-full bg-[#E6F4F1]0 flex items-center justify-center font-bold text-xl mb-1 shadow-md">
                 MM
               </div>
               <span className="text-xs font-bold">{liveClass.teacherName} (Teacher)</span>
@@ -196,14 +196,14 @@ export const StudentLiveClassPage: React.FC = () => {
 
           {/* Classroom Chat */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[380px]">
-            <div className="p-3 bg-slate-50 border-b border-slate-100 font-bold text-xs text-slate-700 flex items-center gap-1.5">
-              <MessageSquare size={14} className="text-indigo-600" /> Classroom Chat
+            <div className="p-3 bg-slate-50 border-b border-slate-100 font-bold text-xs text-[#344054] flex items-center gap-1.5">
+              <MessageSquare size={14} className="text-[#006B5D]" /> Classroom Chat
             </div>
 
             <div className="flex-1 p-3 overflow-y-auto space-y-2">
               {chatMessages.map((m, i) => (
-                <div key={i} className={`p-2 rounded-xl text-xs ${m.isMe ? 'bg-indigo-600 text-white ml-4' : 'bg-slate-50 text-slate-700 mr-4'}`}>
-                  <span className={`text-[10px] font-bold block ${m.isMe ? 'text-indigo-100' : 'text-slate-500'}`}>{m.sender}:</span>
+                <div key={i} className={`p-2 rounded-xl text-xs ${m.isMe ? 'bg-[#006B5D] text-white ml-4' : 'bg-slate-50 text-[#344054] mr-4'}`}>
+                  <span className={`text-[10px] font-bold block ${m.isMe ? 'text-[#006B5D]' : 'text-[#667085]'}`}>{m.sender}:</span>
                   <p className="mt-0.5">{m.text}</p>
                 </div>
               ))}
@@ -215,7 +215,7 @@ export const StudentLiveClassPage: React.FC = () => {
                 value={newMsg}
                 onChange={e => setNewMsg(e.target.value)}
                 placeholder="Say something to teacher..."
-                className="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-[#006B5D]"
               />
               <Button type="submit" size="sm" className="h-8 px-2.5">
                 <Send size={13} />

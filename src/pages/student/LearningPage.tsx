@@ -148,7 +148,7 @@ export const StudentLearningPage: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <Card><CardContent className="py-16 text-center text-sm text-slate-400">Loading your learning adventure...</CardContent></Card>
+        <Card><CardContent className="py-16 text-center text-sm text-[#667085]">Loading your learning adventure...</CardContent></Card>
       </div>
     );
   }
@@ -164,16 +164,16 @@ export const StudentLearningPage: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-4">
         {/* Progress + timers */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#344054]">
             <span>Question {currentIdx + 1} / {questions.length}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#667085]">
               <Clock size={13} /> {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
             </span>
             <span className={cn(
               'inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full',
-              timeLeft <= 5 ? 'bg-red-50 text-red-600' : timeLeft <= 10 ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'
+              timeLeft <= 5 ? 'bg-red-50 text-red-600' : timeLeft <= 10 ? 'bg-amber-50 text-amber-600' : 'bg-[#E6F4F1] text-[#006B5D]'
             )}>
               <Zap size={12} /> {timeLeft}s
             </span>
@@ -181,7 +181,7 @@ export const StudentLearningPage: React.FC = () => {
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+            className="h-full bg-[#006B5D] rounded-full transition-all duration-500"
             style={{ width: `${((currentIdx) / questions.length) * 100}%` }}
           />
         </div>
@@ -191,8 +191,8 @@ export const StudentLearningPage: React.FC = () => {
           <CardContent className="p-6">
             <div className="text-center mb-5">
               {currentQ.emoji && <div className="text-5xl mb-3">{currentQ.emoji}</div>}
-              <span className="inline-block text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full mb-2">{currentQ.area}</span>
-              <h2 className="text-xl font-bold text-slate-800">{currentQ.question}</h2>
+              <span className="inline-block text-[11px] font-semibold text-[#006B5D] bg-[#E6F4F1] px-2 py-0.5 rounded-full mb-2">{currentQ.area}</span>
+              <h2 className="text-xl font-bold text-[#101828]">{currentQ.question}</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -206,12 +206,12 @@ export const StudentLearningPage: React.FC = () => {
                     className={cn(
                       'p-4 rounded-xl border-2 text-left text-sm font-semibold transition-all',
                       revealed && isChosen
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                        ? 'border-[#006B5D] bg-[#E6F4F1] text-[#006B5D]'
                         : revealed
-                          ? 'border-slate-100 bg-slate-50 text-slate-400'
+                          ? 'border-slate-100 bg-slate-50 text-[#667085]'
                           : selected === TIMEOUT_SENTINEL
-                            ? 'border-slate-100 bg-slate-50 text-slate-400'
-                            : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50'
+                            ? 'border-slate-100 bg-slate-50 text-[#667085]'
+                            : 'border-slate-200 bg-white text-[#344054] hover:border-[#B7DDD6] hover:bg-[#E6F4F1]/50'
                     )}
                   >
                     {opt}
@@ -223,7 +223,7 @@ export const StudentLearningPage: React.FC = () => {
             {revealed && (
               <div className={cn(
                 'mt-4 text-center text-sm font-bold flex items-center justify-center gap-2',
-                selected === TIMEOUT_SENTINEL ? 'text-amber-600' : 'text-indigo-600'
+                selected === TIMEOUT_SENTINEL ? 'text-amber-600' : 'text-[#006B5D]'
               )}>
                 {selected === TIMEOUT_SENTINEL ? (
                   <><Clock size={16} /> Time's up! Moving on...</>
@@ -243,29 +243,29 @@ export const StudentLearningPage: React.FC = () => {
     return (
       <div className="max-w-xl mx-auto space-y-5">
         <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-center text-white">
+          <div className="bg-gradient-to-r from-[#006B5D] to-[#007A6B] p-6 text-center text-white">
             <div className="text-5xl mb-2">{result.perfect ? '🏆' : result.correct >= result.total / 2 ? '🎉' : '💪'}</div>
             <h2 className="text-2xl font-bold">
               {result.perfect ? 'Perfect Round!' : result.correct >= result.total / 2 ? 'Great Job!' : 'Keep Practising!'}
             </h2>
-            <p className="text-indigo-100 text-sm mt-1">You scored {result.correct} out of {result.total}</p>
+            <p className="text-[#006B5D] text-sm mt-1">You scored {result.correct} out of {result.total}</p>
           </div>
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="bg-indigo-50 rounded-xl p-3">
-                <Zap className="mx-auto text-indigo-600 mb-1" size={18} />
-                <p className="text-lg font-bold text-indigo-700">+{result.xpEarned}</p>
-                <p className="text-[10px] text-slate-400">XP earned</p>
+              <div className="bg-[#E6F4F1] rounded-xl p-3">
+                <Zap className="mx-auto text-[#006B5D] mb-1" size={18} />
+                <p className="text-lg font-bold text-[#006B5D]">+{result.xpEarned}</p>
+                <p className="text-[10px] text-[#667085]">XP earned</p>
               </div>
               <div className="bg-orange-50 rounded-xl p-3">
                 <Flame className="mx-auto text-orange-500 mb-1" size={18} />
                 <p className="text-lg font-bold text-orange-600">{result.currentStreak}</p>
-                <p className="text-[10px] text-slate-400">Day streak</p>
+                <p className="text-[10px] text-[#667085]">Day streak</p>
               </div>
               <div className="bg-amber-50 rounded-xl p-3">
                 <Star className="mx-auto text-amber-500 mb-1" size={18} />
                 <p className="text-lg font-bold text-amber-600">Lv {result.level ?? level}</p>
-                <p className="text-[10px] text-slate-400">Level</p>
+                <p className="text-[10px] text-[#667085]">Level</p>
               </div>
             </div>
 
@@ -276,7 +276,7 @@ export const StudentLearningPage: React.FC = () => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {result.newBadges.map(b => (
-                    <span key={b.id} className="inline-flex items-center gap-1.5 bg-white border border-amber-200 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-700">
+                    <span key={b.id} className="inline-flex items-center gap-1.5 bg-white border border-amber-200 rounded-full px-3 py-1.5 text-xs font-semibold text-[#344054]">
                       <span className="text-base">{b.emoji}</span> {b.name}
                     </span>
                   ))}
@@ -303,8 +303,8 @@ export const StudentLearningPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">My Learning Adventure</h1>
-          <p className="text-sm text-slate-500">Play a quick game every day to grow your streak!</p>
+          <h1 className="text-2xl font-bold text-[#101828]">My Learning Adventure</h1>
+          <p className="text-sm text-[#667085]">Play a quick game every day to grow your streak!</p>
         </div>
       </div>
 
@@ -312,16 +312,16 @@ export const StudentLearningPage: React.FC = () => {
       {!alreadyDone && (
         <div className={cn(
           'flex items-center gap-3 p-4 rounded-xl border',
-          urgent ? 'bg-red-50 border-red-200' : warning ? 'bg-amber-50 border-amber-200' : 'bg-indigo-50 border-indigo-100'
+          urgent ? 'bg-red-50 border-red-200' : warning ? 'bg-amber-50 border-amber-200' : 'bg-[#E6F4F1] border-[#B7DDD6]'
         )}>
-          <Flame className={urgent ? 'text-red-500' : warning ? 'text-amber-500' : 'text-indigo-500'} size={22} />
+          <Flame className={urgent ? 'text-red-500' : warning ? 'text-amber-500' : 'text-[#006B5D]'} size={22} />
           <div className="flex-1">
-            <p className={cn('text-sm font-bold', urgent ? 'text-red-700' : warning ? 'text-amber-700' : 'text-indigo-700')}>
+            <p className={cn('text-sm font-bold', urgent ? 'text-red-700' : warning ? 'text-amber-700' : 'text-[#006B5D]')}>
               {streakAtRisk ? `Keep your ${progress?.currentStreak}-day streak alive!` : 'Start your streak today!'}
             </p>
-            <p className="text-xs text-slate-500">{formatHM(streakMs)} left today — complete your task before midnight.</p>
+            <p className="text-xs text-[#667085]">{formatHM(streakMs)} left today — complete your task before midnight.</p>
           </div>
-          <Clock className={urgent ? 'text-red-500' : warning ? 'text-amber-500' : 'text-indigo-400'} size={20} />
+          <Clock className={urgent ? 'text-red-500' : warning ? 'text-amber-500' : 'text-[#006B5D]'} size={20} />
         </div>
       )}
 
@@ -336,25 +336,25 @@ export const StudentLearningPage: React.FC = () => {
               <div className="text-6xl font-bold text-orange-500 flex items-center justify-center gap-2">
                 <Flame size={40} className="text-orange-500" /> {progress?.currentStreak ?? 0}
               </div>
-              <p className="text-xs text-slate-400 mt-1">day streak · best {progress?.longestStreak ?? 0}</p>
+              <p className="text-xs text-[#667085] mt-1">day streak · best {progress?.longestStreak ?? 0}</p>
             </div>
 
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-600 flex items-center gap-1"><Star size={12} className="text-amber-500" /> Level {level}</span>
-                <span className="text-slate-400">{progress?.totalXp ?? 0} XP</span>
+                <span className="font-semibold text-[#344054] flex items-center gap-1"><Star size={12} className="text-amber-500" /> Level {level}</span>
+                <span className="text-[#667085]">{progress?.totalXp ?? 0} XP</span>
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div className="h-full bg-amber-500 rounded-full" style={{ width: `${xpIntoLevel}%` }} />
               </div>
-              <p className="text-[10px] text-slate-400 mt-1">{100 - xpIntoLevel} XP to Level {level + 1}</p>
+              <p className="text-[10px] text-[#667085] mt-1">{100 - xpIntoLevel} XP to Level {level + 1}</p>
             </div>
 
             {alreadyDone ? (
               <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
                 <CheckCircle2 className="mx-auto text-emerald-600 mb-1" size={20} />
                 <p className="text-sm font-bold text-emerald-700">Task complete!</p>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[#667085] mt-0.5">
                   {task?.todayResult ? `${task.todayResult.correct}/${task.todayResult.total} correct · +${task.todayResult.xpEarned} XP` : 'Come back tomorrow!'}
                 </p>
               </div>
@@ -373,14 +373,14 @@ export const StudentLearningPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             {progress && progress.badges.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">Complete tasks to earn your first badge!</p>
+              <p className="text-xs text-[#667085] py-6 text-center">Complete tasks to earn your first badge!</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {(progress?.badges ?? []).map(b => (
                   <div key={b.id} className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 text-center">
                     <div className="text-3xl mb-1">{b.emoji}</div>
-                    <p className="text-xs font-bold text-slate-700">{b.name}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">{b.description}</p>
+                    <p className="text-xs font-bold text-[#344054]">{b.name}</p>
+                    <p className="text-[10px] text-[#667085] mt-0.5 leading-snug">{b.description}</p>
                   </div>
                 ))}
               </div>
@@ -388,11 +388,11 @@ export const StudentLearningPage: React.FC = () => {
 
             {progress && progress.sessions.length > 0 && (
               <div className="mt-4 pt-3 border-t border-slate-100">
-                <p className="text-xs font-semibold text-slate-500 mb-2">Recent activity</p>
+                <p className="text-xs font-semibold text-[#667085] mb-2">Recent activity</p>
                 <div className="flex flex-wrap gap-2">
                   {progress.sessions.slice(0, 7).map(s => (
-                    <span key={s.date} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-50 border border-slate-100 rounded-full px-2.5 py-1 text-slate-600">
-                      <Sparkles size={11} className="text-indigo-500" /> {s.date.slice(5)} · {s.correct}/{s.total}
+                    <span key={s.date} className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-50 border border-slate-100 rounded-full px-2.5 py-1 text-[#344054]">
+                      <Sparkles size={11} className="text-[#006B5D]" /> {s.date.slice(5)} · {s.correct}/{s.total}
                     </span>
                   ))}
                 </div>

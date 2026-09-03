@@ -7,7 +7,7 @@ const accentClasses: Record<NonNullable<AiMetric['accent']> | 'none', string> = 
   good: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   warn: 'bg-amber-50 text-amber-700 border-amber-200',
   bad: 'bg-red-50 text-red-700 border-red-200',
-  none: 'bg-indigo-50 text-indigo-700 border-indigo-100',
+  none: 'bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]',
 };
 
 interface AiResponseCardProps {
@@ -31,19 +31,19 @@ export const AiResponseCard: React.FC<AiResponseCardProps> = ({ answer, hideDown
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="p-4 pb-3">
         <div className="flex items-start justify-between gap-3">
-          <h4 className="text-sm font-semibold text-slate-800 leading-snug">{answer.title}</h4>
+          <h4 className="text-sm font-semibold text-[#101828] leading-snug">{answer.title}</h4>
           {!hideDownload && (
             <button
               type="button"
               onClick={handleDownload}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-lg px-2.5 py-1.5 transition-colors"
+              className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-[#006B5D] hover:text-[#006B5D] bg-[#E6F4F1] hover:bg-[#E6F4F1] rounded-lg px-2.5 py-1.5 transition-colors"
             >
               <Download size={13} />
               Download Report
             </button>
           )}
         </div>
-        <p className="text-[13px] text-slate-600 mt-1.5 leading-relaxed">{answer.summary}</p>
+        <p className="text-[13px] text-[#344054] mt-1.5 leading-relaxed">{answer.summary}</p>
 
         {answer.metrics.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
@@ -62,7 +62,7 @@ export const AiResponseCard: React.FC<AiResponseCardProps> = ({ answer, hideDown
 
       {answer.chart && (
         <div className="px-4 pb-2">
-          <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-1">{answer.chart.title}</p>
+          <p className="text-[11px] font-medium text-[#667085] uppercase tracking-wide mb-1">{answer.chart.title}</p>
           <AiChart spec={answer.chart} height={220} />
         </div>
       )}
@@ -76,20 +76,20 @@ export const AiResponseCard: React.FC<AiResponseCardProps> = ({ answer, hideDown
               ) : ins.severity === 'warning' ? (
                 <AlertTriangle size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
               ) : (
-                <Info size={14} className="text-sky-500 mt-0.5 flex-shrink-0" />
+                <Info size={14} className="text-[#006B5D] mt-0.5 flex-shrink-0" />
               )}
-              <span className="text-slate-600">
-                <span className="font-medium text-slate-700">{ins.title}.</span> {ins.detail}
+              <span className="text-[#344054]">
+                <span className="font-medium text-[#344054]">{ins.title}.</span> {ins.detail}
               </span>
             </div>
           ))}
           {answer.recommendations.length > 0 && (
             <div className="rounded-lg bg-slate-50 border border-slate-100 p-3 space-y-1.5">
-              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-[#667085] uppercase tracking-wide">
                 <Lightbulb size={12} className="text-amber-500" /> Suggestions
               </p>
               {answer.recommendations.map(rec => (
-                <p key={rec} className="text-xs text-slate-600 leading-relaxed">• {rec}</p>
+                <p key={rec} className="text-xs text-[#344054] leading-relaxed">• {rec}</p>
               ))}
             </div>
           )}

@@ -113,11 +113,11 @@ export const AssistantPanel: React.FC = () => {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50/50">
             {messages.length === 0 && (
               <div className="text-center py-6">
-                <span className="inline-flex w-12 h-12 rounded-2xl bg-indigo-50 items-center justify-center text-indigo-500 mb-3">
+                <span className="inline-flex w-12 h-12 rounded-2xl bg-[#E6F4F1] items-center justify-center text-[#006B5D] mb-3">
                   <Cpu size={22} />
                 </span>
-                <p className="text-sm font-semibold text-slate-700">What would you like to know?</p>
-                <p className="text-xs text-slate-400 mt-1 mb-4">
+                <p className="text-sm font-semibold text-[#344054]">What would you like to know?</p>
+                <p className="text-xs text-[#667085] mt-1 mb-4">
                   I only see what your {role ?? 'user'} role can access. Try one of these:
                 </p>
                 <div className="flex flex-col gap-2 items-stretch">
@@ -126,7 +126,7 @@ export const AssistantPanel: React.FC = () => {
                       key={s}
                       onClick={() => ask(s)}
                       disabled={busy || offlineMode}
-                      className="text-left text-xs font-medium text-indigo-600 bg-white border border-indigo-100 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-colors disabled:opacity-50"
+                      className="text-left text-xs font-medium text-[#006B5D] bg-white border border-[#B7DDD6] hover:bg-[#E6F4F1] rounded-lg px-3 py-2 transition-colors disabled:opacity-50"
                     >
                       {s}
                     </button>
@@ -142,7 +142,7 @@ export const AssistantPanel: React.FC = () => {
                     <div className="gradient-primary text-white text-[13px] rounded-2xl rounded-br-md px-3.5 py-2.5 shadow-sm">
                       {m.text}
                     </div>
-                    <span className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 flex-shrink-0">
+                    <span className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[#667085] flex-shrink-0">
                       <User size={14} />
                     </span>
                   </div>
@@ -170,8 +170,8 @@ export const AssistantPanel: React.FC = () => {
             {busy && (
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                  <Sparkles size={15} className="text-indigo-500 animate-pulse" />
-                  <span className="text-xs text-slate-500">Analyzing your data…</span>
+                  <Sparkles size={15} className="text-[#006B5D] animate-pulse" />
+                  <span className="text-xs text-[#667085]">Analyzing your data…</span>
                 </div>
               </div>
             )}
@@ -191,7 +191,7 @@ export const AssistantPanel: React.FC = () => {
                   onChange={e => setInput(e.target.value)}
                   placeholder="Ask about attendance, performance, fees…"
                   disabled={busy}
-                  className="flex-1 h-10 text-sm border border-slate-200 rounded-xl px-3.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-colors disabled:bg-slate-50"
+                  className="flex-1 h-10 text-sm border border-slate-200 rounded-xl px-3.5 outline-none focus:border-[#006B5D] focus:ring-2 focus:ring-[#B7DDD6] transition-colors disabled:bg-slate-50"
                 />
                 <button
                   type="submit"

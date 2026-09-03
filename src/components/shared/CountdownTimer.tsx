@@ -29,7 +29,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ dueAt, className
 
   if (ms <= 0) {
     return (
-      <span className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full', className)}>
+      <span className={cn('inline-flex items-center gap-1 text-[11px] font-bold text-[#667085] bg-slate-100 px-2 py-0.5 rounded-full', className)}>
         <Lock size={11} /> Closed
       </span>
     );
@@ -47,7 +47,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ dueAt, className
   return (
     <span className={cn(
       'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full',
-      urgent ? 'text-red-700 bg-red-50' : warning ? 'text-amber-700 bg-amber-50' : 'text-indigo-700 bg-indigo-50',
+      urgent ? 'text-red-700 bg-red-50' : warning ? 'text-amber-700 bg-amber-50' : 'text-[#006B5D] bg-[#E6F4F1]',
       className
     )}>
       {urgent ? <AlertTriangle size={11} /> : <Clock size={11} />}

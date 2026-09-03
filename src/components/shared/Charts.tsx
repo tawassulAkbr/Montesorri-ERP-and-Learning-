@@ -15,8 +15,8 @@ export const AttendanceAreaChart: React.FC<AttendanceAreaChartProps> = ({ data, 
     <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
       <defs>
         <linearGradient id="presentGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
-          <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+          <stop offset="5%" stopColor="#006B5D" stopOpacity={0.22} />
+          <stop offset="95%" stopColor="#006B5D" stopOpacity={0} />
         </linearGradient>
         <linearGradient id="absentGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="5%" stopColor="#EF4444" stopOpacity={0.2} />
@@ -29,7 +29,7 @@ export const AttendanceAreaChart: React.FC<AttendanceAreaChartProps> = ({ data, 
       <Tooltip
         contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 12 }}
       />
-      <Area type="monotone" dataKey="present" name="Present" stroke="#10B981" strokeWidth={2} fill="url(#presentGrad)" />
+      <Area type="monotone" dataKey="present" name="Present" stroke="#006B5D" strokeWidth={2.5} fill="url(#presentGrad)" />
       <Area type="monotone" dataKey="absent" name="Absent" stroke="#EF4444" strokeWidth={2} fill="url(#absentGrad)" />
     </AreaChart>
   </ResponsiveContainer>
@@ -51,8 +51,8 @@ export const TestScoreBarChart: React.FC<TestScoreBarChartProps> = ({ data, heig
         formatter={(val: any, name: any) => [`${val}%`, name]}
       />
       <Legend wrapperStyle={{ fontSize: 11 }} />
-      <Bar dataKey="score" name="My Score" fill="#4F46E5" radius={[4, 4, 0, 0]} />
-      <Bar dataKey="classAvg" name="Class Avg" fill="#E0E7FF" radius={[4, 4, 0, 0]} />
+      <Bar dataKey="score" name="My Score" fill="#006B5D" radius={[8, 8, 0, 0]} />
+      <Bar dataKey="classAvg" name="Class Avg" fill="#D9EFEB" radius={[8, 8, 0, 0]} />
     </BarChart>
   </ResponsiveContainer>
 );
@@ -86,7 +86,7 @@ export const ClassPerformancePieChart: React.FC<ClassPieChartProps> = ({ data, h
         iconType="circle"
         iconSize={8}
         wrapperStyle={{ fontSize: 11 }}
-        formatter={(value: string) => <span className="text-slate-600">{value}</span>}
+        formatter={(value: string) => <span className="text-[#344054]">{value}</span>}
       />
     </PieChart>
   </ResponsiveContainer>
@@ -106,7 +106,7 @@ export const EnrollmentLineChart: React.FC<EnrollmentLineChartProps> = ({ data, 
       <Tooltip
         contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 12 }}
       />
-      <Line type="monotone" dataKey="students" name="Students" stroke="#4F46E5" strokeWidth={2.5} dot={{ r: 4, fill: '#4F46E5' }} activeDot={{ r: 6 }} />
+      <Line type="monotone" dataKey="students" name="Students" stroke="#006B5D" strokeWidth={2.5} dot={{ r: 4, fill: '#006B5D' }} activeDot={{ r: 6 }} />
     </LineChart>
   </ResponsiveContainer>
 );
@@ -119,7 +119,7 @@ interface RadialProgressProps {
   size?: number;
 }
 export const RadialProgress: React.FC<RadialProgressProps> = ({
-  value, label, color = '#4F46E5', size = 140,
+  value, label, color = '#006B5D', size = 140,
 }) => (
   <div className="relative" style={{ width: size, height: size }}>
     <ResponsiveContainer width="100%" height="100%">
@@ -130,12 +130,12 @@ export const RadialProgress: React.FC<RadialProgressProps> = ({
         startAngle={90}
         endAngle={-270}
       >
-        <RadialBar dataKey="value" cornerRadius={10} background={{ fill: '#EEF2FF' }} />
+        <RadialBar dataKey="value" cornerRadius={10} background={{ fill: '#E6F4F1' }} />
       </RadialBarChart>
     </ResponsiveContainer>
     <div className="absolute inset-0 flex flex-col items-center justify-center">
-      <span className="text-2xl font-bold text-slate-800">{value}%</span>
-      {label && <span className="text-xs text-slate-400 mt-0.5">{label}</span>}
+      <span className="text-2xl font-bold text-[#101828]">{value}%</span>
+      {label && <span className="text-xs text-[#667085] mt-0.5">{label}</span>}
     </div>
   </div>
 );

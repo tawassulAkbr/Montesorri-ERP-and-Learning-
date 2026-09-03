@@ -70,10 +70,10 @@ const ROLE_ICONS: Record<Role, React.ReactNode> = {
 };
 
 const ROLE_COLORS: Record<Role, string> = {
-  teacher: 'bg-indigo-100 text-indigo-700',
-  student: 'bg-emerald-100 text-emerald-700',
-  parent: 'bg-sky-100 text-sky-700',
-  admin: 'bg-violet-100 text-violet-700',
+  teacher: 'bg-[#E6F4F1] text-[#006B5D]',
+  student: 'bg-[#E6F4F1] text-[#006B5D]',
+  parent: 'bg-[#E6F4F1] text-[#006B5D]',
+  admin: 'bg-[#E6F4F1] text-[#006B5D]',
 };
 
 // ─── Sidebar Inner ────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
   const navigate = useNavigate();
   const navItems = role ? NAV[role] : [];
   const initials = currentUser ? getInitials(currentUser.name) : 'KG';
-  const avatarCls = currentUser ? avatarColors(currentUser.name) : 'bg-indigo-100 text-indigo-700';
+  const avatarCls = currentUser ? avatarColors(currentUser.name) : 'bg-[#E6F4F1] text-[#006B5D]';
 
   const handleLogout = () => {
     logout();
@@ -92,10 +92,10 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-slate-100">
+    <div className="flex h-full flex-col bg-white">
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-slate-100 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0">
+      <div className="flex h-20 flex-shrink-0 items-center px-5">
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#006B5D]">
           <GraduationCap className="text-white" size={16} />
         </div>
         <AnimatePresence>
@@ -107,8 +107,8 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
               transition={{ duration: 0.15 }}
               className="ml-3 overflow-hidden"
             >
-              <span className="font-bold text-slate-800 text-sm tracking-tight whitespace-nowrap">KinderGuide</span>
-              <span className="block text-[10px] text-indigo-600 font-semibold leading-none">Montessori ERP</span>
+              <span className="whitespace-nowrap text-sm font-extrabold tracking-normal text-[#1D2939]">KinderGuide</span>
+              <span className="block text-[10px] font-bold leading-none text-[#006B5D]">Montessori ERP</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -116,7 +116,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
           <button
             onClick={onToggle}
             className={cn(
-              'ml-auto w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors flex-shrink-0',
+              'ml-auto flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D]',
               collapsed && 'mx-auto'
             )}
           >
@@ -124,7 +124,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
           </button>
         )}
         {onClose && (
-          <button onClick={onClose} className="ml-auto text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="ml-auto text-[#667085] hover:text-[#344054]">
             <ChevronLeft size={16} />
           </button>
         )}
@@ -132,7 +132,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
 
       {/* User Card */}
       <div className={cn(
-        'flex items-center gap-3 px-3 py-4 border-b border-slate-100 flex-shrink-0',
+        'mx-3 mb-3 flex flex-shrink-0 items-center gap-3 rounded-2xl border border-[#EAECF0] bg-[#F9FAFB] px-3 py-3',
         collapsed && 'justify-center px-2'
       )}>
         <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0', avatarCls)}>
@@ -146,7 +146,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
               exit={{ opacity: 0 }}
               className="flex-1 overflow-hidden"
             >
-              <p className="text-sm font-semibold text-slate-800 truncate">{currentUser?.name}</p>
+              <p className="truncate text-sm font-bold text-[#101828]">{currentUser?.name}</p>
               {role && (
                 <span className={cn('inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5', ROLE_COLORS[role])}>
                   {ROLE_ICONS[role]}
@@ -159,21 +159,21 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
         {navItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             onClick={onClose}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-              isActive ? 'nav-link-active' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700',
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all',
+              isActive ? 'bg-[#E6F4F1] text-[#006B5D]' : 'text-[#667085] hover:bg-[#F6FAF9] hover:text-[#006B5D]',
               collapsed && 'justify-center px-2'
             )}
           >
             {({ isActive }) => (
               <>
-                <span className={cn(isActive ? 'text-indigo-600' : 'text-slate-400')}>{item.icon}</span>
+                <span className={cn(isActive ? 'text-[#006B5D]' : 'text-[#98A2B3]')}>{item.icon}</span>
                 <AnimatePresence>
                   {!collapsed && (
                     <motion.span
@@ -196,11 +196,11 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
       </nav>
 
       {/* Logout */}
-      <div className="px-2 py-3 border-t border-slate-100 flex-shrink-0">
+      <div className="flex-shrink-0 px-3 py-3">
         <button
           onClick={handleLogout}
           className={cn(
-            'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer',
+            'flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-[#667085] transition-colors hover:bg-red-50 hover:text-red-600',
             collapsed && 'justify-center px-2'
           )}
         >
@@ -226,7 +226,7 @@ export const Sidebar: React.FC = () => {
       <motion.aside
         animate={{ width: isCollapsed ? 64 : 240 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="hidden lg:flex flex-col h-screen sticky top-0 flex-shrink-0 overflow-hidden"
+        className="hidden h-full flex-shrink-0 flex-col overflow-hidden lg:flex"
       >
         <SidebarContent collapsed={isCollapsed} onToggle={toggle} />
       </motion.aside>

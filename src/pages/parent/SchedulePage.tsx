@@ -17,8 +17,8 @@ export const ParentSchedulePage: React.FC = () => {
   if (!selectedChild) {
     return (
       <div className="p-10 text-center bg-white rounded-2xl border border-slate-100">
-        <p className="text-sm font-semibold text-slate-700">No children are linked to this account yet.</p>
-        <p className="text-xs text-slate-400 mt-1">Please contact the school administrator.</p>
+        <p className="text-sm font-semibold text-[#344054]">No children are linked to this account yet.</p>
+        <p className="text-xs text-[#667085] mt-1">Please contact the school administrator.</p>
       </div>
     );
   }
@@ -31,16 +31,16 @@ export const ParentSchedulePage: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Child's Daily Schedule & Routine</h1>
-          <p className="text-sm text-slate-500">Montessori curriculum timeline, snack times, and live online learning slots</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Child's Daily Schedule & Routine</h1>
+          <p className="text-sm text-[#667085]">Montessori curriculum timeline, snack times, and live online learning slots</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-medium">Viewing for:</span>
+          <span className="text-xs text-[#667085] font-medium">Viewing for:</span>
           <select
             value={selectedChildId}
             onChange={e => setSelectedChildId(e.target.value)}
-            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
             {myChildren.map(c => (
               <option key={c.id} value={c.id}>{c.name} ({c.class})</option>
@@ -71,20 +71,20 @@ export const ParentSchedulePage: React.FC = () => {
                 <Coffee size={16} /> Snack & Meal Guidelines
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-slate-600 space-y-2">
+            <CardContent className="text-xs text-[#344054] space-y-2">
               <p>• Today's Fruit: Cut apples, bananas, or seasonal berries.</p>
               <p>• Clean finger snacks in easy-to-open silicone containers.</p>
               <p>• Child practices self-pouring water and folding their personal napkin.</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-indigo-50/70 to-white border-indigo-200">
+          <Card className="bg-gradient-to-br from-[#E6F4F1]/70 to-white border-[#B7DDD6]">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-indigo-800 flex items-center gap-2">
+              <CardTitle className="text-sm font-bold text-[#006B5D] flex items-center gap-2">
                 <Sparkles size={16} /> Montessori Work Preparation
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-slate-600 space-y-2">
+            <CardContent className="text-xs text-[#344054] space-y-2">
               <p>• Comfortable slip-on indoor shoes for work mats.</p>
               <p>• Extra set of labeled clothes in backpack for sensory water play.</p>
             </CardContent>

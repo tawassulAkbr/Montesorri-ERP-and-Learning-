@@ -37,14 +37,14 @@ export const ChangePasswordPage: React.FC = () => {
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Security Settings</h1>
-        <p className="text-sm text-slate-500">Manage your account password and security preferences</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Security Settings</h1>
+        <p className="text-sm text-[#667085]">Manage your account password and security preferences</p>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <KeyRound className="text-indigo-600" size={20} />
+            <KeyRound className="text-[#006B5D]" size={20} />
             <CardTitle>Change Password</CardTitle>
           </div>
           <CardDescription>
@@ -73,7 +73,7 @@ export const ChangePasswordPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Current Password</Label>
+              <Label className="text-xs font-medium text-[#344054]">Current Password</Label>
               <Input
                 type="password"
                 value={currentPassword}
@@ -85,7 +85,7 @@ export const ChangePasswordPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">New Password</Label>
+              <Label className="text-xs font-medium text-[#344054]">New Password</Label>
               <Input
                 type="password"
                 value={newPassword}
@@ -97,7 +97,7 @@ export const ChangePasswordPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Confirm New Password</Label>
+              <Label className="text-xs font-medium text-[#344054]">Confirm New Password</Label>
               <Input
                 type="password"
                 value={confirmPassword}

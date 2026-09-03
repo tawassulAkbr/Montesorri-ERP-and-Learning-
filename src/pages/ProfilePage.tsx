@@ -89,15 +89,15 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">My Profile</h1>
-        <p className="text-sm text-slate-500">Update your photo, name and personal details</p>
+        <h1 className="text-2xl font-bold text-[#101828]">My Profile</h1>
+        <p className="text-sm text-[#667085]">Update your photo, name and personal details</p>
       </div>
 
       {/* Profile Photo */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Camera className="text-indigo-600" size={20} />
+            <Camera className="text-[#006B5D]" size={20} />
             <CardTitle>Profile Photo</CardTitle>
           </div>
           <CardDescription>Upload a photo so teachers and parents can recognize you.</CardDescription>
@@ -149,7 +149,7 @@ export const ProfilePage: React.FC = () => {
                   </Button>
                 )}
               </div>
-              <p className="text-[11px] text-slate-400">PNG or JPG. Saved changes apply after pressing Save.</p>
+              <p className="text-[11px] text-[#667085]">PNG or JPG. Saved changes apply after pressing Save.</p>
             </div>
           </div>
         </CardContent>
@@ -159,7 +159,7 @@ export const ProfilePage: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <UserCircle2 className="text-indigo-600" size={20} />
+            <UserCircle2 className="text-[#006B5D]" size={20} />
             <CardTitle>Personal Details</CardTitle>
           </div>
           <CardDescription>
@@ -188,18 +188,18 @@ export const ProfilePage: React.FC = () => {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Full Name</Label>
+                <Label className="text-xs font-medium text-[#344054]">Full Name</Label>
                 <Input value={name} onChange={e => setName(e.target.value)} className="mt-1.5" required minLength={2} />
               </div>
               <div>
-                <Label className="text-xs font-medium text-slate-600">Email <span className="text-slate-400">(login)</span></Label>
-                <Input value={currentUser.email} disabled className="mt-1.5 bg-slate-50 text-slate-400" />
+                <Label className="text-xs font-medium text-[#344054]">Email <span className="text-[#667085]">(login)</span></Label>
+                <Input value={currentUser.email} disabled className="mt-1.5 bg-slate-50 text-[#667085]" />
               </div>
             </div>
 
             {role !== 'admin' && (
               <div>
-                <Label className="text-xs font-medium text-slate-600">Contact Number</Label>
+                <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
                 <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 300 0000000" className="mt-1.5" />
               </div>
             )}
@@ -207,18 +207,18 @@ export const ProfilePage: React.FC = () => {
             {role === 'teacher' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-slate-600">Subject Area</Label>
+                  <Label className="text-xs font-medium text-[#344054]">Subject Area</Label>
                   <select
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
-                    className="w-full mt-1.5 text-sm border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                    className="w-full mt-1.5 text-sm border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
                   >
                     {!TEACHER_SUBJECTS.includes(subject) && <option>{subject}</option>}
                     {TEACHER_SUBJECTS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-slate-600">Qualification</Label>
+                  <Label className="text-xs font-medium text-[#344054]">Qualification</Label>
                   <Input value={qualification} onChange={e => setQualification(e.target.value)} placeholder="e.g. AMI Montessori Diploma" className="mt-1.5" />
                 </div>
               </div>
@@ -227,11 +227,11 @@ export const ProfilePage: React.FC = () => {
             {role === 'student' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-slate-600">Parent / Guardian Name</Label>
+                  <Label className="text-xs font-medium text-[#344054]">Parent / Guardian Name</Label>
                   <Input value={guardianName} onChange={e => setGuardianName(e.target.value)} className="mt-1.5" />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-slate-600">Home Address</Label>
+                  <Label className="text-xs font-medium text-[#344054]">Home Address</Label>
                   <Input value={address} onChange={e => setAddress(e.target.value)} placeholder="House, street, city" className="mt-1.5" />
                 </div>
               </div>

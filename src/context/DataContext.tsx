@@ -567,7 +567,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
         <div className="w-10 h-10 rounded-xl gradient-primary animate-pulse" />
-        <p className="text-sm font-medium text-slate-500">Loading your school data...</p>
+        <p className="text-sm font-medium text-[#667085]">Loading your school data...</p>
       </div>
     );
   }

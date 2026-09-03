@@ -49,8 +49,8 @@ export const AdminDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Administrator Console</h1>
-          <p className="text-sm text-slate-500">School-wide metrics, account administration, and leave approvals</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Administrator Console</h1>
+          <p className="text-sm text-[#667085]">School-wide metrics, account administration, and leave approvals</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -68,29 +68,29 @@ export const AdminDashboard: React.FC = () => {
           title="Total Teachers"
           value={teachers.length}
           subtitle="Active faculty staff"
-          icon={<GraduationCap className="text-indigo-600" size={20} />}
-          iconBg="bg-indigo-50"
+          icon={<GraduationCap className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Total Students"
           value={students.length}
           subtitle={feeDueCount > 0 ? `${feeDueCount} with fee due` : 'Enrolled across classes'}
-          icon={<Users className="text-emerald-600" size={20} />}
-          iconBg="bg-emerald-50"
+          icon={<Users className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Registered Parents"
           value={parents.length}
           subtitle="Connected guardians"
-          icon={<Heart className="text-sky-600" size={20} />}
-          iconBg="bg-sky-50"
+          icon={<Heart className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Active Classes"
           value={activeClasses.length}
           subtitle={activeClasses.map(c => c.split(' (')[0]).join(', ')}
-          icon={<BookMarked className="text-violet-600" size={20} />}
-          iconBg="bg-violet-50"
+          icon={<BookMarked className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
       </div>
 
@@ -109,11 +109,11 @@ export const AdminDashboard: React.FC = () => {
                 </Badge>
               )}
             </CardTitle>
-            <p className="text-xs text-slate-400 text-right">Approving marks the teacher's attendance as leave</p>
+            <p className="text-xs text-[#98A2B3] text-right">Approving marks the teacher's attendance as leave</p>
           </CardHeader>
           <CardContent>
             {pendingLeaves.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No pending teacher leave requests. All caught up!</p>
+              <p className="text-xs text-[#98A2B3] py-6 text-center">No pending teacher leave requests. All caught up!</p>
             ) : (
               <div className="space-y-3">
                 {pendingLeaves.map(leave => (
@@ -127,7 +127,7 @@ export const AdminDashboard: React.FC = () => {
                 ))}
               </div>
             )}
-            <p className="text-[11px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
+            <p className="text-[11px] text-[#98A2B3] mt-4 pt-3 border-t border-slate-100">
               Student leave applications submitted by parents are reviewed by the class teacher in the Attendance portal.
             </p>
           </CardContent>
@@ -137,27 +137,27 @@ export const AdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-semibold">Student Attendance Report (P · A · L)</CardTitle>
-            <p className="text-xs text-slate-400 text-right">
+            <p className="text-xs text-[#98A2B3] text-right">
               {palReport ? formatDate(palReport.date) : 'No data yet'}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {!palReport ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No attendance has been recorded yet.</p>
+              <p className="text-xs text-[#98A2B3] py-6 text-center">No attendance has been recorded yet.</p>
             ) : (
               <>
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-center">
-                    <CheckCircle2 className="mx-auto text-emerald-600" size={20} />
+                  <div className="p-3.5 rounded-2xl bg-[#E6F4F1] border border-emerald-100 text-center">
+                    <CheckCircle2 className="mx-auto text-[#006B5D]" size={20} />
                     <p className="text-2xl font-bold text-emerald-700 mt-1">{palReport.present}</p>
-                    <p className="text-[11px] font-semibold text-emerald-600">Present</p>
+                    <p className="text-[11px] font-semibold text-[#006B5D]">Present</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-red-50 border border-red-100 text-center">
+                  <div className="p-3.5 rounded-2xl bg-red-50 border border-red-100 text-center">
                     <XCircle className="mx-auto text-red-600" size={20} />
                     <p className="text-2xl font-bold text-red-700 mt-1">{palReport.absent}</p>
                     <p className="text-[11px] font-semibold text-red-600">Absent</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-100 text-center">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-100 text-center">
                     <CalendarOff className="mx-auto text-amber-600" size={20} />
                     <p className="text-2xl font-bold text-amber-700 mt-1">{palReport.leave}</p>
                     <p className="text-[11px] font-semibold text-amber-600">On Leave</p>
@@ -181,7 +181,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 )}
 
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-[#98A2B3]">
                   {palReport.unmarked > 0
                     ? `${palReport.unmarked} student${palReport.unmarked > 1 ? 's' : ''} not yet marked for this day.`
                     : `All ${students.length} students accounted for on this day.`}
@@ -197,7 +197,7 @@ export const AdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Milestone Grade Distribution</CardTitle>
-            <p className="text-xs text-slate-400">All evaluated milestone results across classes</p>
+            <p className="text-xs text-[#98A2B3]">All evaluated milestone results across classes</p>
           </CardHeader>
           <CardContent>
             <ClassPerformancePieChart data={performanceChart} height={240} />
@@ -207,7 +207,7 @@ export const AdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">School Attendance (30 Days)</CardTitle>
-            <p className="text-xs text-slate-400">Daily student present vs absent counts</p>
+            <p className="text-xs text-[#98A2B3]">Daily student present vs absent counts</p>
           </CardHeader>
           <CardContent>
             <AttendanceAreaChart data={attendanceChart} height={240} />
@@ -224,7 +224,7 @@ export const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {feeDueCount > 0 && (
-              <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+              <div className="p-3 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
                 <AlertCircle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-red-700">Fee collection pending</p>
@@ -236,16 +236,16 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
             {adminNotifications.length === 0 && feeDueCount === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No recent activity.</p>
+              <p className="text-xs text-[#98A2B3] py-6 text-center">No recent activity.</p>
             ) : (
               adminNotifications.map(n => (
-                <div key={n.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
+                <div key={n.id} className="p-3 bg-[#F9FAFB] border border-[#F2F4F7] rounded-2xl flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-[#E6F4F1]0 mt-1.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-slate-800">{n.title}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
+                    <p className="text-xs font-semibold text-[#101828]">{n.title}</p>
+                    <p className="text-xs text-[#667085] mt-0.5">{n.message}</p>
                   </div>
-                  <span className="text-[10px] text-slate-400">{n.createdAt.split('T')[0]}</span>
+                  <span className="text-[10px] text-[#98A2B3]">{n.createdAt.split('T')[0]}</span>
                 </div>
               ))
             )}
@@ -258,17 +258,17 @@ export const AdminDashboard: React.FC = () => {
             <CardTitle className="text-base font-semibold">Administrative Shortcuts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            <Link to="/admin/users" className="block p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-              <span className="text-xs font-bold text-slate-800 block">Manage Users Directory</span>
-              <span className="text-[11px] text-slate-400">Create teacher & student accounts, issue credentials</span>
+            <Link to="/admin/users" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <span className="text-xs font-bold text-[#101828] block">Manage Users Directory</span>
+              <span className="text-[11px] text-[#98A2B3]">Create teacher & student accounts, issue credentials</span>
             </Link>
-            <Link to="/admin/classes" className="block p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-              <span className="text-xs font-bold text-slate-800 block">Class Cohorts & Curriculum</span>
-              <span className="text-[11px] text-slate-400">Assign teachers and manage schedules</span>
+            <Link to="/admin/classes" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <span className="text-xs font-bold text-[#101828] block">Class Cohorts & Curriculum</span>
+              <span className="text-[11px] text-[#98A2B3]">Assign teachers and manage schedules</span>
             </Link>
-            <Link to="/admin/reports" className="block p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-              <span className="text-xs font-bold text-slate-800 block">School Performance Reports</span>
-              <span className="text-[11px] text-slate-400">Analyze overall academic standings</span>
+            <Link to="/admin/reports" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <span className="text-xs font-bold text-[#101828] block">School Performance Reports</span>
+              <span className="text-[11px] text-[#98A2B3]">Analyze overall academic standings</span>
             </Link>
           </CardContent>
         </Card>

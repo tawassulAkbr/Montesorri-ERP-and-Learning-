@@ -30,16 +30,16 @@ export const StudentsPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">My Students</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-[#101828]">My Students</h1>
+        <p className="text-sm text-[#667085]">
           Review your class rosters, new enrollments, and their parents or guardians
         </p>
       </div>
 
       {/* Summary chips */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-100 shadow-sm text-xs font-semibold text-slate-600">
-          <Users size={14} className="text-indigo-600" /> {roster.length} students in your classes
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-100 shadow-sm text-xs font-semibold text-[#344054]">
+          <Users size={14} className="text-[#006B5D]" /> {roster.length} students in your classes
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-200 text-xs font-semibold text-amber-700">
           <Sparkles size={14} /> {newCount} new enrollment{newCount !== 1 ? 's' : ''} (last 7 days)
@@ -54,7 +54,7 @@ export const StudentsPage: React.FC = () => {
       {/* Filters */}
       <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-2.5 text-[#667085]" />
           <Input
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -65,7 +65,7 @@ export const StudentsPage: React.FC = () => {
         <select
           value={classFilter}
           onChange={e => setClassFilter(e.target.value)}
-          className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+          className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
         >
           <option value="all">All my classes</option>
           {myClasses.map(c => <option key={c} value={c}>{c}</option>)}
@@ -76,15 +76,15 @@ export const StudentsPage: React.FC = () => {
       {visible.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-sm font-semibold text-slate-700">No students found</p>
-            <p className="text-xs text-slate-400 mt-1">Try a different search or class filter.</p>
+            <p className="text-sm font-semibold text-[#344054]">No students found</p>
+            <p className="text-xs text-[#667085] mt-1">Try a different search or class filter.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                 <tr>
                   <th className="p-3.5 pl-5">Student</th>
                   <th className="p-3.5">Class</th>
@@ -102,7 +102,7 @@ export const StudentsPage: React.FC = () => {
                           {getInitials(s.name)}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                          <p className="font-semibold text-[#101828] flex items-center gap-1.5">
                             {s.name}
                             {isNewEnrollment(s.createdAt) && (
                               <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
@@ -110,16 +110,16 @@ export const StudentsPage: React.FC = () => {
                               </span>
                             )}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-mono">#{s.rollNo} • {s.enrollmentId}</p>
+                          <p className="text-[10px] text-[#667085] font-mono">#{s.rollNo} • {s.enrollmentId}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-3.5 text-slate-600">{s.class}</td>
+                    <td className="p-3.5 text-[#344054]">{s.class}</td>
                     <td className="p-3.5">
-                      <p className="font-medium text-slate-700">{s.guardianName}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">{s.phone}</p>
+                      <p className="font-medium text-[#344054]">{s.guardianName}</p>
+                      <p className="text-[10px] text-[#667085] font-mono">{s.phone}</p>
                     </td>
-                    <td className="p-3.5 text-slate-600">{formatDate(s.createdAt)}</td>
+                    <td className="p-3.5 text-[#344054]">{formatDate(s.createdAt)}</td>
                     <td className="p-3.5 pr-5 text-right">
                       {s.feeDue
                         ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]"><AlertCircle size={10} /> Fee Due</span>
@@ -130,7 +130,7 @@ export const StudentsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <p className="px-5 py-3 text-[11px] text-slate-400 border-t border-slate-100">
+          <p className="px-5 py-3 text-[11px] text-[#667085] border-t border-slate-100">
             Fee amounts are confidential and visible to the admin only.
           </p>
         </div>

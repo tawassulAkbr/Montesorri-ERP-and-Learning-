@@ -14,7 +14,7 @@ interface StatCardProps {
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
-  title, value, subtitle, icon, trend, trendLabel, iconBg = 'bg-indigo-50', className,
+  title, value, subtitle, icon, trend, trendLabel, iconBg = 'bg-[#E6F4F1]', className,
 }) => {
   const trendPositive = trend !== undefined && trend > 0;
   const trendNegative = trend !== undefined && trend < 0;
@@ -25,25 +25,25 @@ export const StatCard: React.FC<StatCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
       className={cn(
-        'bg-white rounded-xl border border-slate-100 p-5 shadow-sm card-hover relative overflow-hidden',
+        'card-hover relative overflow-hidden rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm',
         className
       )}
     >
       {/* Subtle bg accent */}
-      <div className="absolute top-0 right-0 w-24 h-24 opacity-5 rounded-full -mt-6 -mr-6 bg-indigo-600" />
+      <div className="absolute right-0 top-0 -mr-6 -mt-6 h-24 w-24 rounded-full bg-[#006B5D] opacity-5" />
 
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{title}</p>
-          <p className="text-2xl font-bold text-slate-800 leading-tight">{value}</p>
-          {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-[#667085]">{title}</p>
+          <p className="text-2xl font-extrabold leading-tight text-[#101828]">{value}</p>
+          {subtitle && <p className="mt-1 text-xs font-medium text-[#98A2B3]">{subtitle}</p>}
 
           {trend !== undefined && (
             <div className={cn(
               'inline-flex items-center gap-1 mt-2 text-xs font-medium px-2 py-0.5 rounded-full',
-              trendPositive && 'bg-emerald-50 text-emerald-600',
+              trendPositive && 'bg-[#E6F4F1] text-[#006B5D]',
               trendNegative && 'bg-red-50 text-red-600',
-              !trendPositive && !trendNegative && 'bg-slate-50 text-slate-500',
+              !trendPositive && !trendNegative && 'bg-slate-50 text-[#667085]',
             )}>
               {trendPositive && <TrendingUp size={11} />}
               {trendNegative && <TrendingDown size={11} />}
@@ -53,7 +53,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           )}
         </div>
 
-        <div className={cn('p-3 rounded-xl flex-shrink-0', iconBg)}>
+        <div className={cn('flex-shrink-0 rounded-xl p-3 text-[#006B5D]', iconBg)}>
           {icon}
         </div>
       </div>

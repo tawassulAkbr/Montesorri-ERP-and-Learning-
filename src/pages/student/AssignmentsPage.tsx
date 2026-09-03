@@ -53,15 +53,15 @@ export const StudentAssignmentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">My Assignments & Tasks</h1>
-        <p className="text-sm text-slate-500">Submit your work before the deadline — your submission time is shared with your teacher</p>
+        <h1 className="text-2xl font-bold text-[#101828]">My Assignments & Tasks</h1>
+        <p className="text-sm text-[#667085]">Submit your work before the deadline — your submission time is shared with your teacher</p>
       </div>
 
       {assignments.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-sm font-semibold text-slate-700">No assignments yet</p>
-            <p className="text-xs text-slate-400 mt-1">When your teacher posts an assignment, it appears here with a countdown.</p>
+            <p className="text-sm font-semibold text-[#344054]">No assignments yet</p>
+            <p className="text-xs text-[#667085] mt-1">When your teacher posts an assignment, it appears here with a countdown.</p>
           </CardContent>
         </Card>
       ) : (
@@ -73,7 +73,7 @@ export const StudentAssignmentsPage: React.FC = () => {
               <Card key={a.id} className={sub ? 'border-emerald-200' : ''}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#E6F4F1] text-[#006B5D] flex items-center justify-center flex-shrink-0">
                       <ClipboardList size={18} />
                     </div>
                     <div className="flex-1">
@@ -82,7 +82,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                         <CountdownTimer dueAt={a.dueAt} />
                         {sub?.isLate && <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">SUBMITTED LATE</span>}
                       </CardTitle>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
+                      <p className="text-[11px] text-[#667085] mt-0.5">
                         {a.subject} · By {a.teacherName} · Due {formatDateTime(a.dueAt)}
                       </p>
                     </div>
@@ -90,7 +90,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                 </CardHeader>
 
                 <CardContent className="pt-0 space-y-3">
-                  <p className="text-xs text-slate-600 bg-slate-50 rounded-lg p-3 border border-slate-100">{a.instructions}</p>
+                  <p className="text-xs text-[#344054] bg-slate-50 rounded-lg p-3 border border-slate-100">{a.instructions}</p>
 
                   {sub ? (
                     <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/50">
@@ -98,15 +98,15 @@ export const StudentAssignmentsPage: React.FC = () => {
                         <CheckCircle2 size={15} /> Submitted {formatDateTime(sub.submittedAt)}
                       </div>
                       {sub.fileName && (
-                        <a href={`/uploads/${sub.filePath}`} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline">
+                        <a href={`/uploads/${sub.filePath}`} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs text-[#006B5D] hover:underline">
                           <Paperclip size={12} /> {sub.fileName}
                         </a>
                       )}
-                      {sub.text && <p className="mt-1.5 text-xs text-slate-600">{sub.text}</p>}
+                      {sub.text && <p className="mt-1.5 text-xs text-[#344054]">{sub.text}</p>}
                       {sub.grade !== undefined && sub.grade !== null ? (
                         <p className="mt-2 text-xs font-bold text-emerald-700">Grade: {sub.grade}/100 {sub.feedback ? `— ${sub.feedback}` : ''}</p>
                       ) : (
-                        <p className="mt-2 text-[11px] text-slate-400">Waiting for your teacher to grade this.</p>
+                        <p className="mt-2 text-[11px] text-[#667085]">Waiting for your teacher to grade this.</p>
                       )}
                     </div>
                   ) : closed ? (
@@ -120,10 +120,10 @@ export const StudentAssignmentsPage: React.FC = () => {
                         onChange={e => setTexts(prev => ({ ...prev, [a.id]: e.target.value }))}
                         rows={3}
                         placeholder="Write your answer, or describe your completed work..."
-                        className="w-full text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                        className="w-full text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
                       />
                       <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <label className="inline-flex items-center gap-1.5 text-xs text-indigo-600 cursor-pointer border border-dashed border-indigo-300 rounded-lg px-3 py-1.5 hover:bg-indigo-50">
+                        <label className="inline-flex items-center gap-1.5 text-xs text-[#006B5D] cursor-pointer border border-dashed border-[#B7DDD6] rounded-lg px-3 py-1.5 hover:bg-[#E6F4F1]">
                           <Upload size={13} />
                           {files[a.id] ? files[a.id]!.name : 'Attach a file (photo, PDF, doc)'}
                           <input

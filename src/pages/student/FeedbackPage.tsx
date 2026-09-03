@@ -40,8 +40,8 @@ export const StudentFeedbackPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Share Feedback with Your Teacher</h1>
-        <p className="text-sm text-slate-500 flex items-center gap-1.5">
+        <h1 className="text-2xl font-bold text-[#101828]">Share Feedback with Your Teacher</h1>
+        <p className="text-sm text-[#667085] flex items-center gap-1.5">
           <ShieldCheck size={15} className="text-emerald-600" />
           Your name is hidden from your teacher — feedback is anonymous.
         </p>
@@ -52,18 +52,18 @@ export const StudentFeedbackPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <MessageSquareHeart className="text-indigo-600" size={18} />
+              <MessageSquareHeart className="text-[#006B5D]" size={18} />
               Write Feedback
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-600 mb-1 block">Choose a teacher</label>
+                <label className="text-xs font-medium text-[#344054] mb-1 block">Choose a teacher</label>
                 <select
                   value={teacherId}
                   onChange={e => setTeacherId(e.target.value)}
-                  className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
                   required
                 >
                   <option value="" disabled>Select a teacher...</option>
@@ -74,13 +74,13 @@ export const StudentFeedbackPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-600 mb-1 block">Your message</label>
+                <label className="text-xs font-medium text-[#344054] mb-1 block">Your message</label>
                 <textarea
                   value={content}
                   onChange={e => setContent(e.target.value)}
                   rows={5}
                   placeholder="Tell your teacher what's going well, what's hard, or what you'd like to change..."
-                  className="w-full text-xs border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full text-xs border border-slate-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
                   required
                 />
               </div>
@@ -106,15 +106,15 @@ export const StudentFeedbackPage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {feedbacks.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">You haven't sent any feedback yet.</p>
+              <p className="text-xs text-[#667085] py-6 text-center">You haven't sent any feedback yet.</p>
             ) : (
               feedbacks.map(fb => (
                 <div key={fb.id} className="p-3 rounded-xl border border-slate-100 bg-slate-50/70">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-slate-700">To: {fb.teacherName}</span>
-                    <span className="text-[10px] text-slate-400">{formatDate(fb.createdAt)}</span>
+                    <span className="text-xs font-semibold text-[#344054]">To: {fb.teacherName}</span>
+                    <span className="text-[10px] text-[#667085]">{formatDate(fb.createdAt)}</span>
                   </div>
-                  <p className="text-xs text-slate-600">{fb.content}</p>
+                  <p className="text-xs text-[#344054]">{fb.content}</p>
                 </div>
               ))
             )}

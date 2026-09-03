@@ -35,7 +35,7 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
   };
 
   const statusClass = (status: AttendanceRecord['status'] | undefined, isToday: boolean) => {
-    if (!status) return isToday ? 'ring-2 ring-indigo-400 bg-slate-50 text-slate-400' : 'bg-slate-50 text-slate-300';
+    if (!status) return isToday ? 'ring-2 ring-indigo-400 bg-slate-50 text-[#667085]' : 'bg-slate-50 text-slate-300';
     switch (status) {
       case 'present': return 'attendance-present';
       case 'absent': return 'attendance-absent';
@@ -86,7 +86,7 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
                 onClick={() => setView(v)}
                 className={cn(
                   'px-3 py-1 text-xs font-medium rounded-md transition-all',
-                  view === v ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  view === v ? 'bg-white text-[#006B5D] shadow-sm' : 'text-[#667085] hover:text-[#344054]'
                 )}
               >
                 {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -94,7 +94,7 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-slate-600">
+          <div className="flex items-center gap-2 text-sm text-[#344054]">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={prevMonth}>
               <ChevronLeft size={14} />
             </Button>
@@ -110,24 +110,24 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
       <div className="flex gap-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-emerald-400" />
-          <span className="text-slate-600">Present ({presentCount})</span>
+          <span className="text-[#344054]">Present ({presentCount})</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-400" />
-          <span className="text-slate-600">Absent ({absentCount})</span>
+          <span className="text-[#344054]">Absent ({absentCount})</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-slate-300" />
-          <span className="text-slate-600">Leave ({leaveCount})</span>
+          <span className="text-[#344054]">Leave ({leaveCount})</span>
         </div>
-        <div className="ml-auto font-semibold text-indigo-600">{attendancePct}% Attendance</div>
+        <div className="ml-auto font-semibold text-[#006B5D]">{attendancePct}% Attendance</div>
       </div>
 
       {/* Calendar Grid */}
       <div>
         <div className="grid grid-cols-7 gap-1 mb-1">
           {DAYS.map(d => (
-            <div key={d} className="text-center text-xs font-medium text-slate-400 py-1">{d}</div>
+            <div key={d} className="text-center text-xs font-medium text-[#667085] py-1">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">

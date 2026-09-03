@@ -51,8 +51,8 @@ export const RemarksPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Montessori Child Observations & Remarks</h1>
-        <p className="text-sm text-slate-500">Provide direct feedback, behavioural observations, or home guidance notes to parents</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Montessori Child Observations & Remarks</h1>
+        <p className="text-sm text-[#667085]">Provide direct feedback, behavioural observations, or home guidance notes to parents</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -68,15 +68,15 @@ export const RemarksPage: React.FC = () => {
                 onClick={() => setSelectedStudent(student)}
                 className={`w-full py-3 px-2 flex items-center justify-between text-left rounded-lg transition-colors ${
                   selectedStudent.id === student.id
-                    ? 'bg-indigo-50/80 text-indigo-700'
-                    : 'hover:bg-slate-50 text-slate-700'
+                    ? 'bg-[#E6F4F1]/80 text-[#006B5D]'
+                    : 'hover:bg-slate-50 text-[#344054]'
                 }`}
               >
                 <div>
                   <p className="text-xs font-semibold">{student.name}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">Roll #{student.rollNo} • {student.class}</p>
+                  <p className="text-[10px] text-[#667085] font-mono">Roll #{student.rollNo} • {student.class}</p>
                 </div>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-500">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-[#667085]">
                   {remarks.filter(r => r.studentId === student.id).length} notes
                 </span>
               </button>
@@ -90,7 +90,7 @@ export const RemarksPage: React.FC = () => {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <MessageSquare className="text-indigo-600" size={16} />
+                  <MessageSquare className="text-[#006B5D]" size={16} />
                   Write Observation for {selectedStudent.name}'s Parents
                 </CardTitle>
                 <div className="flex gap-1.5">
@@ -102,7 +102,7 @@ export const RemarksPage: React.FC = () => {
                       className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
                         remarkType === t
                           ? typeConfig[t].cls + ' ring-2 ring-indigo-500'
-                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                          : 'bg-white text-[#667085] border-slate-200 hover:bg-slate-50'
                       }`}
                     >
                       {typeConfig[t].label}
@@ -146,7 +146,7 @@ export const RemarksPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {studentRemarks.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">No remarks sent for this student yet.</p>
+                <p className="text-xs text-[#667085] py-6 text-center">No remarks sent for this student yet.</p>
               ) : (
                 studentRemarks.map(rem => (
                   <div
@@ -155,19 +155,19 @@ export const RemarksPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-800">{rem.teacherName}</span>
-                        <span className="text-[10px] text-slate-400">({rem.teacherSubject})</span>
+                        <span className="text-xs font-bold text-[#101828]">{rem.teacherName}</span>
+                        <span className="text-[10px] text-[#667085]">({rem.teacherSubject})</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeConfig[rem.type].cls}`}>
                           {typeConfig[rem.type].label}
                         </span>
-                        <span className="text-[10px] text-slate-400">{formatDate(rem.createdAt)}</span>
+                        <span className="text-[10px] text-[#667085]">{formatDate(rem.createdAt)}</span>
                       </div>
                     </div>
 
                     <div
-                      className="text-xs text-slate-600 prose-sm"
+                      className="text-xs text-[#344054] prose-sm"
                       dangerouslySetInnerHTML={{ __html: rem.content }}
                     />
                   </div>

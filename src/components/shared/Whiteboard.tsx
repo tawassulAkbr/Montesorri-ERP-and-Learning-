@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 type ToolType = 'pen' | 'highlighter' | 'eraser' | 'line' | 'circle' | 'rectangle' | 'stamp';
 
 const MONTESSORI_COLORS = [
-  { name: 'Indigo Blue', hex: '#4F46E5' },
+  { name: 'Indigo Blue', hex: '#006B5D' },
   { name: 'Cherry Red', hex: '#EF4444' },
   { name: 'Forest Green', hex: '#10B981' },
   { name: 'Sunshine Yellow', hex: '#F59E0B' },
@@ -32,7 +32,7 @@ interface WhiteboardProps {
 export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, className = '' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [tool, setTool] = useState<ToolType>('pen');
-  const [color, setColor] = useState('#4F46E5');
+  const [color, setColor] = useState('#006B5D');
   const [lineWidth, setLineWidth] = useState(4);
   const [selectedStamp, setSelectedStamp] = useState('⭐');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -179,7 +179,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('pen')}
-              className={`p-2 rounded-lg transition-all ${tool === 'pen' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'pen' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Pen size={16} />
             </TooltipTrigger>
@@ -190,7 +190,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('highlighter')}
-              className={`p-2 rounded-lg transition-all ${tool === 'highlighter' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'highlighter' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Highlighter size={16} />
             </TooltipTrigger>
@@ -201,7 +201,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('eraser')}
-              className={`p-2 rounded-lg transition-all ${tool === 'eraser' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'eraser' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Eraser size={16} />
             </TooltipTrigger>
@@ -214,7 +214,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('circle')}
-              className={`p-2 rounded-lg transition-all ${tool === 'circle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'circle' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Circle size={16} />
             </TooltipTrigger>
@@ -225,7 +225,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('rectangle')}
-              className={`p-2 rounded-lg transition-all ${tool === 'rectangle' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'rectangle' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Square size={16} />
             </TooltipTrigger>
@@ -236,7 +236,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
             <TooltipTrigger
               type="button"
               onClick={() => setTool('line')}
-              className={`p-2 rounded-lg transition-all ${tool === 'line' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`p-2 rounded-lg transition-all ${tool === 'line' ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#344054] hover:bg-slate-100'}`}
             >
               <Minus size={16} />
             </TooltipTrigger>
@@ -265,7 +265,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
               key={sz}
               type="button"
               onClick={() => setLineWidth(sz)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${lineWidth === sz ? 'bg-indigo-50 text-indigo-700' : 'text-slate-400 hover:text-slate-700'}`}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${lineWidth === sz ? 'bg-[#E6F4F1] text-[#006B5D]' : 'text-[#667085] hover:text-[#344054]'}`}
             >
               {sz === 2 ? 'Fine' : sz === 5 ? 'Medium' : 'Chunky'}
             </button>
@@ -274,7 +274,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={clearBoard} className="text-xs text-slate-600 gap-1">
+          <Button variant="outline" size="sm" onClick={clearBoard} className="text-xs text-[#344054] gap-1">
             <RotateCcw size={14} /> Clear Board
           </Button>
           <Button size="sm" onClick={downloadCanvas} className="text-xs gap-1 shadow-sm">
@@ -284,8 +284,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
       </div>
 
       {/* Montessori Stamp Stickers Strip */}
-      <div className="px-4 py-2 bg-indigo-50/50 border-b border-indigo-100 flex items-center justify-between gap-2 overflow-x-auto">
-        <div className="flex items-center gap-1 text-xs font-semibold text-indigo-700 whitespace-nowrap">
+      <div className="px-4 py-2 bg-[#E6F4F1]/50 border-b border-[#B7DDD6] flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="flex items-center gap-1 text-xs font-semibold text-[#006B5D] whitespace-nowrap">
           <Sparkles size={14} className="text-amber-500" /> Toddler Stamp Stickers:
         </div>
         <div className="flex items-center gap-1.5">
@@ -296,7 +296,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
               onClick={() => { setSelectedStamp(stamp); setTool('stamp'); }}
               className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all ${
                 tool === 'stamp' && selectedStamp === stamp
-                  ? 'bg-white shadow-md scale-110 border border-indigo-300'
+                  ? 'bg-white shadow-md scale-110 border border-[#B7DDD6]'
                   : 'bg-white/60 hover:bg-white hover:scale-105'
               }`}
             >
@@ -321,7 +321,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ isTeacher = true, classN
         />
 
         {/* Live Board Watermark */}
-        <div className="absolute bottom-3 right-4 pointer-events-none select-none flex items-center gap-1.5 opacity-40 text-xs font-bold text-slate-400">
+        <div className="absolute bottom-3 right-4 pointer-events-none select-none flex items-center gap-1.5 opacity-40 text-xs font-bold text-[#667085]">
           <span>Montessori Interactive Whiteboard</span>
         </div>
       </div>

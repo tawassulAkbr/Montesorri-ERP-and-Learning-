@@ -51,15 +51,15 @@ export const TeacherSchedulePage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Montessori Daily Schedule & Timetable</h1>
-          <p className="text-sm text-slate-500">Plan daily routine slots, circle times, sensorial work cycles, and live classes</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Montessori Daily Schedule & Timetable</h1>
+          <p className="text-sm text-[#667085]">Plan daily routine slots, circle times, sensorial work cycles, and live classes</p>
         </div>
 
         <div className="flex items-center gap-3">
           <select
             value={selectedClass}
             onChange={e => setSelectedClass(e.target.value)}
-            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 outline-none shadow-sm cursor-pointer"
+            className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
             <option>Montessori Toddler (Playgroup)</option>
             <option>Junior Montessori (Nursery)</option>
@@ -76,10 +76,10 @@ export const TeacherSchedulePage: React.FC = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Calendar className="text-indigo-600" size={16} />
+            <Calendar className="text-[#006B5D]" size={16} />
             Daily Routine Timetable for {selectedClass}
           </CardTitle>
-          <span className="text-xs text-slate-400 font-medium">{filteredSchedules.length} periods planned</span>
+          <span className="text-xs text-[#667085] font-medium">{filteredSchedules.length} periods planned</span>
         </CardHeader>
         <CardContent>
           <ScheduleTimeline
@@ -99,7 +99,7 @@ export const TeacherSchedulePage: React.FC = () => {
 
           <form onSubmit={handleCreateSchedule} className="space-y-4">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Activity Title</Label>
+              <Label className="text-xs font-medium text-[#344054]">Activity Title</Label>
               <Input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -110,11 +110,11 @@ export const TeacherSchedulePage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Montessori Category</Label>
+              <Label className="text-xs font-medium text-[#344054]">Montessori Category</Label>
               <select
                 value={category}
                 onChange={e => setCategory(e.target.value as ScheduleCategory)}
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
               >
                 <option value="circle_time">Morning Circle Time</option>
                 <option value="live_class">Live Online Teaching</option>
@@ -130,7 +130,7 @@ export const TeacherSchedulePage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Start Time</Label>
+                <Label className="text-xs font-medium text-[#344054]">Start Time</Label>
                 <Input
                   value={startTime}
                   onChange={e => setStartTime(e.target.value)}
@@ -141,7 +141,7 @@ export const TeacherSchedulePage: React.FC = () => {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-slate-600">End Time</Label>
+                <Label className="text-xs font-medium text-[#344054]">End Time</Label>
                 <Input
                   value={endTime}
                   onChange={e => setEndTime(e.target.value)}
@@ -153,13 +153,13 @@ export const TeacherSchedulePage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Description & Instructions</Label>
+              <Label className="text-xs font-medium text-[#344054]">Description & Instructions</Label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 rows={3}
                 placeholder="List learning objectives or materials required..."
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
               />
             </div>
 
@@ -171,7 +171,7 @@ export const TeacherSchedulePage: React.FC = () => {
                 onChange={e => setIsLive(e.target.checked)}
                 className="rounded"
               />
-              <Label htmlFor="isLiveCheck" className="text-xs text-slate-700 cursor-pointer">
+              <Label htmlFor="isLiveCheck" className="text-xs text-[#344054] cursor-pointer">
                 Mark as Live Virtual Session (enables direct "Join Class" button)
               </Label>
             </div>

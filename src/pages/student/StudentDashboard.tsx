@@ -43,23 +43,23 @@ export const StudentDashboard: React.FC = () => {
       <LiveClassBanner />
 
       {/* Student Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-[#D7E7E4] bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
-          <span className="text-xs uppercase tracking-wider text-indigo-200 font-bold">Montessori Student Portal</span>
-          <h1 className="text-2xl font-bold mt-1">Hello, {currentUser?.name?.split(' ')[0]}! 🌟</h1>
-          <p className="text-xs text-indigo-100 mt-1">
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#006B5D]">Montessori Student Portal</span>
+          <h1 className="mt-1 text-2xl font-extrabold text-[#101828]">Hello, {currentUser?.name?.split(' ')[0]}! 🌟</h1>
+          <p className="mt-1 text-xs font-medium text-[#667085]">
             {me?.class || 'Montessori'} • Roll #{me?.rollNo || '—'} • Age {me?.ageGroup || '—'}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link to="/student/live-class">
-            <Button variant="secondary" size="sm" className="gap-1.5 shadow-sm text-xs font-bold text-indigo-700 bg-white hover:bg-slate-100">
+            <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl bg-[#006B5D] text-xs font-bold text-white shadow-sm hover:bg-[#007A6B]">
               <Video size={15} /> Join Live Class
             </Button>
           </Link>
           <Link to="/student/schedule">
-            <Button variant="outline" size="sm" className="gap-1.5 shadow-sm text-xs border-white/30 text-white hover:bg-white/10">
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-[#D7E7E4] text-xs font-bold text-[#006B5D] shadow-sm hover:bg-[#E6F4F1]">
               <Sparkles size={15} /> Daily Routine
             </Button>
           </Link>
@@ -67,7 +67,7 @@ export const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Gamified Learning Streak Widget */}
-      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 rounded-3xl bg-[#006B5D] p-5 text-white shadow-sm sm:flex-row sm:items-center">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
             <Flame size={30} />
@@ -79,7 +79,7 @@ export const StudentDashboard: React.FC = () => {
                 <span className="text-[10px] font-bold bg-white/25 px-2 py-0.5 rounded-full">DONE TODAY ✓</span>
               )}
             </div>
-            <p className="text-xs text-orange-100 mt-0.5">
+            <p className="mt-0.5 text-xs text-white/75">
               Level {streakInfo?.level ?? 1} · {streakInfo?.totalXp ?? 0} XP · {streakInfo?.badges.length ?? 0} badge{(streakInfo?.badges.length ?? 0) !== 1 ? 's' : ''} earned
             </p>
           </div>
@@ -92,7 +92,7 @@ export const StudentDashboard: React.FC = () => {
             </span>
           ))}
           <Link to="/student/learning">
-            <Button size="sm" className="gap-1.5 shadow-sm text-xs font-bold bg-white text-orange-600 hover:bg-orange-50">
+            <Button size="sm" className="gap-1.5 rounded-xl bg-[#D9531E] text-xs font-bold text-white shadow-sm hover:bg-[#C85A32]">
               {streakInfo?.todayCompleted ? <><Trophy size={14} /> View Progress</> : <><Play size={14} /> Play Today's Task</>}
             </Button>
           </Link>
@@ -105,22 +105,22 @@ export const StudentDashboard: React.FC = () => {
           title="Roll Call Rate"
           value={`${attendanceRate}%`}
           subtitle="Montessori circle attendance"
-          icon={<CalendarCheck className="text-emerald-600" size={20} />}
-          iconBg="bg-emerald-50"
+          icon={<CalendarCheck className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Video Lessons"
           value={lessons.length}
           subtitle="Phonics & rhymes"
-          icon={<Video className="text-indigo-600" size={20} />}
-          iconBg="bg-indigo-50"
+          icon={<Video className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Upcoming Milestones"
           value={upcomingTests.length}
           subtitle="Sensorial & motor checks"
-          icon={<ClipboardList className="text-sky-600" size={20} />}
-          iconBg="bg-sky-50"
+          icon={<ClipboardList className="text-[#006B5D]" size={20} />}
+          iconBg="bg-[#E6F4F1]"
         />
         <StatCard
           title="Milestone Standing"
@@ -140,9 +140,9 @@ export const StudentDashboard: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-base font-semibold">Learning Area Performance</CardTitle>
-              <p className="text-xs text-slate-400">Comparing your developmental progress against cohort averages</p>
+              <p className="text-xs text-[#667085]">Comparing your developmental progress against cohort averages</p>
             </div>
-            <Link to="/student/reports" className="text-xs text-indigo-600 font-medium flex items-center gap-1">
+            <Link to="/student/reports" className="text-xs text-[#006B5D] font-medium flex items-center gap-1">
               Full Evaluation <ArrowUpRight size={14} />
             </Link>
           </CardHeader>
@@ -155,11 +155,11 @@ export const StudentDashboard: React.FC = () => {
         <Card className="flex flex-col justify-between">
           <CardHeader className="pb-0">
             <CardTitle className="text-base font-semibold">Attendance Health</CardTitle>
-            <p className="text-xs text-slate-400">Montessori roll call record</p>
+            <p className="text-xs text-[#667085]">Montessori roll call record</p>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-4">
-            <RadialProgress value={attendanceRate} label="Circle Attendance" color="#10B981" />
-            <p className="text-xs text-slate-500 text-center mt-2">
+            <RadialProgress value={attendanceRate} label="Circle Attendance" color="#006B5D" />
+            <p className="text-xs text-[#667085] text-center mt-2">
               Consistent morning circle routine helps social development!
             </p>
           </CardContent>
@@ -171,7 +171,7 @@ export const StudentDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-semibold">Latest Video Lessons</CardTitle>
-            <Link to="/student/lectures" className="text-xs text-indigo-600 font-medium">
+            <Link to="/student/lectures" className="text-xs text-[#006B5D] font-medium">
               View All
             </Link>
           </CardHeader>
@@ -187,7 +187,7 @@ export const StudentDashboard: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-base font-semibold">Upcoming Developmental Milestones</CardTitle>
-              <Link to="/student/tests" className="text-xs text-indigo-600 font-medium">
+              <Link to="/student/tests" className="text-xs text-[#006B5D] font-medium">
                 View Milestones
               </Link>
             </CardHeader>
@@ -195,10 +195,10 @@ export const StudentDashboard: React.FC = () => {
               {upcomingTests.map(test => (
                 <div key={test.id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl">
                   <div>
-                    <p className="text-xs font-bold text-slate-800">{test.title}</p>
-                    <p className="text-[10px] text-slate-400">{test.subject} • {test.class}</p>
+                    <p className="text-xs font-bold text-[#101828]">{test.title}</p>
+                    <p className="text-[10px] text-[#667085]">{test.subject} • {test.class}</p>
                   </div>
-                  <Badge variant="outline" className="bg-white text-indigo-600 border-indigo-200 text-xs">
+                  <Badge variant="outline" className="bg-white text-[#006B5D] border-[#B7DDD6] text-xs">
                     {formatDate(test.date)}
                   </Badge>
                 </div>

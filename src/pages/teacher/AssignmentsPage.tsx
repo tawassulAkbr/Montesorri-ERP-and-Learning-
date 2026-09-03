@@ -59,8 +59,8 @@ export const TeacherAssignmentsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Assignments & Tasks</h1>
-          <p className="text-sm text-slate-500">Set deadlines, track submissions, and grade student work</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Assignments & Tasks</h1>
+          <p className="text-sm text-[#667085]">Set deadlines, track submissions, and grade student work</p>
         </div>
         <Button onClick={() => setOpenCreate(true)} className="gap-2 shadow-sm">
           <Plus size={16} /> New Assignment
@@ -70,8 +70,8 @@ export const TeacherAssignmentsPage: React.FC = () => {
       {assignments.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-sm font-semibold text-slate-700">No assignments yet</p>
-            <p className="text-xs text-slate-400 mt-1">Create your first assignment with a deadline for your class.</p>
+            <p className="text-sm font-semibold text-[#344054]">No assignments yet</p>
+            <p className="text-xs text-[#667085] mt-1">Create your first assignment with a deadline for your class.</p>
           </CardContent>
         </Card>
       ) : (
@@ -84,7 +84,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#E6F4F1] text-[#006B5D] flex items-center justify-center flex-shrink-0">
                         <ClipboardList size={18} />
                       </div>
                       <div>
@@ -92,7 +92,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
                           {a.title}
                           <CountdownTimer dueAt={a.dueAt} />
                         </CardTitle>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-[#667085] mt-0.5">
                           {a.class} · {a.subject} · Due {formatDateTime(a.dueAt)} · {subs.length} submission{subs.length !== 1 ? 's' : ''}
                         </p>
                       </div>
@@ -101,7 +101,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
                       <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => setExpanded(isOpen ? null : a.id)}>
                         {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />} Submissions
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => deleteAssignment(a.id)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-[#667085] hover:text-red-600" onClick={() => deleteAssignment(a.id)}>
                         <Trash2 size={13} />
                       </Button>
                     </div>
@@ -109,15 +109,15 @@ export const TeacherAssignmentsPage: React.FC = () => {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <p className="text-xs text-slate-600 bg-slate-50 rounded-lg p-3 border border-slate-100">{a.instructions}</p>
+                  <p className="text-xs text-[#344054] bg-slate-50 rounded-lg p-3 border border-slate-100">{a.instructions}</p>
 
                   {isOpen && (
                     <div className="mt-4 border border-slate-100 rounded-xl overflow-hidden">
                       {subs.length === 0 ? (
-                        <p className="text-xs text-slate-400 text-center py-6">No submissions yet.</p>
+                        <p className="text-xs text-[#667085] text-center py-6">No submissions yet.</p>
                       ) : (
                         <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-50 text-slate-400">
+                          <thead className="bg-slate-50 text-[#667085]">
                             <tr>
                               <th className="p-2.5 pl-4">Student</th>
                               <th className="p-2.5">Submitted</th>
@@ -129,20 +129,20 @@ export const TeacherAssignmentsPage: React.FC = () => {
                           <tbody className="divide-y divide-slate-100">
                             {subs.map(s => (
                               <tr key={s.id} className="hover:bg-slate-50">
-                                <td className="p-2.5 pl-4 font-medium text-slate-800">
+                                <td className="p-2.5 pl-4 font-medium text-[#101828]">
                                   {s.studentName}
                                   {s.isLate && <span className="ml-1.5 text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">LATE</span>}
                                 </td>
-                                <td className="p-2.5 text-slate-500">{formatDateTime(s.submittedAt)}</td>
+                                <td className="p-2.5 text-[#667085]">{formatDateTime(s.submittedAt)}</td>
                                 <td className="p-2.5">
                                   {s.fileName ? (
-                                    <a href={`/uploads/${s.filePath}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-600 hover:underline">
+                                    <a href={`/uploads/${s.filePath}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#006B5D] hover:underline">
                                       <Paperclip size={12} /> {s.fileName}
                                     </a>
                                   ) : s.text ? (
-                                    <span className="text-slate-600 line-clamp-1 max-w-[180px]">{s.text}</span>
+                                    <span className="text-[#344054] line-clamp-1 max-w-[180px]">{s.text}</span>
                                   ) : (
-                                    <span className="text-slate-400">—</span>
+                                    <span className="text-[#667085]">—</span>
                                   )}
                                 </td>
                                 <td className="p-2.5">
@@ -155,7 +155,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
                                       max={100}
                                       value={grades[s.id] ?? ''}
                                       onChange={e => setGrades(prev => ({ ...prev, [s.id]: e.target.value }))}
-                                      className="w-16 border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-indigo-500"
+                                      className="w-16 border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-[#006B5D]"
                                     />
                                   )}
                                 </td>
@@ -165,7 +165,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
                                       <CheckCircle2 size={12} /> Grade
                                     </Button>
                                   ) : (
-                                    <span className="text-[10px] text-slate-400">Graded</span>
+                                    <span className="text-[10px] text-[#667085]">Graded</span>
                                   )}
                                 </td>
                               </tr>
@@ -190,20 +190,20 @@ export const TeacherAssignmentsPage: React.FC = () => {
           </DialogHeader>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Title</Label>
+              <Label className="text-xs font-medium text-[#344054]">Title</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Sandpaper Letters Practice Sheet" className="mt-1 text-xs" required />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Class</Label>
-                <select value={cls} onChange={e => setCls(e.target.value)} className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <Label className="text-xs font-medium text-[#344054]">Class</Label>
+                <select value={cls} onChange={e => setCls(e.target.value)} className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white">
                   {MONTESSORI_CLASSES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <Label className="text-xs font-medium text-slate-600">Subject</Label>
-                <select value={subject} onChange={e => setSubject(e.target.value)} className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <Label className="text-xs font-medium text-[#344054]">Subject</Label>
+                <select value={subject} onChange={e => setSubject(e.target.value)} className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white">
                   {TEACHER_SUBJECTS.map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
@@ -211,23 +211,23 @@ export const TeacherAssignmentsPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Due Date</Label>
+                <Label className="text-xs font-medium text-[#344054]">Due Date</Label>
                 <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="mt-1 text-xs" required />
               </div>
               <div>
-                <Label className="text-xs font-medium text-slate-600">Due Time</Label>
+                <Label className="text-xs font-medium text-[#344054]">Due Time</Label>
                 <Input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} className="mt-1 text-xs" required />
               </div>
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Instructions</Label>
+              <Label className="text-xs font-medium text-[#344054]">Instructions</Label>
               <textarea
                 value={instructions}
                 onChange={e => setInstructions(e.target.value)}
                 rows={3}
                 placeholder="Describe the task, materials, and what students should submit..."
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
                 required
               />
             </div>

@@ -22,14 +22,14 @@ export const StudentLecturesPage: React.FC = () => {
       <LiveClassBanner />
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Montessori Video Lectures & Rhymes</h1>
-        <p className="text-sm text-slate-500">Watch phonics songs, sensorial demonstrations, and counting rhymes</p>
+        <h1 className="text-2xl font-bold text-[#101828]">Montessori Video Lectures & Rhymes</h1>
+        <p className="text-sm text-[#667085]">Watch phonics songs, sensorial demonstrations, and counting rhymes</p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-2.5 text-[#667085]" />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -45,8 +45,8 @@ export const StudentLecturesPage: React.FC = () => {
               onClick={() => setSelectedSubject(subj)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 selectedSubject === subj
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#006B5D] text-white shadow-sm'
+                  : 'bg-slate-50 text-[#344054] hover:bg-slate-100'
               }`}
             >
               {subj}

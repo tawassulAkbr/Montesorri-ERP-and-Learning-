@@ -102,8 +102,8 @@ export const LessonsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Montessori Video Lessons & Rhymes</h1>
-          <p className="text-sm text-slate-500">Publish video lessons, phonics rhymes, and sensorial exercises for students & parents</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Montessori Video Lessons & Rhymes</h1>
+          <p className="text-sm text-[#667085]">Publish video lessons, phonics rhymes, and sensorial exercises for students & parents</p>
         </div>
 
         <Button onClick={() => setOpenModal(true)} className="gap-2 shadow-sm">
@@ -114,7 +114,7 @@ export const LessonsPage: React.FC = () => {
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-2.5 text-[#667085]" />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -130,8 +130,8 @@ export const LessonsPage: React.FC = () => {
               onClick={() => setSelectedSubject(subj)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 selectedSubject === subj
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#006B5D] text-white shadow-sm'
+                  : 'bg-slate-50 text-[#344054] hover:bg-slate-100'
               }`}
             >
               {subj}
@@ -144,8 +144,8 @@ export const LessonsPage: React.FC = () => {
       {filteredLessons.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-100">
           <Video className="mx-auto text-slate-300 mb-2" size={40} />
-          <p className="text-sm font-semibold text-slate-700">No lessons found</p>
-          <p className="text-xs text-slate-400">Try adjusting your search query or subject filters.</p>
+          <p className="text-sm font-semibold text-[#344054]">No lessons found</p>
+          <p className="text-xs text-[#667085]">Try adjusting your search query or subject filters.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -160,14 +160,14 @@ export const LessonsPage: React.FC = () => {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Video className="text-indigo-600" size={20} />
+              <Video className="text-[#006B5D]" size={20} />
               Upload Montessori Video Lecture
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleCreateLesson} className="space-y-4">
             <div>
-              <Label className="text-xs font-medium text-slate-600">Lesson Title</Label>
+              <Label className="text-xs font-medium text-[#344054]">Lesson Title</Label>
               <Input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -179,11 +179,11 @@ export const LessonsPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Learning Area</Label>
+                <Label className="text-xs font-medium text-[#344054]">Learning Area</Label>
                 <select
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
-                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
                   <option>Phonics & Language</option>
                   <option>Sensorial & Practical Life</option>
@@ -194,11 +194,11 @@ export const LessonsPage: React.FC = () => {
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-slate-600">Target Cohort</Label>
+                <Label className="text-xs font-medium text-[#344054]">Target Cohort</Label>
                 <select
                   value={targetClass}
                   onChange={e => setTargetClass(e.target.value)}
-                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
                   <option>Montessori Toddler (Playgroup)</option>
                   <option>Junior Montessori (Nursery)</option>
@@ -208,15 +208,15 @@ export const LessonsPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Video Source</Label>
+              <Label className="text-xs font-medium text-[#344054]">Video Source</Label>
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <button
                   type="button"
                   onClick={() => setSourceMode('youtube')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                     sourceMode === 'youtube'
-                      ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-[#006B5D] text-white border-[#006B5D]'
+                      : 'bg-white text-[#344054] border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   YouTube Link
@@ -226,8 +226,8 @@ export const LessonsPage: React.FC = () => {
                   onClick={() => setSourceMode('upload')}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                     sourceMode === 'upload'
-                      ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-[#006B5D] text-white border-[#006B5D]'
+                      : 'bg-white text-[#344054] border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   Upload My Video
@@ -238,7 +238,7 @@ export const LessonsPage: React.FC = () => {
             {sourceMode === 'youtube' ? (
               <>
                 <div>
-                  <Label className="text-xs font-medium text-slate-600">YouTube Video Link or ID</Label>
+                  <Label className="text-xs font-medium text-[#344054]">YouTube Video Link or ID</Label>
                   <Input
                     value={youtubeUrl}
                     onChange={e => setYoutubeUrl(e.target.value)}
@@ -250,8 +250,8 @@ export const LessonsPage: React.FC = () => {
 
                 {previewThumbnail && (
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                    <p className="text-[11px] font-semibold text-slate-700 flex items-center gap-1">
-                      <Play size={12} className="text-indigo-600" /> Video Thumbnail Detected
+                    <p className="text-[11px] font-semibold text-[#344054] flex items-center gap-1">
+                      <Play size={12} className="text-[#006B5D]" /> Video Thumbnail Detected
                     </p>
                     <div className="aspect-video w-full rounded-lg overflow-hidden relative shadow-inner">
                       <img
@@ -265,9 +265,9 @@ export const LessonsPage: React.FC = () => {
               </>
             ) : (
               <div>
-                <Label className="text-xs font-medium text-slate-600">Your Recorded Video (max 25 MB)</Label>
-                <label className="mt-1 flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl p-4 text-xs text-slate-500 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all">
-                  <Upload size={15} className="text-indigo-500" />
+                <Label className="text-xs font-medium text-[#344054]">Your Recorded Video (max 25 MB)</Label>
+                <label className="mt-1 flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl p-4 text-xs text-[#667085] cursor-pointer hover:border-[#B7DDD6] hover:bg-[#E6F4F1]/30 transition-all">
+                  <Upload size={15} className="text-[#006B5D]" />
                   {videoFile ? videoFile.name : 'Click to choose a video file (mp4, webm...)'}
                   <input
                     type="file"
@@ -281,7 +281,7 @@ export const LessonsPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Duration (MM:SS)</Label>
+                <Label className="text-xs font-medium text-[#344054]">Duration (MM:SS)</Label>
                 <Input
                   value={duration}
                   onChange={e => setDuration(e.target.value)}
@@ -292,13 +292,13 @@ export const LessonsPage: React.FC = () => {
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-600">Parent & Child Activity Instructions</Label>
+              <Label className="text-xs font-medium text-[#344054]">Parent & Child Activity Instructions</Label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 rows={3}
                 placeholder="Suggested home materials (sand tray, clay, counters)..."
-                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-[#006B5D] resize-none"
               />
             </div>
 

@@ -101,8 +101,8 @@ export const TeacherMessagesPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Parent Messages</h1>
-          <p className="text-sm text-slate-500">Private chatrooms with parents about their child's progress</p>
+          <h1 className="text-2xl font-bold text-[#101828]">Parent Messages</h1>
+          <p className="text-sm text-[#667085]">Private chatrooms with parents about their child's progress</p>
         </div>
         <Button onClick={() => setNewChatOpen(true)} className="gap-2 shadow-sm">
           <Plus size={16} /> New Conversation
@@ -119,8 +119,8 @@ export const TeacherMessagesPage: React.FC = () => {
       {threads.length === 0 && !selectedParentId ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-sm font-semibold text-slate-700">No conversations yet</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-sm font-semibold text-[#344054]">No conversations yet</p>
+            <p className="text-xs text-[#667085] mt-1">
               When a parent messages you it appears here, or start one yourself with "New Conversation".
             </p>
           </CardContent>
@@ -135,18 +135,18 @@ export const TeacherMessagesPage: React.FC = () => {
                 onClick={() => setSelectedParentId(t.parentId ?? null)}
                 className={cn(
                   'w-full text-left p-3.5 border-b border-slate-50 transition-colors',
-                  selectedParentId === t.parentId ? 'bg-indigo-50/60' : 'hover:bg-slate-50'
+                  selectedParentId === t.parentId ? 'bg-[#E6F4F1]/60' : 'hover:bg-slate-50'
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-slate-800">{t.parentName}</span>
+                  <span className="text-xs font-semibold text-[#101828]">{t.parentName}</span>
                   {t.unread > 0 && (
-                    <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-[#006B5D] text-white text-[10px] font-bold flex items-center justify-center">
                       {t.unread}
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400 truncate mt-0.5">{t.lastMessage}</p>
+                <p className="text-[11px] text-[#667085] truncate mt-0.5">{t.lastMessage}</p>
                 <p className="text-[9px] text-slate-300 mt-0.5">{formatDateTime(t.lastAt)}</p>
               </button>
             ))}
@@ -162,9 +162,9 @@ export const TeacherMessagesPage: React.FC = () => {
             ) : (
               <>
                 <div className="border-b border-slate-100 px-4 py-3">
-                  <p className="text-sm font-bold text-slate-800">{selectedName || 'Parent'}</p>
+                  <p className="text-sm font-bold text-[#101828]">{selectedName || 'Parent'}</p>
                   {selectedContact && (
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-[#667085]">
                       About {selectedContact.studentName} · {selectedContact.className}
                     </p>
                   )}
@@ -174,11 +174,11 @@ export const TeacherMessagesPage: React.FC = () => {
                     <div key={m.id} className={`flex ${m.senderRole === 'teacher' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-xs ${
                         m.senderRole === 'teacher'
-                          ? 'bg-indigo-600 text-white rounded-br-sm'
-                          : 'bg-slate-100 text-slate-700 rounded-bl-sm'
+                          ? 'bg-[#006B5D] text-white rounded-br-sm'
+                          : 'bg-slate-100 text-[#344054] rounded-bl-sm'
                       }`}>
                         <p className="whitespace-pre-wrap">{m.content}</p>
-                        <p className={`text-[9px] mt-1 ${m.senderRole === 'teacher' ? 'text-indigo-200' : 'text-slate-400'}`}>
+                        <p className={`text-[9px] mt-1 ${m.senderRole === 'teacher' ? 'text-[#006B5D]' : 'text-[#667085]'}`}>
                           {m.senderRole === 'teacher' ? 'You' : m.parentName} · {formatDateTime(m.createdAt)}
                         </p>
                       </div>
@@ -200,7 +200,7 @@ export const TeacherMessagesPage: React.FC = () => {
                     value={draft}
                     onChange={e => setDraft(e.target.value)}
                     placeholder="Write a reply..."
-                    className="flex-1 text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex-1 text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-[#006B5D]"
                   />
                   <Button type="submit" size="sm" className="gap-1.5" disabled={sending || !draft.trim()}>
                     <Send size={13} /> Send
@@ -221,16 +221,16 @@ export const TeacherMessagesPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-2">
             {contacts.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-6">No parents found in your assigned classes.</p>
+              <p className="text-xs text-[#667085] text-center py-6">No parents found in your assigned classes.</p>
             ) : (
               contacts.map(c => (
                 <button
                   key={c.parentId}
                   onClick={() => { setSelectedParentId(c.parentId); setNewChatOpen(false); }}
-                  className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors"
+                  className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-[#B7DDD6] hover:bg-[#E6F4F1]/40 transition-colors"
                 >
-                  <p className="text-xs font-semibold text-slate-800">{c.parentName}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
+                  <p className="text-xs font-semibold text-[#101828]">{c.parentName}</p>
+                  <p className="text-[10px] text-[#667085] mt-0.5">
                     Parent of {c.studentName} · {c.className}
                   </p>
                 </button>

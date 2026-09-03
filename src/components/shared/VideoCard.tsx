@@ -10,12 +10,12 @@ interface VideoCardProps {
 }
 
 const SUBJECT_COLORS: Record<string, string> = {
-  'Phonics & Language': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'Phonics & Early Language': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'Phonics & Language': 'bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]',
+  'Phonics & Early Language': 'bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]',
   'Sensorial & Practical Life': 'bg-emerald-50 text-emerald-700 border-emerald-200',
   'Sensorial & Practical Life (EPL)': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Early Mathematics': 'bg-sky-50 text-sky-700 border-sky-200',
-  'Early Mathematics & Counting': 'bg-sky-50 text-sky-700 border-sky-200',
+  'Early Mathematics': 'bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]',
+  'Early Mathematics & Counting': 'bg-[#E6F4F1] text-[#006B5D] border-[#B7DDD6]',
   'Rhymes & Story Circle': 'bg-amber-50 text-amber-700 border-amber-200',
   'Rhymes, Story Circle & Arabic': 'bg-amber-50 text-amber-700 border-amber-200',
   'Creative Arts & Crafts': 'bg-pink-50 text-pink-700 border-pink-200',
@@ -28,7 +28,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
   const thumbUrl = lesson.youtubeId
     ? `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`
     : null;
-  const subjectColor = SUBJECT_COLORS[lesson.subject] || 'bg-slate-50 text-slate-700 border-slate-200';
+  const subjectColor = SUBJECT_COLORS[lesson.subject] || 'bg-slate-50 text-[#344054] border-slate-200';
 
   return (
     <>
@@ -40,7 +40,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
         onClick={() => setOpen(true)}
       >
         {/* Thumbnail */}
-        <div className="relative aspect-video bg-gradient-to-br from-indigo-100 to-violet-100 overflow-hidden">
+        <div className="relative aspect-video bg-gradient-to-br from-[#E6F4F1] to-[#007A6B] overflow-hidden">
           {thumbUrl ? (
             <img
               src={thumbUrl}
@@ -48,14 +48,14 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-indigo-400 gap-2">
+            <div className="w-full h-full flex flex-col items-center justify-center text-[#006B5D] gap-2">
               <Video size={28} />
               <span className="text-[10px] font-semibold uppercase tracking-wide">Teacher Recording</span>
             </div>
           )}
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
             <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <Play className="text-indigo-600 w-5 h-5 ml-0.5" fill="currentColor" />
+              <Play className="text-[#006B5D] w-5 h-5 ml-0.5" fill="currentColor" />
             </div>
           </div>
           <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-mono">
@@ -70,16 +70,16 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
               {lesson.subject}
             </span>
             {isUpload && (
-              <span className="text-[10px] font-semibold text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-[#006B5D] bg-[#E6F4F1] border border-[#B7DDD6] px-2 py-0.5 rounded-full">
                 Uploaded
               </span>
             )}
           </div>
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug mb-2 line-clamp-2">
+          <h3 className="font-semibold text-[#101828] text-sm leading-snug mb-2 line-clamp-2">
             {lesson.title}
           </h3>
-          <p className="text-xs text-slate-400 line-clamp-2 mb-3">{lesson.description}</p>
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <p className="text-xs text-[#667085] line-clamp-2 mb-3">{lesson.description}</p>
+          <div className="flex items-center justify-between text-xs text-[#667085]">
             <div className="flex items-center gap-1">
               <BookOpen size={12} />
               <span>{lesson.teacherName}</span>
@@ -114,9 +114,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({ lesson }) => {
           <div className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary">{lesson.subject}</Badge>
-              <span className="text-xs text-slate-400">{lesson.class}</span>
+              <span className="text-xs text-[#667085]">{lesson.class}</span>
             </div>
-            <p className="text-sm text-slate-500">{lesson.description}</p>
+            <p className="text-sm text-[#667085]">{lesson.description}</p>
           </div>
         </DialogContent>
       </Dialog>

@@ -38,7 +38,7 @@ export const ForgotPasswordPage: React.FC = () => {
           <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
             <GraduationCap className="text-white" size={16} />
           </div>
-          <span className="font-bold text-slate-800">KinderGuide</span>
+          <span className="font-bold text-[#101828]">KinderGuide</span>
         </div>
 
         {sent ? (
@@ -46,9 +46,9 @@ export const ForgotPasswordPage: React.FC = () => {
             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Check your inbox</h2>
-            <p className="text-sm text-slate-500 mb-6">
-              If an account exists for <span className="font-semibold text-slate-700">{email}</span>,
+            <h2 className="text-xl font-bold text-[#101828] mb-2">Check your inbox</h2>
+            <p className="text-sm text-[#667085] mb-6">
+              If an account exists for <span className="font-semibold text-[#344054]">{email}</span>,
               a password reset link has been sent. The link expires in 1 hour.
             </p>
             <Link to="/login">
@@ -57,14 +57,14 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-bold text-slate-800 mb-1">Forgot Password?</h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <h2 className="text-xl font-bold text-[#101828] mb-1">Forgot Password?</h2>
+            <p className="text-sm text-[#667085] mb-6">
               Enter your registered email and we'll send you a reset link.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label className="text-xs font-medium text-slate-600">Registered Email</Label>
+                <Label className="text-xs font-medium text-[#344054]">Registered Email</Label>
                 <div className="relative mt-1.5">
                   <Input
                     type="email"
@@ -73,7 +73,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     placeholder="e.g. sarah.mitchell@kinderguide.edu"
                     required
                   />
-                  <Mail size={16} className="absolute right-3 top-3 text-slate-400" />
+                  <Mail size={16} className="absolute right-3 top-3 text-[#667085]" />
                 </div>
               </div>
 
@@ -86,7 +86,7 @@ export const ForgotPasswordPage: React.FC = () => {
             </form>
 
             <div className="text-center mt-6">
-              <Link to="/login" className="text-xs text-slate-500 hover:text-indigo-600 font-medium">
+              <Link to="/login" className="text-xs text-[#667085] hover:text-[#006B5D] font-medium">
                 Back to Sign In
               </Link>
             </div>

@@ -49,8 +49,8 @@ export const AdminTeacherReportsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Teacher Performance Reports</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-[#101828]">Teacher Performance Reports</h1>
+          <p className="text-sm text-[#667085]">
             Attendance, check-in times, and teaching activity per teacher — {data ? `${formatDate(data.from)} to ${formatDate(data.to)}` : rangeLabel}
           </p>
         </div>
@@ -63,7 +63,7 @@ export const AdminTeacherReportsPage: React.FC = () => {
                 onClick={() => setRange(r)}
                 className={cn(
                   'px-3 py-1.5 rounded-md text-xs font-semibold capitalize transition-all',
-                  range === r ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  range === r ? 'bg-[#006B5D] text-white shadow-sm' : 'text-[#667085] hover:text-[#344054]'
                 )}
               >
                 {r}
@@ -77,14 +77,14 @@ export const AdminTeacherReportsPage: React.FC = () => {
       </div>
 
       {loading ? (
-        <Card><CardContent className="py-12 text-center text-sm text-slate-400">Loading reports...</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-sm text-[#667085]">Loading reports...</CardContent></Card>
       ) : !data || data.reports.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-sm text-slate-400">No teacher data available.</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-sm text-[#667085]">No teacher data available.</CardContent></Card>
       ) : (
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-medium border-b border-slate-100">
+              <thead className="bg-slate-50 text-[#667085] font-medium border-b border-slate-100">
                 <tr>
                   <th className="p-3.5 pl-5">Teacher</th>
                   <th className="p-3.5 text-center"><CalendarCheck size={13} className="inline mr-1" />Present</th>
@@ -102,12 +102,12 @@ export const AdminTeacherReportsPage: React.FC = () => {
                   <tr key={r.teacherId} className="hover:bg-slate-50/70 transition-colors">
                     <td className="p-3.5 pl-5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-[#E6F4F1] text-[#006B5D] flex items-center justify-center font-bold text-xs">
                           <GraduationCap size={14} />
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800">{r.name}</p>
-                          <p className="text-[10px] text-slate-400">{r.subject}</p>
+                          <p className="font-semibold text-[#101828]">{r.name}</p>
+                          <p className="text-[10px] text-[#667085]">{r.subject}</p>
                         </div>
                       </div>
                     </td>
@@ -115,16 +115,16 @@ export const AdminTeacherReportsPage: React.FC = () => {
                       <span className="font-bold text-emerald-600">{r.present}</span>
                     </td>
                     <td className="p-3.5 text-center">
-                      <span className={cn('font-bold', r.absent > 0 ? 'text-red-600' : 'text-slate-400')}>{r.absent}</span>
+                      <span className={cn('font-bold', r.absent > 0 ? 'text-red-600' : 'text-[#667085]')}>{r.absent}</span>
                     </td>
                     <td className="p-3.5 text-center">
-                      <span className={cn('font-bold', r.leave > 0 ? 'text-amber-600' : 'text-slate-400')}>{r.leave}</span>
+                      <span className={cn('font-bold', r.leave > 0 ? 'text-amber-600' : 'text-[#667085]')}>{r.leave}</span>
                     </td>
-                    <td className="p-3.5 text-center font-mono text-slate-600">{r.avgCheckIn ?? '—'}</td>
-                    <td className="p-3.5 text-center text-slate-600">{r.lessonsUploaded}</td>
-                    <td className="p-3.5 text-center text-slate-600">{r.testsCreated}</td>
-                    <td className="p-3.5 text-center text-slate-600">{r.remarksPosted}</td>
-                    <td className="p-3.5 pr-5 text-center text-slate-600">{r.leavesApplied}</td>
+                    <td className="p-3.5 text-center font-mono text-[#344054]">{r.avgCheckIn ?? '—'}</td>
+                    <td className="p-3.5 text-center text-[#344054]">{r.lessonsUploaded}</td>
+                    <td className="p-3.5 text-center text-[#344054]">{r.testsCreated}</td>
+                    <td className="p-3.5 text-center text-[#344054]">{r.remarksPosted}</td>
+                    <td className="p-3.5 pr-5 text-center text-[#344054]">{r.leavesApplied}</td>
                   </tr>
                 ))}
               </tbody>

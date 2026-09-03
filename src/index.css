@@ -41,7 +41,7 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 238.7 83.5% 66.7%;
+  --primary: 172 100% 21%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
@@ -53,7 +53,7 @@
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 238.7 83.5% 66.7%;
+  --ring: 172 100% 21%;
   --radius: 0.75rem;
 }
 
@@ -62,12 +62,107 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
-  background-color: #F8FAFC;
-  color: hsl(var(--foreground));
+  background-color: #FFFFFF;
+  color: #344054;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  color: #101828;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+h1 {
+  font-weight: 800;
+}
+
+h2,
+h3 {
+  font-weight: 700;
+}
+
+p,
+li,
+td,
+th,
+label,
+input,
+select,
+textarea,
+button {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+p,
+li,
+td {
+  color: #344054;
+  line-height: 1.55;
+}
+
+small,
+caption {
+  color: #667085;
+}
+
+a {
+  color: #006B5D;
+}
+
+select,
+textarea,
+input:not([type='checkbox']):not([type='radio']) {
+  max-width: 100%;
+}
+
+select,
+textarea {
+  border-color: #E2E8F0;
+  background-color: #F9FAFB;
+  color: #344054;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  color: #667085;
+  font-weight: 700;
+}
+
+td {
+  vertical-align: top;
+}
+
+@media (max-width: 768px) {
+  table {
+    min-width: 680px;
+  }
+
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* ─── Custom utilities ─────────────────────────────────────────────────────── */
@@ -81,15 +176,15 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px -5px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 10px 30px -5px rgba(0, 107, 93, 0.12);
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  background: linear-gradient(135deg, #006B5D 0%, #007A6B 100%);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  background: linear-gradient(135deg, #006B5D 0%, #007A6B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -117,9 +212,9 @@ body {
 }
 
 .nav-link-active {
-  background-color: #EEF2FF;
-  color: #4F46E5;
-  border-left: 3px solid #4F46E5;
+  background-color: #E6F4F1;
+  color: #006B5D;
+  border-left: 3px solid #006B5D;
 }
 
 /* Quill editor customizations */
