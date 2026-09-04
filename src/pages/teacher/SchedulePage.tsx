@@ -12,7 +12,7 @@ import type { ScheduleCategory } from '@/types';
 
 export const TeacherSchedulePage: React.FC = () => {
   const { schedules, addScheduleItem, deleteScheduleItem } = useData();
-  const [selectedClass, setSelectedClass] = useState('Junior Montessori (Nursery)');
+  const [selectedClass, setSelectedClass] = useState('Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
   const [openModal, setOpenModal] = useState(false);
 
   // Form State
@@ -33,7 +33,7 @@ export const TeacherSchedulePage: React.FC = () => {
       startTime,
       endTime,
       class: selectedClass,
-      teacherName: 'Maria Montessori',
+      teacherName: 'Amina Khan',
       description,
       isLive,
     });
@@ -61,9 +61,10 @@ export const TeacherSchedulePage: React.FC = () => {
             onChange={e => setSelectedClass(e.target.value)}
             className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
-            <option>Montessori Toddler (Playgroup)</option>
-            <option>Junior Montessori (Nursery)</option>
-            <option>Senior Montessori (Prep)</option>
+            <option>Early Childhood / Toddler (Ages 1.5 - 3)</option>
+            <option>Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</option>
+            <option>Lower Elementary / Prep & Class 1 (Ages 6 - 9)</option>
+            <option>Upper Elementary / Class 2 - 5 (Ages 9 - 12)</option>
           </select>
 
           <Button onClick={() => setOpenModal(true)} className="gap-2 shadow-sm">
@@ -118,12 +119,12 @@ export const TeacherSchedulePage: React.FC = () => {
               >
                 <option value="circle_time">Morning Circle Time</option>
                 <option value="live_class">Live Online Teaching</option>
-                <option value="sensorial">Montessori Work Period (EPL & Sensorial)</option>
-                <option value="phonics">Phonics & Early Language</option>
-                <option value="math">Early Mathematics & Counting</option>
+                <option value="sensorial">Practical Life / Sensorial Work Period</option>
+                <option value="phonics">Language Arts</option>
+                <option value="math">Mathematics</option>
                 <option value="snack_break">Snack Time & Table Grace</option>
                 <option value="storytelling">Storybook Circle</option>
-                <option value="art_craft">Creative Art & Sensory Play</option>
+                <option value="art_craft">Cultural Studies / General Knowledge</option>
                 <option value="outdoor_play">Gross Motor & Outdoor Play</option>
               </select>
             </div>
@@ -188,3 +189,5 @@ export const TeacherSchedulePage: React.FC = () => {
     </div>
   );
 };
+
+

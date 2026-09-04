@@ -6,7 +6,7 @@ import { useData } from '@/context/DataContext';
 
 export const StudentSchedulePage: React.FC = () => {
   const { schedules } = useData();
-  const myClassSchedules = schedules.filter(s => s.class === 'Junior Montessori (Nursery)');
+  const myClassSchedules = schedules.filter(s => s.class === 'Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
 
   return (
     <div className="space-y-6">
@@ -14,7 +14,7 @@ export const StudentSchedulePage: React.FC = () => {
 
       <div>
         <h1 className="text-2xl font-bold text-[#101828]">My Daily Montessori Routine 🌟</h1>
-        <p className="text-sm text-[#667085]">Here is your fun schedule for today at Junior Montessori</p>
+        <p className="text-sm text-[#667085]">Here is your fun schedule for today at Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</p>
       </div>
 
       <Card>
@@ -31,3 +31,5 @@ export const StudentSchedulePage: React.FC = () => {
     </div>
   );
 };
+
+

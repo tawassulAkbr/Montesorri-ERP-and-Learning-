@@ -70,7 +70,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="e.g. sarah.mitchell@kinderguide.edu"
+                    placeholder="e.g. amina.khan@faculty.kinderguide.com"
                     required
                   />
                   <Mail size={16} className="absolute right-3 top-3 text-[#667085]" />
@@ -96,3 +96,4 @@ export const ForgotPasswordPage: React.FC = () => {
     </div>
   );
 };
+

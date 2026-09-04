@@ -4,6 +4,7 @@ import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { notFound } from '../utils/errors';
+import { schoolOf } from '../utils/tenant';
 
 // ─── Student submits feedback (identity stored, hidden from teacher) ─────────
 export const studentFeedbackRouter = Router();
@@ -16,11 +17,11 @@ const feedbackSchema = z.object({
 
 studentFeedbackRouter.post('/', async (req, res) => {
   const { teacherId, content } = feedbackSchema.parse(req.body);
-  const [student, teacher] = await Promise.all([
-    prisma.student.findUnique({ where: { id: req.user!.id } }),
-    prisma.teacher.findUnique({ where: { id: teacherId } }),
-  ]);
+  const student = await prisma.student.findUnique({ where: { id: req.user!.id } });
   if (!student) throw notFound('Student record not found');
+  const teacher = await prisma.teacher.findFirst({
+    where: { id: teacherId, schoolId: student.schoolId },
+  });
   if (!teacher) throw notFound('Teacher not found');
 
   const feedback = await prisma.feedback.create({
@@ -94,8 +95,12 @@ teacherFeedbackRouter.patch('/:id/read', async (req, res) => {
 export const adminFeedbackRouter = Router();
 adminFeedbackRouter.use(requireAuth, requireRole('admin'));
 
-adminFeedbackRouter.get('/', async (_req, res) => {
-  const feedbacks = await prisma.feedback.findMany({ orderBy: { createdAt: 'desc' } });
+adminFeedbackRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
+  const feedbacks = await prisma.feedback.findMany({
+    where: { teacher: { schoolId } },
+    orderBy: { createdAt: 'desc' },
+  });
   res.json({
     feedbacks: feedbacks.map(f => ({
       id: f.id,

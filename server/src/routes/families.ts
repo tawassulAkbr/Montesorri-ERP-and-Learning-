@@ -7,7 +7,7 @@ import { todayISO } from '../services/attendance';
 import { badRequest, notFound } from '../utils/errors';
 import {
   studentToFrontend, parentToFrontend, attendanceToFrontend,
-  testResultToFrontend, leaveToFrontend,
+  testResultToFrontend, leaveToFrontend, paymentToFrontend,
 } from '../utils/serializers';
 
 export const studentRouter = Router();
@@ -72,7 +72,7 @@ parentRouter.get('/me', async (req, res) => {
 parentRouter.get('/children', async (req, res) => {
   const parent = await getParent(req.user!.id);
   res.json({
-    children: parent.children.map(c => studentToFrontend(c, { includeFeeAmount: false })),
+    children: parent.children.map(c => studentToFrontend(c, { includeFeeAmount: true })),
   });
 });
 
@@ -139,4 +139,23 @@ parentRouter.get('/children/:id/leaves', async (req, res) => {
     orderBy: { submittedAt: 'desc' },
   });
   res.json({ leaves: leaves.map(leaveToFrontend) });
+});
+
+parentRouter.get('/finance', async (req, res) => {
+  const parent = await getParent(req.user!.id);
+  const childIds = parent.children.map(c => c.id);
+  const payments = await prisma.payment.findMany({
+    where: { studentId: { in: childIds } },
+    include: {
+      student: { select: { name: true, class: true, rollNo: true, enrollmentId: true, guardianName: true } },
+      school: { select: { name: true, city: true, address: true, phone: true } },
+    },
+    orderBy: [{ createdAt: 'desc' }, { receiptNo: 'desc' }],
+  });
+  res.json({
+    children: parent.children.map(c => ({
+      id: c.id, name: c.name, class: c.class, feeAmount: c.feeAmount, feeDue: c.feeDue,
+    })),
+    payments: payments.map(paymentToFrontend),
+  });
 });

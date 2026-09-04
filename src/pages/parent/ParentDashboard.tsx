@@ -1,23 +1,27 @@
 import { useMemo, useState } from 'react';
-import { CalendarCheck, MessageSquare, ArrowUpRight, Plus, Sparkles } from 'lucide-react';
+import { CalendarCheck, MessageSquare, ArrowUpRight, Plus, Sparkles, Receipt as ReceiptIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
 import { AiInsightsSection } from '@/components/ai/AiInsightsSection';
 import { AttendanceAreaChart } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { SubmitLeaveModal } from '@/components/shared/LeaveModal';
 import { LiveClassBanner } from '@/components/shared/LiveClassBanner';
+import { ReceiptDialog } from '@/components/shared/ReceiptDocument';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/hooks/useAuth';
-import { buildAttendanceChartData, formatDate, getInitials } from '@/lib/utils';
+import { buildAttendanceChartData, formatDate, formatPKR, getInitials, PAYMENT_METHOD_LABELS } from '@/lib/utils';
+import type { Payment } from '@/types';
 
 export const ParentDashboard: React.FC = () => {
   const { currentUser } = useAuth();
-  const { students, remarks, leaveRequests, teachers, applyLeave, attendance } = useData();
+  const { students, remarks, leaveRequests, teachers, applyLeave, attendance, payments } = useData();
   const myChildren = students.filter(s => s.parentId === currentUser?.id);
   const [selectedChildId, setSelectedChildId] = useState('');
   const [openLeaveModal, setOpenLeaveModal] = useState(false);
+  const [receipt, setReceipt] = useState<Payment | null>(null);
 
   const selectedChild = myChildren.find(c => c.id === selectedChildId) || myChildren[0];
 
@@ -26,6 +30,10 @@ export const ParentDashboard: React.FC = () => {
     [attendance, selectedChild?.id]
   );
   const chartData = useMemo(() => buildAttendanceChartData(childAttendance), [childAttendance]);
+  const childPayments = useMemo(
+    () => payments.filter(p => p.studentId === selectedChild?.id),
+    [payments, selectedChild?.id]
+  );
 
   const childRemarks = remarks.filter(r => r.studentId === selectedChild?.id);
   const childLeaves = leaveRequests.filter(l => l.kind === 'student' && l.studentId === selectedChild?.id);
@@ -155,6 +163,74 @@ export const ParentDashboard: React.FC = () => {
         </Card>
       </div>
 
+      {/* Fee & Payments */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-base font-semibold">Fee & Payments</CardTitle>
+            <p className="text-xs text-[#98A2B3]">Receipts issued for {selectedChild.name}</p>
+          </div>
+          <Badge
+            variant="outline"
+            className={selectedChild.feeDue
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-emerald-50 text-emerald-700 border-emerald-200'}
+          >
+            {selectedChild.feeDue ? 'Fee due' : 'Fee cleared'}
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 p-3.5 rounded-2xl bg-[#F6FAF9] border border-[#D7E7E4]">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#667085]">Monthly Fee</p>
+              <p className="text-sm font-extrabold text-[#101828]">
+                {selectedChild.feeAmount ? formatPKR(selectedChild.feeAmount) : 'Set by school office'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#667085]">Total Paid</p>
+              <p className="text-sm font-extrabold text-[#006B5D]">
+                {formatPKR(childPayments.reduce((sum, p) => sum + p.amount, 0))}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#667085]">Receipts</p>
+              <p className="text-sm font-extrabold text-[#101828]">{childPayments.length}</p>
+            </div>
+            {selectedChild.feeDue && (
+              <p className="text-[11px] text-amber-700 font-medium">
+                Please clear the outstanding fee at the school office or via bank transfer.
+              </p>
+            )}
+          </div>
+
+          {childPayments.length === 0 ? (
+            <p className="text-xs text-[#98A2B3] py-4 text-center">No payments recorded yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {childPayments.slice(0, 3).map(p => (
+                <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-[#F2F4F7] bg-[#F9FAFB]/70">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#101828] truncate">
+                      {p.term} · <span className="font-mono">{p.receiptNo}</span>
+                    </p>
+                    <p className="text-[10px] text-[#98A2B3]">
+                      {formatDate(p.createdAt)} · {PAYMENT_METHOD_LABELS[p.method]}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-extrabold text-[#006B5D] font-mono">{formatPKR(p.amount)}</span>
+                    <Button variant="ghost" size="sm" className="gap-1 text-[11px]" onClick={() => setReceipt(p)}>
+                      <ReceiptIcon size={13} /> Receipt
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Remarks Feed & Subject Teachers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -222,6 +298,8 @@ export const ParentDashboard: React.FC = () => {
         applicantName={selectedChild.name}
         onSubmit={handleApplyLeave}
       />
+
+      <ReceiptDialog payment={receipt} onClose={() => setReceipt(null)} />
     </div>
   );
 };

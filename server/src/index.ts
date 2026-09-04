@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'node:path';
 import rateLimit from 'express-rate-limit';
 import { ZodError } from 'zod';
@@ -22,10 +23,14 @@ import { parentMessageRouter, teacherMessageRouter } from './routes/messages';
 import { teacherReportRouter } from './routes/teacher-reports';
 import { studentLearningRouter, teacherStreakRouter } from './routes/learning';
 import { aiRouter } from './routes/ai';
+import { financeRouter } from './routes/finance';
+import { inventoryRouter } from './routes/inventory';
 import { prisma } from './db';
 
 const app = express();
 
+// CSP off: lessons embed YouTube players and the charts render inline SVG.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({ origin: config.FRONTEND_URL }));
 app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
@@ -47,6 +52,8 @@ app.use('/api/bootstrap', bootstrapRouter);
 app.use('/api/admin/feedback', adminFeedbackRouter);
 app.use('/api/admin/assignments', adminAssignmentRouter);
 app.use('/api/admin/teacher-reports', teacherReportRouter);
+app.use('/api/admin/finance', financeRouter);
+app.use('/api/admin/inventory', inventoryRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/teachers/messages', teacherMessageRouter);
 app.use('/api/teachers/feedback', teacherFeedbackRouter);
@@ -97,9 +104,29 @@ app.listen(config.PORT, () => {
 // Warm the Neon connection immediately on startup, then keep it warm every 2
 // minutes so the free-tier compute doesn't auto-suspend and cause cold-start
 // connection timeouts (Prisma P2024) on the next request.
-prisma.$queryRaw`SELECT 1`
-  .then(() => console.log('Database connection warm'))
-  .catch(() => { /* retried by keep-alive */ });
-setInterval(() => {
+
+// Store the keep-alive timer on globalThis so tsx watch restarts clear the
+// previous interval instead of leaking it.
+const g = global as unknown as { _keepAlive?: ReturnType<typeof setInterval> };
+if (g._keepAlive) clearInterval(g._keepAlive);
+
+async function warmup(retries = 3, delayMs = 5000): Promise<void> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('Database connection warm');
+      return;
+    } catch (err) {
+      console.warn(`Database warmup attempt ${i + 1}/${retries} failed, retrying in ${delayMs / 1000}s...`);
+      if (i < retries - 1) await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  console.error('Database warmup failed — queries will connect on first request');
+}
+
+warmup();
+
+g._keepAlive = setInterval(() => {
   prisma.$queryRaw`SELECT 1`.catch(() => { /* keep-alive only */ });
 }, 2 * 60 * 1000);
+

@@ -27,14 +27,17 @@ export interface StudentLite {
 
 export async function buildScope(user: AuthUser): Promise<AiScope> {
   if (user.role === 'admin') {
-    const students = await prisma.student.findMany({ select: { id: true } });
+    const students = await prisma.student.findMany({
+      where: { schoolId: user.schoolId },
+      select: { id: true },
+    });
     return { role: 'admin', teacherClasses: [], studentIds: students.map(s => s.id) };
   }
   if (user.role === 'teacher') {
     const teacher = await prisma.teacher.findUnique({ where: { id: user.id } });
     if (!teacher) throw notFound('Teacher record not found');
     const students = await prisma.student.findMany({
-      where: { class: { in: teacher.classes } },
+      where: { schoolId: user.schoolId, class: { in: teacher.classes } },
       select: { id: true },
     });
     return { role: 'teacher', teacherClasses: teacher.classes, studentIds: students.map(s => s.id) };
@@ -282,8 +285,9 @@ export interface FeeSnapshot {
   studentCount: number;
 }
 
-export async function feeSnapshot(): Promise<FeeSnapshot> {
+export async function feeSnapshot(schoolId: string): Promise<FeeSnapshot> {
   const students = await prisma.student.findMany({
+    where: { schoolId },
     select: { id: true, name: true, class: true, rollNo: true, feeAmount: true, feeDue: true },
     orderBy: [{ class: 'asc' }, { rollNo: 'asc' }],
   });
@@ -315,9 +319,11 @@ export interface ClassSummary {
   avgScore: number | null;
 }
 
-export async function classSummaries(onlyClasses?: string[]): Promise<ClassSummary[]> {
+export async function classSummaries(schoolId: string, onlyClasses?: string[]): Promise<ClassSummary[]> {
   const students = await prisma.student.findMany({
-    where: onlyClasses && onlyClasses.length > 0 ? { class: { in: onlyClasses } } : undefined,
+    where: onlyClasses && onlyClasses.length > 0
+      ? { schoolId, class: { in: onlyClasses } }
+      : { schoolId },
     select: { id: true, class: true },
   });
   const classes = [...new Set(students.map(s => s.class))].sort();
@@ -352,8 +358,12 @@ export function classComparisonChart(rows: ClassSummary[]): AiChartSpec {
   );
 }
 
-export async function enrollmentPie(): Promise<AiChartSpec> {
-  const grouped = await prisma.student.groupBy({ by: ['class'], _count: { _all: true } });
+export async function enrollmentPie(schoolId: string): Promise<AiChartSpec> {
+  const grouped = await prisma.student.groupBy({
+    by: ['class'],
+    where: { schoolId },
+    _count: { _all: true },
+  });
   const palette = [AI_COLORS.indigo, AI_COLORS.amber, AI_COLORS.green, AI_COLORS.pink, AI_COLORS.cyan];
   return pieChart(
     'Enrollment by class',

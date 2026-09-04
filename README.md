@@ -1,75 +1,86 @@
-# React + TypeScript + Vite
+# KinderGuide Montessori ERP/LMS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+KinderGuide is a role-based Montessori school platform with dashboards for admins, teachers, parents, and students. It includes admissions/users, attendance, leave workflows, lessons, assessments, progress reports, assignments, parent messaging, finance, inventory, HR/payroll planning, curriculum tracking, gamified learning, AI insights, and offline sync support.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Frontend: React 19, TypeScript, Vite, Tailwind CSS, Recharts, Lucide icons
+- Backend: Node.js, Express, Prisma, PostgreSQL
+- Security: JWT auth, role guards, tenant scoping, Helmet, auth rate limiting, server-side HTML sanitization
+- Offline: localStorage snapshots plus queued write replay when connectivity returns
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+cd server
+npm install
+copy .env.example .env
+npm run db:migrate
+npm run db:seed
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+In a second terminal:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run dev
 ```
+
+Frontend: `http://localhost:5173`
+API: `http://localhost:4000/api`
+
+## Environment
+
+Root `.env` is optional for the Vite app. Backend settings live in `server/.env`.
+
+Required backend variables:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+JWT_SECRET="replace-with-at-least-32-characters"
+JWT_EXPIRES_IN="7d"
+PORT=4000
+FRONTEND_URL="http://localhost:5173"
+RESEND_API_KEY=""
+EMAIL_FROM="KinderGuide <onboarding@resend.dev>"
+AI_API_KEY=""
+AI_API_BASE="https://api.openai.com/v1"
+AI_MODEL="gpt-4o-mini"
+```
+
+## Demo Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@kinderguide.com` | `admin123` |
+| Teacher | `amina.khan@faculty.kinderguide.com` | `teacher123` |
+| Parent | `bilal.ahmed@parent.kinderguide.com` | `parent123` |
+| Student | `bilal.ahmed@kinderguide.com` | `student123` |
+
+## Commands
+
+```bash
+npm run lint
+npm run build
+cd server
+npm run typecheck
+npm run db:migrate
+npm run db:seed
+```
+
+## Architecture
+
+- `src/`: React app, role routes, dashboards, shared UI, offline cache/queue, AI panel.
+- `server/src/routes/`: Express API modules for auth, admin, teacher, family, academics, finance, inventory, assignments, messages, AI, and uploads.
+- `server/prisma/schema.prisma`: PostgreSQL schema with school tenants, users, credentials, attendance, payments, inventory, learning, and communications.
+- `server/prisma/migrations/`: database migration history.
+
+## Key Modules
+
+- Admin: user management, classes, finance, inventory, HR/payroll, curriculum, reports.
+- Teacher: live class, schedule, lessons, attendance, students, streaks, tests, assignments, remarks, messages.
+- Parent: child dashboard, attendance/leaves, remarks, daily work, teachers, messages.
+- Student: learning game, live class, lectures, tests, reports, assignments, feedback.
+- AI: role-scoped insights, charts, assistant Q&A, optional OpenAI-compatible classifier.
+- Offline: cached bootstrap/AI/finance/inventory data and queued mutation replay.

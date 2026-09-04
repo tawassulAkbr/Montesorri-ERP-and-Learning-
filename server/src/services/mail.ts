@@ -1,7 +1,15 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { config, emailEnabled } from '../config';
 
-const resend = emailEnabled ? new Resend(config.RESEND_API_KEY) : null;
+const transporter = emailEnabled
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: config.SMTP_USER,
+        pass: config.SMTP_APP_PASSWORD,
+      },
+    })
+  : null;
 
 export interface CredentialEmailData {
   to: string;
@@ -53,27 +61,30 @@ export async function sendPasswordResetEmail(to: string, rawToken: string): Prom
 }
 
 async function deliver(opts: { to: string; subject: string; html: string }): Promise<void> {
-  if (!resend) {
-    // Dev fallback: no RESEND_API_KEY configured — print the full email to the
-    // server console instead of sending. Set RESEND_API_KEY in server/.env to
-    // deliver for real (free key at https://resend.com).
+  if (!transporter) {
+    // Dev fallback: no SMTP credentials configured — print the full email to the
+    // server console instead of sending.
     console.log('\n────────────────────────────────────────────────────────────');
-    console.log('[EMAIL NOT SENT — no RESEND_API_KEY configured]');
+    console.log('[EMAIL NOT SENT — no SMTP credentials configured]');
     console.log(`  To:      ${opts.to}`);
     console.log(`  Subject: ${opts.subject}`);
     console.log('  Body (HTML):');
     console.log(opts.html);
-    console.log('  → Add RESEND_API_KEY to server/.env to send real emails.');
+    console.log('  → Add SMTP_USER and SMTP_APP_PASSWORD to server/.env to send real emails.');
     console.log('────────────────────────────────────────────────────────────\n');
     return;
   }
-  const { error } = await resend.emails.send({
-    from: config.EMAIL_FROM,
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-  });
-  if (error) {
-    throw new Error(`Resend error: ${error.message}`);
+
+  try {
+    await transporter.sendMail({
+      from: `${config.EMAIL_FROM} <${config.SMTP_USER}>`,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    });
+    console.log(`✅ Email sent to ${opts.to}: "${opts.subject}"`);
+  } catch (err: any) {
+    console.error(`❌ Failed to send email to ${opts.to}:`, err.message);
+    // Don't crash the request — log the error but let the enrollment succeed
   }
 }

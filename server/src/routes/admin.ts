@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import type { EmploymentStatus } from '@prisma/client';
 import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
@@ -8,6 +9,7 @@ import { sendCredentialsEmail } from '../services/mail';
 import { nextEmployeeId, nextEnrollmentId, nextRollNo } from '../services/ids';
 import { deriveTeacherStatus, todayISO, eachWeekday } from '../services/attendance';
 import { conflict, notFound, badRequest } from '../utils/errors';
+import { schoolOf } from '../utils/tenant';
 import {
   teacherToFrontend, studentToFrontend, parentToFrontend,
   leaveToFrontend, notificationToFrontend,
@@ -17,40 +19,72 @@ export const adminRouter = Router();
 adminRouter.use(requireAuth, requireRole('admin'));
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-adminRouter.get('/dashboard', async (_req, res) => {
-  const [teachers, students, parents, pendingLeaves, feeDueCount] = await Promise.all([
-    prisma.teacher.count(),
-    prisma.student.count(),
-    prisma.parent.count(),
-    prisma.leaveRequest.findMany({ where: { status: 'PENDING', kind: 'TEACHER' }, orderBy: { submittedAt: 'desc' } }),
-    prisma.student.count({ where: { feeDue: true } }),
+adminRouter.get('/dashboard', async (req, res) => {
+  const schoolId = schoolOf(req);
+  const [teachers, students, parents, pendingLeaves, feeDueCount, inventoryItems] = await Promise.all([
+    prisma.teacher.count({ where: { schoolId } }),
+    prisma.student.count({ where: { schoolId } }),
+    prisma.parent.count({ where: { schoolId } }),
+    prisma.leaveRequest.findMany({
+      where: { status: 'PENDING', kind: 'TEACHER', teacher: { schoolId } },
+      orderBy: { submittedAt: 'desc' },
+    }),
+    prisma.student.count({ where: { schoolId, feeDue: true } }),
+    prisma.inventoryItem.findMany({ where: { schoolId }, select: { quantity: true, minStock: true } }),
   ]);
   res.json({
-    totals: { teachers, students, parents, feeDueCount },
+    totals: {
+      teachers, students, parents, feeDueCount,
+      inventoryItems: inventoryItems.length,
+      lowStockCount: inventoryItems.filter(i => i.quantity <= i.minStock).length,
+    },
     pendingLeaves: pendingLeaves.map(leaveToFrontend),
   });
 });
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────
+const EMPLOYMENT_STATUSES = ['active', 'on_leave', 'resigned'] as const;
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const slugEmail = (name: string, domain: string) =>
+  `${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '')}@${domain}`;
+
 const createTeacherSchema = z.object({
   name: z.string().min(2),
-  email: z.string().min(3),
+  email: z.string().optional(),
+  personalEmail: z.string().email().optional(),
   phone: z.string().min(3),
   qualification: z.string().min(2),
   subject: z.string().min(2),
   classes: z.array(z.string()).min(1),
+  status: z.enum(EMPLOYMENT_STATUSES).optional(),
+  joinDate: isoDate.optional(),
 });
 
+const updateTeacherSchema = z.object({
+  name: z.string().min(2).optional(),
+  phone: z.string().min(3).optional(),
+  qualification: z.string().min(2).optional(),
+  subject: z.string().min(2).optional(),
+  classes: z.array(z.string()).min(1).optional(),
+  status: z.enum(EMPLOYMENT_STATUSES).optional(),
+  joinDate: isoDate.nullable().optional(),
+});
+
+const toEmploymentStatus = (s: (typeof EMPLOYMENT_STATUSES)[number]) => s.toUpperCase() as EmploymentStatus;
+
 adminRouter.post('/teachers', async (req, res) => {
+  const schoolId = schoolOf(req);
   const input = createTeacherSchema.parse(req.body);
-  const email = input.email.trim().toLowerCase();
+  const email = slugEmail(input.name, 'faculty.kinderguide.com');
 
   const existing = await prisma.credential.findUnique({ where: { email } });
   if (existing) throw conflict('A user with this email already exists');
+  const existingTeacher = await prisma.teacher.findFirst({ where: { email } });
+  if (existingTeacher) throw conflict('A teacher with this email already exists');
 
   const password = generatePassword();
   const teacher = await prisma.$transaction(async tx => {
-    const employeeId = await nextEmployeeId();
+    const employeeId = await nextEmployeeId(schoolId);
     const created = await tx.teacher.create({
       data: {
         name: input.name.trim(),
@@ -60,6 +94,9 @@ adminRouter.post('/teachers', async (req, res) => {
         subject: input.subject,
         classes: input.classes,
         employeeId,
+        schoolId,
+        status: input.status ? toEmploymentStatus(input.status) : 'ACTIVE',
+        joinDate: input.joinDate,
       },
     });
     await tx.credential.create({
@@ -74,7 +111,7 @@ adminRouter.post('/teachers', async (req, res) => {
   });
 
   await sendCredentialsEmail({
-    to: email,
+    to: input.personalEmail || email,
     name: teacher.name,
     roleLabel: 'Teacher',
     email,
@@ -87,8 +124,9 @@ adminRouter.post('/teachers', async (req, res) => {
   });
 });
 
-adminRouter.get('/teachers', async (_req, res) => {
-  const teachers = await prisma.teacher.findMany({ orderBy: { createdAt: 'asc' } });
+adminRouter.get('/teachers', async (req, res) => {
+  const schoolId = schoolOf(req);
+  const teachers = await prisma.teacher.findMany({ where: { schoolId }, orderBy: { createdAt: 'asc' } });
   const date = todayISO();
   const withStatus = await Promise.all(
     teachers.map(async t => ({
@@ -99,37 +137,65 @@ adminRouter.get('/teachers', async (_req, res) => {
   res.json({ teachers: withStatus });
 });
 
+adminRouter.patch('/teachers/:id', async (req, res) => {
+  const schoolId = schoolOf(req);
+  const input = updateTeacherSchema.parse(req.body);
+  const owned = await prisma.teacher.findFirst({ where: { id: req.params.id, schoolId } });
+  if (!owned) throw notFound('Teacher not found');
+
+  const teacher = await prisma.teacher.update({
+    where: { id: owned.id },
+    data: {
+      ...(input.name && { name: input.name.trim() }),
+      ...(input.phone && { phone: input.phone.trim() }),
+      ...(input.qualification && { qualification: input.qualification.trim() }),
+      ...(input.subject && { subject: input.subject.trim() }),
+      ...(input.classes && { classes: input.classes }),
+      ...(input.status && { status: toEmploymentStatus(input.status) }),
+      ...(input.joinDate !== undefined && { joinDate: input.joinDate }),
+    },
+  });
+  res.json({ teacher: teacherToFrontend(teacher) });
+});
+
 // ─── Students (with automatic parent account) ────────────────────────────────
 const createStudentSchema = z.object({
   name: z.string().min(2),
-  email: z.string().email('Student email is required'),
+  email: z.string().email().optional(),
+  personalEmail: z.string().email().optional(),
   phone: z.string().min(3),
   address: z.string().min(3),
   guardianName: z.string().min(2),
-  guardianEmail: z.string().email('Guardian email is required'),
+  guardianEmail: z.string().email().optional(),
   guardianPhone: z.string().optional(),
   class: z.string().min(2),
   feeAmount: z.number().int().positive(),
 });
 
 adminRouter.post('/students', async (req, res) => {
+  const schoolId = schoolOf(req);
   const input = createStudentSchema.parse(req.body);
-  const studentEmail = input.email.trim().toLowerCase();
-  const guardianEmail = input.guardianEmail.trim().toLowerCase();
+  const studentEmail = input.email ? input.email.trim().toLowerCase() : slugEmail(input.name, 'kinderguide.com');
+  const guardianEmail = input.guardianEmail ? input.guardianEmail.trim().toLowerCase() : slugEmail(input.guardianName, 'parent.kinderguide.com');
   const guardianPhone = input.guardianPhone || input.phone;
 
   if (await prisma.credential.findUnique({ where: { email: studentEmail } })) {
     throw conflict('A user with the student email already exists');
   }
+  if (await prisma.student.findFirst({ where: { email: studentEmail } })) {
+    throw conflict('A student with this email already exists');
+  }
 
   const studentPassword = generatePassword();
-  const ageGroup = input.class.includes('Toddler') ? '2-3 Years'
-    : input.class.includes('Senior') ? '4-5 Years' : '3-4 Years';
+  const ageGroup = input.class.includes('1.5 - 3') ? 'Ages 1.5 - 3'
+    : input.class.includes('3 - 6') ? 'Ages 3 - 6'
+      : input.class.includes('6 - 9') ? 'Ages 6 - 9'
+        : input.class.includes('9 - 12') ? 'Ages 9 - 12' : undefined;
 
   const result = await prisma.$transaction(async tx => {
-    // Find or create the parent account
+    // Find or create the parent account (scoped to this school)
     const existingParent = await tx.parent.findFirst({
-      where: { OR: [{ email: guardianEmail }, { phone: guardianPhone }] },
+      where: { schoolId, OR: [{ email: guardianEmail }, { phone: guardianPhone }] },
     });
 
     let parentId: string;
@@ -142,7 +208,7 @@ adminRouter.post('/students', async (req, res) => {
     } else {
       parentPassword = generatePassword();
       const createdParent = await tx.parent.create({
-        data: { name: input.guardianName.trim(), email: guardianEmail, phone: guardianPhone },
+        data: { name: input.guardianName.trim(), email: guardianEmail, phone: guardianPhone, schoolId },
       });
       parentId = createdParent.id;
       parentName = createdParent.name;
@@ -156,8 +222,8 @@ adminRouter.post('/students', async (req, res) => {
       });
     }
 
-    const enrollmentId = await nextEnrollmentId();
-    const rollNo = await nextRollNo(input.class);
+    const enrollmentId = await nextEnrollmentId(schoolId);
+    const rollNo = await nextRollNo(schoolId, input.class);
     const student = await tx.student.create({
       data: {
         name: input.name.trim(),
@@ -167,6 +233,7 @@ adminRouter.post('/students', async (req, res) => {
         class: input.class,
         ageGroup,
         parentId,
+        schoolId,
         phone: input.phone,
         address: input.address,
         guardianName: input.guardianName.trim(),
@@ -187,27 +254,21 @@ adminRouter.post('/students', async (req, res) => {
     return { student, parentName, parentPassword };
   });
 
-  // Email credentials. The student's login goes to the student email, and is
-  // ALSO forwarded to the parent/guardian so they can help the child sign in.
+  const targetEmail = input.personalEmail || guardianEmail;
+
+  // Send Student credentials
   await sendCredentialsEmail({
-    to: studentEmail,
+    to: targetEmail,
     name: result.student.name,
     roleLabel: 'Student',
     email: studentEmail,
     password: studentPassword,
   });
-  if (guardianEmail !== studentEmail) {
-    await sendCredentialsEmail({
-      to: guardianEmail,
-      name: result.student.name,
-      roleLabel: 'Student',
-      email: studentEmail,
-      password: studentPassword,
-    });
-  }
+
+  // Send Parent credentials if a new parent was created
   if (result.parentPassword) {
     await sendCredentialsEmail({
-      to: guardianEmail,
+      to: targetEmail,
       name: result.parentName,
       roleLabel: 'Parent',
       email: guardianEmail,
@@ -228,13 +289,19 @@ adminRouter.post('/students', async (req, res) => {
   });
 });
 
-adminRouter.get('/students', async (_req, res) => {
-  const students = await prisma.student.findMany({ orderBy: [{ class: 'asc' }, { rollNo: 'asc' }] });
+adminRouter.get('/students', async (req, res) => {
+  const schoolId = schoolOf(req);
+  const students = await prisma.student.findMany({
+    where: { schoolId },
+    orderBy: [{ class: 'asc' }, { rollNo: 'asc' }],
+  });
   res.json({ students: students.map(s => studentToFrontend(s, { includeFeeAmount: true })) });
 });
 
-adminRouter.get('/parents', async (_req, res) => {
+adminRouter.get('/parents', async (req, res) => {
+  const schoolId = schoolOf(req);
   const parents = await prisma.parent.findMany({
+    where: { schoolId },
     orderBy: { createdAt: 'asc' },
     include: { children: { select: { id: true } } },
   });
@@ -243,8 +310,9 @@ adminRouter.get('/parents', async (_req, res) => {
 
 // ─── Fee toggle (admin marks student red) ────────────────────────────────────
 adminRouter.patch('/students/:id/fee-due', async (req, res) => {
+  const schoolId = schoolOf(req);
   const due = z.object({ due: z.boolean() }).parse(req.body).due;
-  const student = await prisma.student.findUnique({ where: { id: String(req.params.id) } });
+  const student = await prisma.student.findFirst({ where: { id: String(req.params.id), schoolId } });
   if (!student) throw notFound('Student not found');
 
   const now = new Date().toISOString();
@@ -280,7 +348,8 @@ adminRouter.patch('/students/:id/fee-due', async (req, res) => {
 
 // ─── Fee reminder (admin nudges student + parent) ────────────────────────────
 adminRouter.post('/students/:id/fee-reminder', async (req, res) => {
-  const student = await prisma.student.findUnique({ where: { id: String(req.params.id) } });
+  const schoolId = schoolOf(req);
+  const student = await prisma.student.findFirst({ where: { id: String(req.params.id), schoolId } });
   if (!student) throw notFound('Student not found');
 
   await prisma.$transaction([
@@ -306,11 +375,19 @@ adminRouter.post('/students/:id/fee-reminder', async (req, res) => {
 
 // ─── Password reset (admin-generated, emailed) ───────────────────────────────
 adminRouter.post('/users/:id/reset-password', async (req, res) => {
+  const schoolId = schoolOf(req);
   const role = z.enum(['teacher', 'student', 'parent']).parse(req.body.role);
   const cred = await prisma.credential.findFirst({
     where: { userId: String(req.params.id), role: role.toUpperCase() as any },
   });
   if (!cred) throw notFound('Credential not found');
+
+  // Verify the user belongs to this school
+  const belongsToSchool =
+    role === 'teacher' ? await prisma.teacher.findFirst({ where: { id: cred.userId, schoolId } })
+    : role === 'student' ? await prisma.student.findFirst({ where: { id: cred.userId, schoolId } })
+    : await prisma.parent.findFirst({ where: { id: cred.userId, schoolId } });
+  if (!belongsToSchool) throw notFound('User not found in this school');
 
   const password = generatePassword();
   await prisma.credential.update({
@@ -319,9 +396,9 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
   });
 
   const name =
-    role === 'teacher' ? (await prisma.teacher.findUnique({ where: { id: cred.userId } }))?.name
-    : role === 'student' ? (await prisma.student.findUnique({ where: { id: cred.userId } }))?.name
-    : (await prisma.parent.findUnique({ where: { id: cred.userId } }))?.name;
+    role === 'teacher' ? (belongsToSchool as any).name
+    : role === 'student' ? (belongsToSchool as any).name
+    : (belongsToSchool as any).name;
 
   await sendCredentialsEmail({
     to: cred.email,
@@ -336,8 +413,13 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
 
 // ─── Leave review ─────────────────────────────────────────────────────────────
 adminRouter.get('/leaves', async (req, res) => {
+  const schoolId = schoolOf(req);
   const status = z.enum(['pending', 'accepted', 'rejected', 'all']).default('pending').parse(req.query.status ?? 'pending');
-  const where = { kind: 'TEACHER' as const, ...(status === 'all' ? {} : { status: status.toUpperCase() as any }) };
+  const where = {
+    kind: 'TEACHER' as const,
+    teacher: { schoolId },
+    ...(status === 'all' ? {} : { status: status.toUpperCase() as any }),
+  };
   const leaves = await prisma.leaveRequest.findMany({
     where,
     orderBy: { submittedAt: 'desc' },
@@ -346,10 +428,15 @@ adminRouter.get('/leaves', async (req, res) => {
 });
 
 adminRouter.patch('/leaves/:id', async (req, res) => {
+  const schoolId = schoolOf(req);
   const { status } = z.object({ status: z.enum(['accepted', 'rejected']) }).parse(req.body);
-  const leave = await prisma.leaveRequest.findUnique({ where: { id: String(req.params.id) } });
+  const leave = await prisma.leaveRequest.findUnique({
+    where: { id: String(req.params.id) },
+    include: { teacher: { select: { schoolId: true } } },
+  });
   if (!leave) throw notFound('Leave request not found');
   if (leave.kind !== 'TEACHER') throw badRequest('Student leave requests are reviewed by the class teacher');
+  if (leave.teacher?.schoolId !== schoolId) throw notFound('Leave request not found');
   if (leave.status !== 'PENDING') throw badRequest('Leave request already reviewed');
 
   const ops: any[] = [

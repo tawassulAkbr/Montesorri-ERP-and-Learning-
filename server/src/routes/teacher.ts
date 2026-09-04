@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { deriveTeacherStatus, todayISO, eachWeekday } from '../services/attendance';
 import { badRequest, notFound } from '../utils/errors';
+import { schoolOf } from '../utils/tenant';
 import {
   leaveToFrontend, studentToFrontend, attendanceToFrontend,
 } from '../utils/serializers';
@@ -85,12 +86,16 @@ teacherRouter.get('/my-leaves', async (req, res) => {
 // ─── Class roster (guardian names + fee flag, NEVER fee amounts) ─────────────
 teacherRouter.get('/students', async (req, res) => {
   const teacher = await getTeacher(req.user!.id);
+  const schoolId = schoolOf(req);
   const classFilter = typeof req.query.class === 'string' ? req.query.class : undefined;
   if (classFilter && !teacher.classes.includes(classFilter)) {
     throw badRequest('You do not teach this class');
   }
   const students = await prisma.student.findMany({
-    where: classFilter ? { class: classFilter } : { class: { in: teacher.classes } },
+    where: {
+      schoolId,
+      ...(classFilter ? { class: classFilter } : { class: { in: teacher.classes } }),
+    },
     orderBy: [{ class: 'asc' }, { rollNo: 'asc' }],
   });
   res.json({
@@ -152,15 +157,17 @@ teacherRouter.post('/attendance', async (req, res) => {
 });
 
 teacherRouter.get('/attendance', async (req, res) => {
+  const schoolId = schoolOf(req);
   const classFilter = typeof req.query.class === 'string' ? req.query.class : undefined;
   const date = typeof req.query.date === 'string' ? req.query.date : todayISO();
   const teacher = await getTeacher(req.user!.id);
   const records = await prisma.attendanceRecord.findMany({
     where: {
       date,
-      ...(classFilter
-        ? { student: { class: classFilter } }
-        : { student: { class: { in: teacher.classes } } }),
+      student: {
+        schoolId,
+        ...(classFilter ? { class: classFilter } : { class: { in: teacher.classes } }),
+      },
     },
   });
   res.json({ attendance: records.map(attendanceToFrontend) });
@@ -169,12 +176,13 @@ teacherRouter.get('/attendance', async (req, res) => {
 // ─── Student leave review (teacher) ──────────────────────────────────────────
 teacherRouter.get('/student-leaves', async (req, res) => {
   const teacher = await getTeacher(req.user!.id);
+  const schoolId = schoolOf(req);
   const status = z.enum(['pending', 'accepted', 'rejected', 'all']).default('pending').parse(req.query.status ?? 'pending');
   const leaves = await prisma.leaveRequest.findMany({
     where: {
       kind: 'STUDENT',
       ...(status === 'all' ? {} : { status: status.toUpperCase() as any }),
-      student: { class: { in: teacher.classes } },
+      student: { schoolId, class: { in: teacher.classes } },
     },
     orderBy: { submittedAt: 'desc' },
   });

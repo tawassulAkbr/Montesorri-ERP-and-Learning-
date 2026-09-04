@@ -17,8 +17,8 @@ export const DailyWorkPage: React.FC = () => {
   const { dailyWork, addDailyWork } = useData();
   const { currentUser } = useAuth();
   const [openModal, setOpenModal] = useState(false);
-  const [subject, setSubject] = useState('Phonics & Early Language');
-  const [targetClass, setTargetClass] = useState('Junior Montessori (Nursery)');
+  const [subject, setSubject] = useState('Practical Life');
+  const [targetClass, setTargetClass] = useState('Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
   const [content, setContent] = useState('');
   const [attachment, setAttachment] = useState('');
 
@@ -121,11 +121,12 @@ export const DailyWorkPage: React.FC = () => {
                   onChange={e => setSubject(e.target.value)}
                   className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
-                  <option>Phonics & Early Language</option>
-                  <option>Sensorial & Practical Life</option>
-                  <option>Early Mathematics</option>
-                  <option>Rhymes & Story Circle</option>
-                  <option>Creative Arts & Crafts</option>
+                  <option>Practical Life</option>
+                  <option>Sensorial</option>
+                  <option>Language Arts</option>
+                  <option>Mathematics</option>
+                  <option>Cultural Studies / General Knowledge</option>
+                  <option>Islamiyat</option>
                 </select>
               </div>
 
@@ -136,9 +137,10 @@ export const DailyWorkPage: React.FC = () => {
                   onChange={e => setTargetClass(e.target.value)}
                   className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
-                  <option>Montessori Toddler (Playgroup)</option>
-                  <option>Junior Montessori (Nursery)</option>
-                  <option>Senior Montessori (Prep)</option>
+                  <option>Early Childhood / Toddler (Ages 1.5 - 3)</option>
+                  <option>Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</option>
+                  <option>Lower Elementary / Prep & Class 1 (Ages 6 - 9)</option>
+                  <option>Upper Elementary / Class 2 - 5 (Ages 9 - 12)</option>
                 </select>
               </div>
             </div>
@@ -177,3 +179,5 @@ export const DailyWorkPage: React.FC = () => {
     </div>
   );
 };
+
+

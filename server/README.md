@@ -1,12 +1,12 @@
 # KinderGuide Server
 
 Node.js + Express + Prisma + PostgreSQL backend for the KinderGuide Montessori ERP.
-This folder is fully self-contained — the React frontend in `../src` is not used or modified by this code.
+This folder is fully self-contained; the React frontend in `../src` is separate.
 
 ## Requirements
 
 - Node.js 20+
-- A PostgreSQL database (Neon free tier recommended) — connection string goes in `.env`
+- A PostgreSQL database (Neon free tier recommended); connection string goes in `.env`
 - Optional: a Resend API key (free tier) for sending credential & password-reset emails.
   Without it, emails are logged to the console instead of sent.
 
@@ -20,7 +20,7 @@ npm run db:seed          # creates the single admin account
 npm run dev              # starts on http://localhost:4000
 ```
 
-Seeded admin login: `admin@kinderguide.edu` / `admin123` (change it after first login).
+Seeded demo logins: `admin@kinderguide.com` / `admin123`, `amina.khan@faculty.kinderguide.com` / `teacher123`, `bilal.ahmed@kinderguide.com` / `student123`, `bilal.ahmed@parent.kinderguide.com` / `parent123`.
 
 ## Scripts
 

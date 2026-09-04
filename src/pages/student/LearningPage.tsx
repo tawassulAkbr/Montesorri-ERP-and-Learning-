@@ -66,7 +66,7 @@ export const StudentLearningPage: React.FC = () => {
   // Landing countdown ticks
   useEffect(() => {
     if (view !== 'landing') return;
-    const id = setInterval(() => setStreakMs(msUntilMidnight()), 30000);
+    const id = setInterval(() => setStreakMs(msUntilMidnight()), 3000);
     return () => clearInterval(id);
   }, [view]);
 

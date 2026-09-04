@@ -15,7 +15,7 @@ export const AttendancePage: React.FC = () => {
     markDailyAttendance, updateLeaveStatus, applyTeacherLeave, markTeacherPresent,
   } = useData();
   const { currentUser } = useAuth();
-  const [selectedClass, setSelectedClass] = useState('Junior Montessori (Nursery)');
+  const [selectedClass, setSelectedClass] = useState('Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
   const [selectedDate, setSelectedDate] = useState(todayISO());
   const [activeTab, setActiveTab] = useState<'daily' | 'monthly' | 'leaves'>('daily');
   const [openLeaveModal, setOpenLeaveModal] = useState(false);
@@ -90,9 +90,10 @@ export const AttendancePage: React.FC = () => {
             onChange={e => setSelectedClass(e.target.value)}
             className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
-            <option>Montessori Toddler (Playgroup)</option>
-            <option>Junior Montessori (Nursery)</option>
-            <option>Senior Montessori (Prep)</option>
+            <option>Early Childhood / Toddler (Ages 1.5 - 3)</option>
+            <option>Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</option>
+            <option>Lower Elementary / Prep & Class 1 (Ages 6 - 9)</option>
+            <option>Upper Elementary / Class 2 - 5 (Ages 9 - 12)</option>
           </select>
 
           <input
@@ -345,3 +346,5 @@ export const AttendancePage: React.FC = () => {
     </div>
   );
 };
+
+

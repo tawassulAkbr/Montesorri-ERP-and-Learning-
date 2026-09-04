@@ -59,14 +59,14 @@ export const TeacherMessagesPage: React.FC = () => {
   useEffect(() => {
     loadThreads();
     loadContacts();
-    const id = setInterval(loadThreads, 5000);
+    const id = setInterval(loadThreads, 3000);
     return () => clearInterval(id);
   }, [loadThreads, loadContacts]);
 
   useEffect(() => {
     if (!selectedParentId) return;
     loadMessages(selectedParentId);
-    const id = setInterval(() => loadMessages(selectedParentId), 5000);
+    const id = setInterval(() => loadMessages(selectedParentId), 3000);
     return () => clearInterval(id);
   }, [selectedParentId, loadMessages]);
 
@@ -242,3 +242,4 @@ export const TeacherMessagesPage: React.FC = () => {
     </div>
   );
 };
+

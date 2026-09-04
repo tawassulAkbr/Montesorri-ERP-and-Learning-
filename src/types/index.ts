@@ -8,6 +8,8 @@ export interface User {
   email: string;
   role: Role;
   avatar?: string;
+  schoolId: string;
+  schoolName?: string;
   createdAt: string;
 }
 
@@ -19,13 +21,17 @@ export interface Teacher extends User {
   classes: string[];
   phone: string;
   qualification: string;
+  status?: EmploymentStatus;
+  joinDate?: string; // 'YYYY-MM-DD'
 }
+
+export type EmploymentStatus = 'active' | 'on_leave' | 'resigned';
 
 // ─── Student ─────────────────────────────────────────────────────────────────
 export interface Student extends User {
   role: 'student';
   rollNo: string;
-  class: string; // e.g. "Junior Montessori (Nursery)", "Senior Montessori (Prep)"
+  class: string;
   ageGroup?: string; // e.g. "3-4 Years"
   section?: string;
   parentId: string;
@@ -54,7 +60,7 @@ export interface Admin extends User {
 export interface Lesson {
   id: string;
   title: string;
-  subject: string; // Phonics & Language, Sensorial & Practical Life, Early Math, Rhymes, Creative Art
+  subject: string; // Practical Life, Sensorial, Language Arts, Mathematics, Cultural Studies / General Knowledge, Islamiyat
   class: string;
   teacherId: string;
   teacherName: string;
@@ -203,6 +209,7 @@ export interface ScheduleItem {
 // ─── Live Virtual Classroom State ─────────────────────────────────────────────
 export interface LiveClassSession {
   isActive: boolean;
+  isLive: boolean;
   topic: string;
   subject: string;
   class: string;
@@ -298,6 +305,50 @@ export interface MessageThread {
   unread: number;
 }
 
+// ─── Finance (fee ledger) ────────────────────────────────────────────────────
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'jazzcash' | 'easypaisa';
+
+export interface Payment {
+  id: string;
+  receiptNo: string;
+  studentId: string;
+  amount: number;
+  method: PaymentMethod;
+  term: string;
+  note?: string;
+  receivedById: string;
+  receivedByName?: string;
+  createdAt: string; // ISO datetime
+  schoolId: string;
+  studentName?: string;
+  studentClass?: string;
+  studentRollNo?: string;
+  studentEnrollmentId?: string;
+  guardianName?: string;
+  schoolName?: string;
+  schoolCity?: string;
+  schoolAddress?: string;
+  schoolPhone?: string;
+}
+
+export interface IncomeMonthPoint {
+  key: string;
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface FinanceSummary {
+  months: IncomeMonthPoint[];
+  collectedThisMonth: number;
+  collectedTotal: number;
+  outstandingCount: number;
+  outstandingAmount: number;
+  totalStudents: number;
+  avgFee: number;
+  byMethod: { method: PaymentMethod; amount: number }[];
+}
+
 // ─── Chart Data ───────────────────────────────────────────────────────────────
 export interface AttendanceChartPoint {
   date: string;
@@ -383,3 +434,34 @@ export interface StudentStreakSummary {
   lastActivityDate: string | null;
   atRisk: boolean;
 }
+
+// ─── Inventory ────────────────────────────────────────────────────────────────
+export type InventoryCategory =
+  | 'stationery' | 'cleaning' | 'sports' | 'furniture' | 'medical' | 'other';
+
+export type MovementType = 'stock_in' | 'stock_out' | 'adjust';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: InventoryCategory;
+  quantity: number;
+  minStock: number;
+  unit?: string;
+  location?: string;
+  lowStock: boolean;
+  updatedAt: string; // ISO datetime
+}
+
+export interface InventoryMovement {
+  id: string;
+  itemId: string;
+  itemName?: string;
+  type: MovementType;
+  quantity: number;
+  note?: string;
+  byId: string;
+  byName: string;
+  createdAt: string; // ISO datetime
+}
+

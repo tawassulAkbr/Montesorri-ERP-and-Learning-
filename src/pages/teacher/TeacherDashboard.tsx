@@ -16,7 +16,7 @@ import { buildAttendanceChartData, buildClassPerformanceData, formatDate } from 
 export const TeacherDashboard: React.FC = () => {
   const { students, lessons, tests, dailyWork, leaveRequests, liveClass, startLiveClass, attendance, testResults } = useData();
   const { currentUser } = useAuth();
-  const [activeClass, setActiveClass] = useState('Junior Montessori (Nursery)');
+  const [activeClass, setActiveClass] = useState('Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
 
   const classStudentIds = useMemo(
     () => students.filter(s => s.class === activeClass).map(s => s.id),
@@ -58,9 +58,10 @@ export const TeacherDashboard: React.FC = () => {
             onChange={e => setActiveClass(e.target.value)}
             className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-3 py-2 text-[#344054] outline-none shadow-sm cursor-pointer"
           >
-            <option>Montessori Toddler (Playgroup)</option>
-            <option>Junior Montessori (Nursery)</option>
-            <option>Senior Montessori (Prep)</option>
+            <option>Early Childhood / Toddler (Ages 1.5 - 3)</option>
+            <option>Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</option>
+            <option>Lower Elementary / Prep & Class 1 (Ages 6 - 9)</option>
+            <option>Upper Elementary / Class 2 - 5 (Ages 9 - 12)</option>
           </select>
 
           <Link to="/teacher/live-class">
@@ -80,7 +81,7 @@ export const TeacherDashboard: React.FC = () => {
       {/* KPI Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Montessori Toddlers"
+          title="Early Childhood / Toddler (Ages 1.5 - 3) Learners"
           value={students.length}
           subtitle="Enrolled in active cohorts"
           icon={<Users className="text-[#006B5D]" size={20} />}
@@ -223,3 +224,5 @@ export const TeacherDashboard: React.FC = () => {
     </div>
   );
 };
+
+

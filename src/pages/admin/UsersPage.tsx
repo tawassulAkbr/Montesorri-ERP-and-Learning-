@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Plus, Search, KeyRound, Copy, Check, GraduationCap, Heart, BookOpen, AlertCircle,
+  Plus, Search, KeyRound, Copy, Check, GraduationCap, Heart, BookOpen, AlertCircle, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useData } from '@/context/DataContext';
-import { MONTESSORI_CLASSES, TEACHER_SUBJECTS, todayISO, isWeekend, getInitials, avatarColors, cn } from '@/lib/utils';
-import type { IssuedCredentials, Student, Teacher, Parent, TeacherAttendanceRecord } from '@/types';
+import { MONTESSORI_CLASSES, TEACHER_SUBJECTS, todayISO, isWeekend, getInitials, avatarColors, cn, EMPLOYMENT_STATUS_LABELS, slugEmail } from '@/lib/utils';
+import type { IssuedCredentials, Student, Teacher, Parent, TeacherAttendanceRecord, EmploymentStatus } from '@/types';
 
 type TabId = 'teacher' | 'student' | 'parent';
 
@@ -93,11 +93,13 @@ const AddTeacherModal: React.FC<{
 }> = ({ open, onClose, onCreated }) => {
   const { createTeacher } = useData();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [qualification, setQualification] = useState('');
   const [subject, setSubject] = useState<string>(TEACHER_SUBJECTS[0]);
   const [classes, setClasses] = useState<string[]>([MONTESSORI_CLASSES[1]]);
+  const [status, setStatus] = useState<EmploymentStatus>('active');
+  const [personalEmail, setPersonalEmail] = useState('');
+  const [joinDate, setJoinDate] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -106,13 +108,14 @@ const AddTeacherModal: React.FC<{
   };
 
   const reset = () => {
-    setName(''); setEmail(''); setPhone(''); setQualification('');
+    setName(''); setPhone(''); setQualification('');
     setSubject(TEACHER_SUBJECTS[0]); setClasses([MONTESSORI_CLASSES[1]]); setError('');
+    setStatus('active'); setJoinDate(''); setPersonalEmail('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const emailLower = email.trim().toLowerCase();
+    const emailLower = slugEmail(name, 'faculty.kinderguide.com');
     if (classes.length === 0) {
       setError('Select at least one class.');
       return;
@@ -122,7 +125,9 @@ const AddTeacherModal: React.FC<{
     try {
       const cred = await createTeacher({
         name: name.trim(), email: emailLower, phone: phone.trim(),
+        personalEmail: personalEmail.trim() || undefined,
         qualification: qualification.trim(), subject, classes,
+        status, joinDate: joinDate || undefined,
       });
       reset();
       onClose();
@@ -148,22 +153,47 @@ const AddTeacherModal: React.FC<{
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs font-medium text-[#344054]">Full Name</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Ayesha Khan" className="mt-1 text-xs" required />
+              <Input value={name} onChange={e => setName(e.target.value)} className="mt-1 text-xs" required />
             </div>
             <div>
               <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 300 0000000" className="mt-1 text-xs" required />
+              <Input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 text-xs" required />
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-medium text-[#344054]">Email Address (login)</Label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="teacher@kinderguide.edu" className="mt-1 text-xs" required />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Email Address (auto)</Label>
+              <Input type="email" value={slugEmail(name || 'teacher', 'faculty.kinderguide.com')} readOnly className="mt-1 text-xs bg-slate-50" />
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Personal Email (for credentials)</Label>
+              <Input type="email" value={personalEmail} onChange={e => setPersonalEmail(e.target.value)} className="mt-1 text-xs" required />
+            </div>
           </div>
 
           <div>
             <Label className="text-xs font-medium text-[#344054]">Qualification</Label>
-            <Input value={qualification} onChange={e => setQualification(e.target.value)} placeholder="e.g. AMI Montessori Diploma" className="mt-1 text-xs" required />
+            <Input value={qualification} onChange={e => setQualification(e.target.value)} className="mt-1 text-xs" required />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Employment Status</Label>
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value as EmploymentStatus)}
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
+              >
+                {(Object.keys(EMPLOYMENT_STATUS_LABELS) as EmploymentStatus[]).map(s => (
+                  <option key={s} value={s}>{EMPLOYMENT_STATUS_LABELS[s]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Join Date <span className="text-[#98A2B3] font-normal">(optional)</span></Label>
+              <Input type="date" value={joinDate} onChange={e => setJoinDate(e.target.value)} className="mt-1 text-xs" />
+            </div>
           </div>
 
           <div>
@@ -206,6 +236,139 @@ const AddTeacherModal: React.FC<{
   );
 };
 
+// ─── Edit Teacher Modal ───────────────────────────────────────────────────────
+const EditTeacherModal: React.FC<{
+  teacher: Teacher | null;
+  onClose: () => void;
+}> = ({ teacher, onClose }) => {
+  const { updateTeacher } = useData();
+  const [phone, setPhone] = useState('');
+  const [qualification, setQualification] = useState('');
+  const [subject, setSubject] = useState('');
+  const [classes, setClasses] = useState<string[]>([]);
+  const [status, setStatus] = useState<EmploymentStatus>('active');
+  const [joinDate, setJoinDate] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // Re-seed the form whenever a different teacher is opened for editing.
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+  if (teacher && seededFor !== teacher.id) {
+    setSeededFor(teacher.id);
+    setPhone(teacher.phone);
+    setQualification(teacher.qualification);
+    setSubject(teacher.subject);
+    setClasses(teacher.classes);
+    setStatus(teacher.status ?? 'active');
+    setJoinDate(teacher.joinDate ?? '');
+    setError('');
+  }
+  if (!teacher && seededFor !== null) setSeededFor(null);
+
+  const toggleClass = (cls: string) => {
+    setClasses(prev => prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!teacher) return;
+    if (classes.length === 0) { setError('Select at least one class.'); return; }
+    setSubmitting(true);
+    setError('');
+    try {
+      await updateTeacher(teacher.id, {
+        phone: phone.trim(), qualification: qualification.trim(), subject, classes,
+        status, joinDate: joinDate || null,
+      });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update teacher.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={!!teacher} onOpenChange={o => { if (!o) onClose(); }}>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Teacher — {teacher?.name}</DialogTitle>
+          <DialogDescription>
+            Update contact details, assignment and HR record. Login credentials are unchanged.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
+              <Input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 text-xs" required />
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Qualification</Label>
+              <Input value={qualification} onChange={e => setQualification(e.target.value)} className="mt-1 text-xs" required />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Subject Area</Label>
+              <select
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
+              >
+                {TEACHER_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Employment Status</Label>
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value as EmploymentStatus)}
+                className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
+              >
+                {(Object.keys(EMPLOYMENT_STATUS_LABELS) as EmploymentStatus[]).map(s => (
+                  <option key={s} value={s}>{EMPLOYMENT_STATUS_LABELS[s]}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-[#344054]">Join Date</Label>
+            <Input type="date" value={joinDate} onChange={e => setJoinDate(e.target.value)} className="mt-1 text-xs" />
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-[#344054]">Assigned Classes</Label>
+            <div className="mt-1.5 space-y-1.5">
+              {MONTESSORI_CLASSES.map(cls => (
+                <label key={cls} className="flex items-center gap-2 text-xs text-[#344054] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={classes.includes(cls)}
+                    onChange={() => toggleClass(cls)}
+                    className="rounded accent-indigo-600"
+                  />
+                  {cls}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
+            <Button type="submit" disabled={submitting}>{submitting ? 'Saving…' : 'Save Changes'}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Add Student Modal ────────────────────────────────────────────────────────
 const AddStudentModal: React.FC<{
   open: boolean;
@@ -214,18 +377,18 @@ const AddStudentModal: React.FC<{
 }> = ({ open, onClose, onCreated }) => {
   const { createStudentWithParent } = useData();
   const [name, setName] = useState('');
-  const [studentEmail, setStudentEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [guardianName, setGuardianName] = useState('');
-  const [guardianEmail, setGuardianEmail] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
   const [address, setAddress] = useState('');
   const [cls, setCls] = useState<string>(MONTESSORI_CLASSES[1]);
   const [feeAmount, setFeeAmount] = useState('');
+  const [personalEmail, setPersonalEmail] = useState('');
 
   const reset = () => {
-    setName(''); setStudentEmail(''); setPhone(''); setGuardianName(''); setGuardianEmail('');
+    setName(''); setPhone(''); setGuardianName('');
     setGuardianPhone(''); setAddress(''); setCls(MONTESSORI_CLASSES[1]); setFeeAmount('');
+    setPersonalEmail('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -235,12 +398,13 @@ const AddStudentModal: React.FC<{
     try {
       const creds = await createStudentWithParent({
         name: name.trim(),
-        email: studentEmail.trim().toLowerCase(),
+        email: slugEmail(name, 'kinderguide.com'),
         phone: phone.trim(),
         address: address.trim(),
         guardianName: guardianName.trim(),
-        guardianEmail: guardianEmail.trim().toLowerCase(),
+        guardianEmail: slugEmail(name, 'parent.kinderguide.com'),
         guardianPhone: guardianPhone.trim() || undefined,
+        personalEmail: personalEmail.trim() || undefined,
         class: cls,
         feeAmount: fee,
       });
@@ -266,29 +430,35 @@ const AddStudentModal: React.FC<{
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs font-medium text-[#344054]">Child's Full Name</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Noor Fatima" className="mt-1 text-xs" required />
+              <Input value={name} onChange={e => setName(e.target.value)} className="mt-1 text-xs" required />
             </div>
             <div>
               <Label className="text-xs font-medium text-[#344054]">Contact Number</Label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 310 0000000" className="mt-1 text-xs" required />
+              <Input value={phone} onChange={e => setPhone(e.target.value)} className="mt-1 text-xs" required />
             </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-medium text-[#344054]">Child's Email (student login) <span className="text-red-500">*</span></Label>
-            <Input type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} placeholder="student@kinderguide.edu" className="mt-1 text-xs" required />
-            <p className="text-[10px] text-[#667085] mt-1">The child's login credentials are emailed here and also to the guardian below.</p>
-          </div>
-
-          <div>
-            <Label className="text-xs font-medium text-[#344054]">Parent / Guardian Name</Label>
-            <Input value={guardianName} onChange={e => setGuardianName(e.target.value)} placeholder="e.g. Mr. Ahmed Raza" className="mt-1 text-xs" required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-medium text-[#344054]">Guardian Email <span className="text-red-500">*</span></Label>
-              <Input type="email" value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} placeholder="parent@kinderguide.edu" className="mt-1 text-xs" required />
+              <Label className="text-xs font-medium text-[#344054]">Child's Email (auto)</Label>
+              <Input type="email" value={slugEmail(name || 'student', 'kinderguide.com')} readOnly className="mt-1 text-xs bg-slate-50" />
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Personal Email (for credentials)</Label>
+              <Input type="email" value={personalEmail} onChange={e => setPersonalEmail(e.target.value)} className="mt-1 text-xs" required />
+            </div>
+          </div>
+          <p className="text-[10px] text-[#667085] mt-1">The login credentials are emailed to the personal email address provided.</p>
+
+          <div>
+            <Label className="text-xs font-medium text-[#344054]">Parent / Guardian Name</Label>
+            <Input value={guardianName} onChange={e => setGuardianName(e.target.value)} className="mt-1 text-xs" required />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-[#344054]">Guardian Email (auto)</Label>
+              <Input type="email" value={slugEmail(name || 'student', 'parent.kinderguide.com')} readOnly className="mt-1 text-xs bg-slate-50" />
             </div>
             <div>
               <Label className="text-xs font-medium text-[#344054]">Guardian Phone <span className="text-[#667085]">(optional)</span></Label>
@@ -298,7 +468,7 @@ const AddStudentModal: React.FC<{
 
           <div>
             <Label className="text-xs font-medium text-[#344054]">Home Address</Label>
-            <Input value={address} onChange={e => setAddress(e.target.value)} placeholder="House, street, city" className="mt-1 text-xs" required />
+            <Input value={address} onChange={e => setAddress(e.target.value)} className="mt-1 text-xs" required />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -314,7 +484,7 @@ const AddStudentModal: React.FC<{
             </div>
             <div>
               <Label className="text-xs font-medium text-[#344054]">Monthly Fee (PKR)</Label>
-              <Input type="number" min="1" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} placeholder="e.g. 12000" className="mt-1 text-xs" required />
+              <Input type="number" min="1" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} className="mt-1 text-xs" required />
             </div>
           </div>
 
@@ -343,6 +513,7 @@ export const AdminUsersPage: React.FC = () => {
   const [addTeacherOpen, setAddTeacherOpen] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [issued, setIssued] = useState<IssuedCredentials[] | null>(null);
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
 
   const today = todayISO();
   const weekend = isWeekend(today);
@@ -458,6 +629,7 @@ export const AdminUsersPage: React.FC = () => {
                   <th className="p-3.5">Subject</th>
                   <th className="p-3.5">Assigned Classes</th>
                   <th className="p-3.5">Qualification</th>
+                  <th className="p-3.5">HR Status</th>
                   <th className="p-3.5">Contact</th>
                   <th className="p-3.5">Today's Status</th>
                   <th className="p-3.5 pr-5 text-right">Actions</th>
@@ -484,17 +656,40 @@ export const AdminUsersPage: React.FC = () => {
                     </td>
                     <td className="p-3.5 text-[#344054]">{t.classes.join(', ')}</td>
                     <td className="p-3.5 text-[#344054]">{t.qualification}</td>
+                    <td className="p-3.5">
+                      <Badge
+                        className={cn(
+                          'text-[10px] font-semibold whitespace-nowrap',
+                          t.status === 'on_leave' && 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-50',
+                          t.status === 'resigned' && 'bg-slate-100 text-[#667085] border border-slate-200 hover:bg-slate-100',
+                          (t.status ?? 'active') === 'active' && 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50',
+                        )}
+                      >
+                        {EMPLOYMENT_STATUS_LABELS[t.status ?? 'active']}
+                      </Badge>
+                      {t.joinDate && <p className="text-[10px] text-[#98A2B3] mt-0.5">Joined {t.joinDate}</p>}
+                    </td>
                     <td className="p-3.5 text-[#344054] font-mono text-[11px]">{t.phone}</td>
                     <td className="p-3.5">{statusBadge(teacherRecord(t))}</td>
                     <td className="p-3.5 pr-5 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
-                        onClick={() => handleResetPassword(t.id, 'teacher')}
-                      >
-                        <KeyRound size={12} /> Reset Password
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
+                          onClick={() => setEditingTeacher(t)}
+                        >
+                          <Pencil size={12} /> Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-[10px] text-[#667085] hover:text-[#006B5D] gap-1"
+                          onClick={() => handleResetPassword(t.id, 'teacher')}
+                        >
+                          <KeyRound size={12} /> Reset Password
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -646,6 +841,7 @@ export const AdminUsersPage: React.FC = () => {
         onCreated={creds => setIssued(creds)}
       />
       <CredentialsDialog issued={issued} onClose={() => setIssued(null)} />
+      <EditTeacherModal teacher={editingTeacher} onClose={() => setEditingTeacher(null)} />
     </div>
   );
 };

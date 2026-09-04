@@ -54,7 +54,7 @@ export const SUGGESTED_QUESTIONS: Record<Role, string[]> = {
     'Show my class attendance trend',
     'Suggest Montessori activities for counting',
     "Summarize my students' performance",
-    'Generate a progress report for Ali Hassan',
+    'Generate a progress report for Bilal Ahmed',
   ],
   parent: [
     'How is my child progressing?',

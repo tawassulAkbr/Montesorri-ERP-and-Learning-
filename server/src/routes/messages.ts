@@ -4,6 +4,7 @@ import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { notFound } from '../utils/errors';
+import { schoolOf } from '../utils/tenant';
 
 const contentSchema = z.object({ content: z.string().min(1).max(2000) });
 
@@ -75,7 +76,7 @@ parentMessageRouter.post('/:teacherId', async (req, res) => {
   const teacherId = String(req.params.teacherId);
   const [parent, teacher] = await Promise.all([
     prisma.parent.findUnique({ where: { id: req.user!.id } }),
-    prisma.teacher.findUnique({ where: { id: teacherId } }),
+    prisma.teacher.findFirst({ where: { id: teacherId, schoolId: schoolOf(req) } }),
   ]);
   if (!parent) throw notFound('Parent record not found');
   if (!teacher) throw notFound('Teacher not found');
@@ -143,7 +144,7 @@ teacherMessageRouter.get('/contacts', async (req, res) => {
   if (!teacher) throw notFound('Teacher record not found');
 
   const students = await prisma.student.findMany({
-    where: { class: { in: teacher.classes } },
+    where: { schoolId: teacher.schoolId, class: { in: teacher.classes } },
     include: { parent: true },
   });
 
@@ -182,7 +183,7 @@ teacherMessageRouter.post('/:parentId', async (req, res) => {
   const parentId = String(req.params.parentId);
   const [teacher, parent] = await Promise.all([
     prisma.teacher.findUnique({ where: { id: req.user!.id } }),
-    prisma.parent.findUnique({ where: { id: parentId } }),
+    prisma.parent.findFirst({ where: { id: parentId, schoolId: schoolOf(req) } }),
   ]);
   if (!teacher) throw notFound('Teacher record not found');
   if (!parent) throw notFound('Parent not found');

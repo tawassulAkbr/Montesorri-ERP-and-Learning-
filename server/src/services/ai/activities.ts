@@ -48,11 +48,11 @@ export const ACTIVITY_BANK: Record<string, MontessoriActivity[]> = {
 };
 
 export const FAMILY_LABELS: Record<string, string> = {
-  math: 'Early Mathematics & Counting',
-  phonics: 'Phonics & Early Language',
-  sensorial: 'Sensorial Materials',
+  math: 'Mathematics',
+  phonics: 'Language Arts',
+  sensorial: 'Sensorial',
   practical: 'Practical Life',
-  art: 'Creative Arts',
-  rhymes: 'Rhymes & Story Circle',
-  general: 'Everyday Montessori',
+  art: 'Cultural Studies / General Knowledge',
+  rhymes: 'Language Arts',
+  general: 'Cultural Studies / General Knowledge',
 };

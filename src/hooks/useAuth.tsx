@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { User, Role } from '../types';
 import { apiGet, apiPost, setToken, clearToken, getToken } from '@/lib/api';
+import { clear as clearQueue } from '@/lib/offlineQueue';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -45,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(() => {
     clearToken();
+    clearQueue();
     setTokenState(null);
     setCurrentUser(null);
     setRole(null);

@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Video, ClipboardList, CalendarCheck, BarChart3,
   MessageSquare, BookOpen, Users, GraduationCap, Heart, ShieldCheck,
   LogOut, ChevronLeft, ChevronRight, Settings, BookMarked, Radio, Calendar,
-  MessageSquareHeart, Flame, Sparkles
+  MessageSquareHeart, Flame, Sparkles, Banknote, Package
+  , BriefcaseBusiness, BookOpenCheck
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,7 +17,7 @@ import type { Role } from '@/types';
 const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLive?: boolean }[]> = {
   teacher: [
     { label: 'Dashboard', to: '/teacher/dashboard', icon: <LayoutDashboard size={18} /> },
-    { label: 'Live Virtual Class', to: '/teacher/live-class', icon: <Radio size={18} className="text-red-500" />, isLive: true },
+    { label: 'Live Virtual Class', to: '/teacher/live-class', icon: <Radio size={18} className="text-red-500" /> },
     { label: 'Daily Schedule', to: '/teacher/schedule', icon: <Calendar size={18} /> },
     { label: 'Video Lessons', to: '/teacher/lessons', icon: <Video size={18} /> },
     { label: 'Daily Activities', to: '/teacher/daily-work', icon: <BookOpen size={18} /> },
@@ -33,7 +34,7 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
   student: [
     { label: 'Dashboard', to: '/student/dashboard', icon: <LayoutDashboard size={18} /> },
     { label: 'My Learning', to: '/student/learning', icon: <Sparkles size={18} className="text-orange-500" /> },
-    { label: 'Live Classroom', to: '/student/live-class', icon: <Radio size={18} className="text-red-500" />, isLive: true },
+    { label: 'Live Classroom', to: '/student/live-class', icon: <Radio size={18} className="text-red-500" /> },
     { label: 'My Daily Routine', to: '/student/schedule', icon: <Calendar size={18} /> },
     { label: 'Video Lectures', to: '/student/lectures', icon: <Video size={18} /> },
     { label: 'Daily Activities', to: '/student/daily-work', icon: <BookOpen size={18} /> },
@@ -57,6 +58,10 @@ const NAV: Record<Role, { label: string; to: string; icon: React.ReactNode; isLi
     { label: 'Class Cohorts', to: '/admin/classes', icon: <BookMarked size={18} /> },
     { label: 'School Reports', to: '/admin/reports', icon: <BarChart3 size={18} /> },
     { label: 'Teacher Reports', to: '/admin/teacher-reports', icon: <GraduationCap size={18} /> },
+    { label: 'Finance & Fees', to: '/admin/finance', icon: <Banknote size={18} /> },
+    { label: 'HR & Payroll', to: '/admin/hr-payroll', icon: <BriefcaseBusiness size={18} /> },
+    { label: 'Curriculum', to: '/admin/curriculum', icon: <BookOpenCheck size={18} /> },
+    { label: 'Inventory', to: '/admin/inventory', icon: <Package size={18} /> },
     { label: 'Student Feedback', to: '/admin/feedback', icon: <MessageSquareHeart size={18} /> },
     { label: 'Settings', to: '/admin/settings', icon: <Settings size={18} /> },
   ],
@@ -92,9 +97,9 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="no-print flex h-full flex-col bg-white">
       {/* Logo */}
-      <div className="flex h-20 flex-shrink-0 items-center px-5">
+      <div className={cn('flex h-20 flex-shrink-0 items-center', collapsed ? 'justify-center px-2' : 'px-5')}>
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#006B5D]">
           <GraduationCap className="text-white" size={16} />
         </div>
@@ -108,19 +113,20 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
               className="ml-3 overflow-hidden"
             >
               <span className="whitespace-nowrap text-sm font-extrabold tracking-normal text-[#1D2939]">KinderGuide</span>
-              <span className="block text-[10px] font-bold leading-none text-[#006B5D]">Montessori ERP</span>
+              <span className="block max-w-[150px] truncate text-[10px] font-bold leading-none text-[#006B5D]">
+                {currentUser?.schoolName ?? 'Montessori ERP'}
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
-        {onToggle && (
+        {onToggle && !collapsed && (
           <button
             onClick={onToggle}
-            className={cn(
-              'ml-auto flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D]',
-              collapsed && 'mx-auto'
-            )}
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
+            className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-[#EAECF0] bg-white text-[#667085] transition-all hover:border-[#B7DDD6] hover:bg-[#E6F4F1] hover:text-[#006B5D] hover:shadow-sm active:scale-95"
           >
-            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            <ChevronLeft size={15} />
           </button>
         )}
         {onClose && (
@@ -129,6 +135,20 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
           </button>
         )}
       </div>
+
+      {/* Expand toggle gets its own row when collapsed so it is never clipped */}
+      {collapsed && onToggle && (
+        <div className="flex flex-shrink-0 justify-center pb-2">
+          <button
+            onClick={onToggle}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#EAECF0] bg-white text-[#667085] transition-all hover:border-[#B7DDD6] hover:bg-[#E6F4F1] hover:text-[#006B5D] hover:shadow-sm active:scale-95"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      )}
 
       {/* User Card */}
       <div className={cn(
@@ -159,7 +179,7 @@ const SidebarContent: React.FC<{ collapsed: boolean; onToggle?: () => void; onCl
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+      <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-2">
         {navItems.map(item => (
           <NavLink
             key={item.to}

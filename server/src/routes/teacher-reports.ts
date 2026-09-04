@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
+import { schoolOf } from '../utils/tenant';
 
 export const teacherReportRouter = Router();
 teacherReportRouter.use(requireAuth, requireRole('admin'));
@@ -15,18 +16,19 @@ function rangeStart(range: 'daily' | 'weekly' | 'monthly'): string {
 }
 
 teacherReportRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const range = z.enum(['daily', 'weekly', 'monthly']).default('weekly').parse(req.query.range ?? 'weekly');
   const from = rangeStart(range);
   const to = new Date().toISOString().slice(0, 10);
 
-  const teachers = await prisma.teacher.findMany({ orderBy: { createdAt: 'asc' } });
+  const teachers = await prisma.teacher.findMany({ where: { schoolId }, orderBy: { createdAt: 'asc' } });
 
   const [attendance, lessons, tests, remarks, leaves] = await Promise.all([
-    prisma.teacherAttendanceRecord.findMany({ where: { date: { gte: from, lte: to } } }),
-    prisma.lesson.findMany({ where: { uploadedAt: { gte: from, lte: to } } }),
-    prisma.test.findMany({ where: { createdAt: { gte: from, lte: to } } }),
-    prisma.remark.findMany({ where: { createdAt: { gte: from, lte: to } } }),
-    prisma.leaveRequest.findMany({ where: { kind: 'TEACHER', fromDate: { lte: to }, toDate: { gte: from } } }),
+    prisma.teacherAttendanceRecord.findMany({ where: { teacher: { schoolId }, date: { gte: from, lte: to } } }),
+    prisma.lesson.findMany({ where: { schoolId, uploadedAt: { gte: from, lte: to } } }),
+    prisma.test.findMany({ where: { teacher: { schoolId }, createdAt: { gte: from, lte: to } } }),
+    prisma.remark.findMany({ where: { teacher: { schoolId }, createdAt: { gte: from, lte: to } } }),
+    prisma.leaveRequest.findMany({ where: { kind: 'TEACHER', teacher: { schoolId }, fromDate: { lte: to }, toDate: { gte: from } } }),
   ]);
 
   const reports = teachers.map(t => {

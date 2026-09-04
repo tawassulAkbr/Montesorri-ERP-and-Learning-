@@ -53,37 +53,54 @@ export const StudentReportsPage: React.FC = () => {
           <p className="text-sm text-[#667085]">Official term performance metrics, subject breakdowns, and attendance summary</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-            <Printer size={15} /> Print
+        <div className="no-print flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
+            <Printer size={15} /> Print Report
           </Button>
-          <Button size="sm" className="gap-1.5 text-xs">
-            <Download size={15} /> Download PDF
+          <Button size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
+            <Download size={15} /> Export PDF
           </Button>
         </div>
       </div>
 
       {/* Hero Card */}
-      <Card className="bg-gradient-to-r from-[#006B5D] to-[#007A6B] text-white border-0 shadow-sm">
-        <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-[#013A33] via-[#006B5D] to-[#0A8B7A] text-white shadow-lg">
+        {/* Decorative pattern */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          style={{ backgroundImage: 'radial-gradient(#ffffff 2px, transparent 2px)', backgroundSize: '28px 28px' }}
+        />
+        <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-[#FBBF24]/15 blur-3xl" />
+        <div className="pointer-events-none absolute -left-10 -bottom-10 h-44 w-44 rounded-full bg-white/10 blur-2xl" />
+
+        <CardContent className="relative z-10 p-7 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
           <div>
-            <span className="text-xs uppercase tracking-wider text-[#006B5D] font-bold">Academic Transcript</span>
-            <h2 className="text-2xl font-bold mt-1">{currentUser?.name}</h2>
-            <p className="text-xs text-[#006B5D] mt-0.5">
-              {me?.class} • Roll No #{me?.rollNo} • Enrollment ID {me?.enrollmentId}
+            <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-[#FBBF24] font-extrabold mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FBBF24]" />
+              Academic Evaluation · {new Date().getFullYear()}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-[1.1] mt-1">
+              {currentUser?.name}
+            </h2>
+            <p className="text-[13px] text-emerald-50/80 mt-2.5 font-medium leading-relaxed">
+              <span className="inline-block">{me?.class}</span>
+              <span className="mx-1.5 text-emerald-50/40">•</span>
+              <span className="inline-block">Roll No {me?.rollNo}</span>
+              <span className="mx-1.5 text-emerald-50/40">•</span>
+              <span className="inline-block font-mono tracking-wide">{me?.enrollmentId}</span>
             </p>
           </div>
 
-          <div className="flex items-center gap-6 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl">
+          <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/10 px-5 py-3.5 backdrop-blur-md shadow-inner">
             <div>
-              <span className="text-[10px] text-[#006B5D] uppercase font-bold block">Best Grade</span>
-              <span className="text-2xl font-black">{bestGrade ?? '—'}</span>
+              <span className="text-[10px] text-emerald-50/70 uppercase tracking-[0.16em] font-bold block mb-1">Overall Standing</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[11px] text-emerald-50/60 font-bold">Grade</span>
+                <span className="text-4xl font-black leading-none tracking-tight text-white">{bestGrade ?? '—'}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] text-[#006B5D] uppercase font-bold block">Class Rank</span>
-              <span className="text-2xl font-black">
-                {classRank ? `#${classRank.pos} of ${classRank.total}` : '—'}
-              </span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FBBF24] text-[#013A33] shadow-md">
+              <Award size={24} strokeWidth={2.5} />
             </div>
           </div>
         </CardContent>

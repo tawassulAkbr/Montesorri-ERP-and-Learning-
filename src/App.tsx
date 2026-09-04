@@ -55,6 +55,10 @@ import { AdminClassesPage } from '@/pages/admin/ClassesPage';
 import { AdminReportsPage } from '@/pages/admin/ReportsPage';
 import { AdminTeacherReportsPage } from '@/pages/admin/TeacherReportsPage';
 import { AdminFeedbackPage } from '@/pages/admin/FeedbackPage';
+import { FinancePage } from '@/pages/admin/FinancePage';
+import { InventoryPage } from '@/pages/admin/InventoryPage';
+import { HrPayrollPage } from '@/pages/admin/HrPayrollPage';
+import { CurriculumPage } from '@/pages/admin/CurriculumPage';
 
 import type { Role } from '@/types';
 
@@ -154,6 +158,10 @@ export default function App() {
                 <Route path="classes" element={<ProtectedRoute allowedRole="admin"><AdminClassesPage /></ProtectedRoute>} />
                 <Route path="reports" element={<ProtectedRoute allowedRole="admin"><AdminReportsPage /></ProtectedRoute>} />
                 <Route path="teacher-reports" element={<ProtectedRoute allowedRole="admin"><AdminTeacherReportsPage /></ProtectedRoute>} />
+                <Route path="finance" element={<ProtectedRoute allowedRole="admin"><FinancePage /></ProtectedRoute>} />
+                <Route path="hr-payroll" element={<ProtectedRoute allowedRole="admin"><HrPayrollPage /></ProtectedRoute>} />
+                <Route path="curriculum" element={<ProtectedRoute allowedRole="admin"><CurriculumPage /></ProtectedRoute>} />
+                <Route path="inventory" element={<ProtectedRoute allowedRole="admin"><InventoryPage /></ProtectedRoute>} />
                 <Route path="feedback" element={<ProtectedRoute allowedRole="admin"><AdminFeedbackPage /></ProtectedRoute>} />
                 <Route path="settings" element={<ProtectedRoute allowedRole="admin"><ChangePasswordPage /></ProtectedRoute>} />
               </Route>

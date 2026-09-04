@@ -1,3 +1,5 @@
+import { enqueue } from './offlineQueue';
+
 const TOKEN_KEY = 'kg_token';
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
@@ -14,16 +16,35 @@ export class ApiError extends Error {
   }
 }
 
+export class QueuedError extends Error {
+  opId: string;
+
+  constructor(opId: string) {
+    super('Saved offline — it will sync when the connection returns.');
+    this.name = 'QueuedError';
+    this.opId = opId;
+  }
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`/api${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (err) {
+    if (method !== 'GET' && token) {
+      const queued = enqueue({ method, path, body });
+      throw new QueuedError(queued.opId);
+    }
+    throw err;
+  }
 
   if (res.status === 401) {
     clearToken();

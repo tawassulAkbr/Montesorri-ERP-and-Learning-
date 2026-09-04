@@ -16,25 +16,43 @@ const loginSchema = z.object({
   role: z.enum(['teacher', 'student', 'parent', 'admin']),
 });
 
+const schoolInclude = { school: { select: { name: true } } } as const;
+
 async function buildUserPayload(userId: string, role: 'teacher' | 'student' | 'parent' | 'admin') {
   if (role === 'teacher') {
-    const t = await prisma.teacher.findUnique({ where: { id: userId } });
+    const t = await prisma.teacher.findUnique({ where: { id: userId }, include: schoolInclude });
     return t ? teacherToFrontend(t) : null;
   }
   if (role === 'student') {
-    const s = await prisma.student.findUnique({ where: { id: userId } });
-    // Fee amounts are admin-only — excluded from the student's own profile.
+    const s = await prisma.student.findUnique({ where: { id: userId }, include: schoolInclude });
     return s ? studentToFrontend(s, { includeFeeAmount: false }) : null;
   }
   if (role === 'parent') {
     const p = await prisma.parent.findUnique({
       where: { id: userId },
-      include: { children: { select: { id: true } } },
+      include: { children: { select: { id: true } }, ...schoolInclude },
     });
     return p ? parentToFrontend(p, p.children.map(c => c.id)) : null;
   }
-  const a = await prisma.admin.findUnique({ where: { id: userId } });
+  const a = await prisma.admin.findUnique({ where: { id: userId }, include: schoolInclude });
   return a ? adminToFrontend(a) : null;
+}
+
+async function getSchoolIdForUser(userId: string, role: string): Promise<string> {
+  if (role === 'teacher') {
+    const t = await prisma.teacher.findUnique({ where: { id: userId }, select: { schoolId: true } });
+    if (t) return t.schoolId;
+  } else if (role === 'student') {
+    const s = await prisma.student.findUnique({ where: { id: userId }, select: { schoolId: true } });
+    if (s) return s.schoolId;
+  } else if (role === 'parent') {
+    const p = await prisma.parent.findUnique({ where: { id: userId }, select: { schoolId: true } });
+    if (p) return p.schoolId;
+  } else if (role === 'admin') {
+    const a = await prisma.admin.findUnique({ where: { id: userId }, select: { schoolId: true } });
+    if (a) return a.schoolId;
+  }
+  throw notFound('Account record not found');
 }
 
 authRouter.post('/login', async (req, res) => {
@@ -51,7 +69,8 @@ authRouter.post('/login', async (req, res) => {
   if (!user) {
     throw unauthorized('Account record not found');
   }
-  const token = signToken({ sub: cred.userId, role, email: cred.email });
+  const schoolId = await getSchoolIdForUser(cred.userId, role);
+  const token = signToken({ sub: cred.userId, role, email: cred.email, schoolId });
   res.json({ token, user });
 });
 
@@ -74,12 +93,12 @@ const profileSchema = z.object({
 authRouter.put('/profile', requireAuth, async (req, res) => {
   const input = profileSchema.parse(req.body);
   const { id, role } = req.user!;
-  // '' clears the avatar, undefined leaves it unchanged.
   const avatarUrl = input.avatarUrl === undefined ? undefined : (input.avatarUrl === '' ? null : input.avatarUrl);
 
   if (role === 'teacher') {
     const t = await prisma.teacher.update({
       where: { id },
+      include: schoolInclude,
       data: {
         ...(input.name && { name: input.name }),
         ...(input.phone && { phone: input.phone }),
@@ -94,6 +113,7 @@ authRouter.put('/profile', requireAuth, async (req, res) => {
   if (role === 'student') {
     const s = await prisma.student.update({
       where: { id },
+      include: schoolInclude,
       data: {
         ...(input.name && { name: input.name }),
         ...(input.phone && { phone: input.phone }),
@@ -108,7 +128,7 @@ authRouter.put('/profile', requireAuth, async (req, res) => {
   if (role === 'parent') {
     const p = await prisma.parent.update({
       where: { id },
-      include: { children: { select: { id: true } } },
+      include: { children: { select: { id: true } }, ...schoolInclude },
       data: {
         ...(input.name && { name: input.name }),
         ...(input.phone && { phone: input.phone }),
@@ -120,6 +140,7 @@ authRouter.put('/profile', requireAuth, async (req, res) => {
   }
   const a = await prisma.admin.update({
     where: { id },
+    include: schoolInclude,
     data: {
       ...(input.name && { name: input.name }),
       ...(avatarUrl !== undefined && { avatarUrl }),
@@ -151,7 +172,6 @@ const forgotSchema = z.object({ email: z.string().min(3) });
 authRouter.post('/forgot-password', async (req, res) => {
   const { email } = forgotSchema.parse(req.body);
   const cred = await prisma.credential.findUnique({ where: { email: email.toLowerCase() } });
-  // Always respond success to avoid revealing which emails exist.
   if (cred) {
     const { raw, hash } = generateResetToken();
     await prisma.passwordResetToken.create({

@@ -213,7 +213,7 @@ export const ProfilePage: React.FC = () => {
                     onChange={e => setSubject(e.target.value)}
                     className="w-full mt-1.5 text-sm border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D] bg-white"
                   >
-                    {!TEACHER_SUBJECTS.includes(subject) && <option>{subject}</option>}
+                    {!(TEACHER_SUBJECTS as readonly string[]).includes(subject) && <option>{subject}</option>}
                     {TEACHER_SUBJECTS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>

@@ -48,7 +48,7 @@ export const ReportsPage: React.FC = () => {
           <p className="text-sm text-[#667085]">Analyze test metrics, exam grade breakdowns, and generate student evaluation cards</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="no-print flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.print()}>
             <Printer size={15} /> Print Report
           </Button>

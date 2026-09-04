@@ -257,7 +257,7 @@ teacherStreakRouter.get('/', async (req, res) => {
   if (!teacher) throw notFound('Teacher record not found');
 
   const students = await prisma.student.findMany({
-    where: { class: { in: teacher.classes } },
+    where: { schoolId: teacher.schoolId, class: { in: teacher.classes } },
     orderBy: [{ class: 'asc' }, { rollNo: 'asc' }],
   });
   const ids = students.map(s => s.id);

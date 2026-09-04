@@ -9,6 +9,7 @@ export interface AuthUser {
   id: string;
   role: FrontendRole;
   email: string;
+  schoolId: string;
 }
 
 declare global {
@@ -24,6 +25,7 @@ export interface JwtPayload {
   sub: string;
   role: FrontendRole;
   email: string;
+  schoolId: string;
 }
 
 export function signToken(payload: JwtPayload): string {
@@ -39,7 +41,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
   }
   try {
     const payload = jwt.verify(header.slice(7), config.JWT_SECRET) as JwtPayload;
-    req.user = { id: payload.sub, role: payload.role, email: payload.email };
+    req.user = { id: payload.sub, role: payload.role, email: payload.email, schoolId: payload.schoolId };
     next();
   } catch {
     throw unauthorized('Invalid or expired token');

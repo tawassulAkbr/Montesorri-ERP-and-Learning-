@@ -7,8 +7,9 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   PORT: z.coerce.number().default(4000),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  RESEND_API_KEY: z.string().default(''),
-  EMAIL_FROM: z.string().default('KinderGuide <onboarding@resend.dev>'),
+  SMTP_USER: z.string().email().default(''),
+  SMTP_APP_PASSWORD: z.string().default(''),
+  EMAIL_FROM: z.string().default('KinderGuide'),
   FRONTEND_URL: z.string().default('http://localhost:5173'),
   AI_API_KEY: z.string().default(''),
   AI_API_BASE: z.string().default('https://api.openai.com/v1'),
@@ -26,5 +27,5 @@ if (!parsed.success) {
 }
 
 export const config = parsed.data;
-export const emailEnabled = config.RESEND_API_KEY.length > 0;
+export const emailEnabled = config.SMTP_USER.length > 0 && config.SMTP_APP_PASSWORD.length > 0;
 export const aiLlmEnabled = config.AI_API_KEY.length > 0;

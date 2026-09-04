@@ -1,26 +1,29 @@
 import { useMemo } from 'react';
-import { Users, GraduationCap, Heart, BookMarked, UserPlus, AlertCircle, CheckCircle2, XCircle, CalendarOff } from 'lucide-react';
+import { Users, GraduationCap, Heart, BookMarked, UserPlus, AlertCircle, CheckCircle2, XCircle, CalendarOff, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { StatCard } from '@/components/shared/StatCard';
 import { AiInsightsSection } from '@/components/ai/AiInsightsSection';
-import { AttendanceAreaChart, ClassPerformancePieChart } from '@/components/shared/Charts';
+import { AttendanceAreaChart, ClassPerformancePieChart, FeeCollectionPieChart } from '@/components/shared/Charts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LeaveRequestCard } from '@/components/shared/LeaveModal';
 import { useData } from '@/context/DataContext';
-import { buildAttendanceChartData, buildClassPerformanceData, formatDate, MONTESSORI_CLASSES } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { buildAttendanceChartData, buildClassPerformanceData, formatDate, formatPKR, MONTESSORI_CLASSES } from '@/lib/utils';
 
 export const AdminDashboard: React.FC = () => {
   const {
     teachers, students, parents, attendance, testResults,
-    notifications, leaveRequests, updateLeaveStatus,
+    notifications, leaveRequests, updateLeaveStatus, financeSummary,
+    inventoryItems, lowStockCount,
   } = useData();
+  const { currentUser } = useAuth();
 
   const attendanceChart = useMemo(() => buildAttendanceChartData(attendance), [attendance]);
   const performanceChart = useMemo(() => buildClassPerformanceData(testResults), [testResults]);
 
-  const adminNotifications = notifications.filter(n => n.userId === 'a1').slice(0, 6);
+  const adminNotifications = notifications.filter(n => n.userId === currentUser?.id).slice(0, 6);
   const pendingLeaves = leaveRequests.filter(l => l.status === 'pending' && l.kind === 'teacher');
   const feeDueCount = students.filter(s => s.feeDue).length;
   const activeClasses = MONTESSORI_CLASSES.filter(c => students.some(s => s.class === c));
@@ -63,7 +66,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Total Teachers"
           value={teachers.length}
@@ -91,6 +94,13 @@ export const AdminDashboard: React.FC = () => {
           subtitle={activeClasses.map(c => c.split(' (')[0]).join(', ')}
           icon={<BookMarked className="text-[#006B5D]" size={20} />}
           iconBg="bg-[#E6F4F1]"
+        />
+        <StatCard
+          title="Inventory Items"
+          value={inventoryItems.length}
+          subtitle={lowStockCount > 0 ? `${lowStockCount} low on stock` : 'All above minimum'}
+          icon={<Package className={lowStockCount > 0 ? 'text-red-600' : 'text-[#006B5D]'} size={20} />}
+          iconBg={lowStockCount > 0 ? 'bg-red-50' : 'bg-[#E6F4F1]'}
         />
       </div>
 
@@ -121,8 +131,8 @@ export const AdminDashboard: React.FC = () => {
                     key={leave.id}
                     leave={leave}
                     showActions
-                    onAccept={id => updateLeaveStatus(id, 'accepted', 'a1')}
-                    onReject={id => updateLeaveStatus(id, 'rejected', 'a1')}
+                    onAccept={id => updateLeaveStatus(id, 'accepted', currentUser?.id ?? '')}
+                    onReject={id => updateLeaveStatus(id, 'rejected', currentUser?.id ?? '')}
                   />
                 ))}
               </div>
@@ -224,15 +234,18 @@ export const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {feeDueCount > 0 && (
-              <div className="p-3 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
-                <AlertCircle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-red-700">Fee collection pending</p>
-                  <p className="text-xs text-red-600 mt-0.5">
-                    {feeDueCount} student{feeDueCount > 1 ? 's have' : ' has'} unpaid fees. Mark them in the Users Directory.
-                  </p>
+              <div className="p-4 bg-white border border-[#EAECF0] rounded-2xl shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle size={16} className="text-amber-500" />
+                  <p className="text-sm font-bold text-[#101828]">Outstanding fees</p>
                 </div>
-                <Link to="/admin/users" className="text-[10px] font-bold text-red-600 underline whitespace-nowrap">Review</Link>
+                <p className="text-xs text-[#667085] mb-4">
+                  {formatPKR(financeSummary?.outstandingAmount ?? 0)} is pending across {feeDueCount} student(s).{' '}
+                  <Link to="/admin/finance" className="text-[#006B5D] font-bold">Review</Link>
+                </p>
+                <div className="mx-auto w-full max-w-[200px]">
+                  <FeeCollectionPieChart collected={students.length - feeDueCount} outstanding={feeDueCount} />
+                </div>
               </div>
             )}
             {adminNotifications.length === 0 && feeDueCount === 0 ? (
@@ -261,6 +274,19 @@ export const AdminDashboard: React.FC = () => {
             <Link to="/admin/users" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
               <span className="text-xs font-bold text-[#101828] block">Manage Users Directory</span>
               <span className="text-[11px] text-[#98A2B3]">Create teacher & student accounts, issue credentials</span>
+            </Link>
+            <Link to="/admin/finance" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <span className="text-xs font-bold text-[#101828] block">Finance & Fee Collection</span>
+              <span className="text-[11px] text-[#98A2B3]">
+                {formatPKR(financeSummary?.collectedThisMonth ?? 0)} collected this month · issue receipts
+              </span>
+            </Link>
+            <Link to="/admin/inventory" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+              <span className="text-xs font-bold text-[#101828] block">Inventory & Supplies</span>
+              <span className="text-[11px] text-[#98A2B3]">
+                {inventoryItems.length} tracked items
+                {lowStockCount > 0 ? ` · ${lowStockCount} need reordering` : ' · stock levels healthy'}
+              </span>
             </Link>
             <Link to="/admin/classes" className="block p-3 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
               <span className="text-xs font-bold text-[#101828] block">Class Cohorts & Curriculum</span>

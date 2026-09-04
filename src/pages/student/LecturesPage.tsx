@@ -39,7 +39,7 @@ export const StudentLecturesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-          {['All', 'Phonics & Language', 'Sensorial & Practical Life', 'Early Mathematics', 'Rhymes & Story Circle', 'Creative Arts & Crafts'].map(subj => (
+          {['All', 'Practical Life', 'Sensorial', 'Language Arts', 'Mathematics', 'Cultural Studies / General Knowledge', 'Islamiyat'].map(subj => (
             <button
               key={subj}
               onClick={() => setSelectedSubject(subj)}

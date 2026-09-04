@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Menu, Lock, LogOut, User, Sparkles, Search } from 'lucide-react';
+import { Bell, Menu, Lock, LogOut, User, Sparkles, Search, Sun, Moon, CloudOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -19,6 +19,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   students: 'Students', 'live-class': 'Live Class', schedule: 'Schedule',
   messages: 'Messages', feedback: 'Feedback', assignments: 'Assignments',
   'teacher-reports': 'Teacher Reports', profile: 'My Profile',
+  finance: 'Finance & Fees', inventory: 'Inventory',
 };
 
 function crumbLabel(crumb: string): string {
@@ -30,11 +31,34 @@ function crumbLabel(crumb: string): string {
 
 export const Topbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
-  const { notifications, markNotificationRead, aiEnabled, toggleAi } = useData();
+  const { notifications, markNotificationRead, aiEnabled, toggleAi, pendingWrites } = useData();
   const { openMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('kg-theme') === 'dark' ? 'dark' : 'light')
+  );
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('kg-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    if (notifOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notifOpen]);
 
   const myNotifications = notifications.filter(n => n.userId === currentUser?.id);
   const unread = myNotifications.filter(n => !n.read).length;
@@ -50,7 +74,7 @@ export const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white px-5 py-5 lg:px-7">
+    <header className="no-print sticky top-0 z-30 bg-white px-5 py-5 lg:px-7">
       {/* Mobile hamburger */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 items-center gap-3">
@@ -80,6 +104,30 @@ export const Topbar: React.FC = () => {
             />
           </div>
 
+          {/* Offline write queue — parked mutations waiting to sync */}
+          {pendingWrites > 0 && (
+            <div
+              title={`${pendingWrites} change(s) saved offline. They sync automatically once the server is reachable.`}
+              className="no-print flex h-11 flex-shrink-0 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700"
+            >
+              <CloudOff size={16} />
+              <span className="hidden sm:inline">Saved offline</span>
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1 text-[10px] font-bold text-white">
+                {pendingWrites}
+              </span>
+            </div>
+          )}
+
+          {/* Dark / light theme toggle */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-[#EAECF0] bg-white text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D]"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
           {/* AI features toggle */}
           <button
             onClick={toggleAi}
@@ -95,7 +143,7 @@ export const Topbar: React.FC = () => {
           </button>
 
           {/* Notifications */}
-          <div className="relative">
+          <div className="relative" ref={notifRef}>
             <button
               onClick={() => setNotifOpen(!notifOpen)}
               className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-[#EAECF0] bg-white text-[#667085] transition-colors hover:bg-[#E6F4F1] hover:text-[#006B5D]"
@@ -117,9 +165,9 @@ export const Topbar: React.FC = () => {
               transition={{ duration: 0.15 }}
               className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-[#EAECF0] bg-white shadow-xl"
             >
-              <div className="border-b border-[#EAECF0] p-4">
+              <div className="border-b border-[#EAECF0] p-4 flex justify-between items-center">
                 <span className="text-sm font-bold text-[#101828]">Notifications</span>
-                {unread > 0 && <Badge variant="secondary" className="ml-2 text-xs">{unread} new</Badge>}
+                {unread > 0 && <Badge variant="secondary" className="text-xs">{unread} new</Badge>}
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {myNotifications.length === 0 ? (
@@ -168,6 +216,9 @@ export const Topbar: React.FC = () => {
           <div className="px-3 py-2">
             <p className="text-sm font-semibold text-[#101828]">{currentUser?.name}</p>
             <p className="text-xs text-[#667085] truncate">{currentUser?.email}</p>
+            {currentUser?.schoolName && (
+              <p className="mt-0.5 text-[11px] font-semibold text-[#006B5D] truncate">{currentUser.schoolName}</p>
+            )}
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">

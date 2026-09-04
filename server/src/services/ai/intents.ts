@@ -23,7 +23,7 @@ export const SUGGESTED_QUESTIONS: Record<FrontendRole, string[]> = {
     'Show my class attendance trend',
     'Suggest Montessori activities for counting',
     "Summarize my students' performance",
-    'Generate a progress report for Ali Hassan',
+    'Generate a progress report for Bilal Ahmed',
   ],
   parent: [
     'How is my child progressing?',
@@ -107,7 +107,7 @@ async function handleFee(ctx: Ctx): Promise<AiResponse> {
   }
 
   if (user.role === 'admin') {
-    const snap = await feeSnapshot();
+    const snap = await feeSnapshot(user.schoolId);
     const insights: AiInsight[] = [];
     if (snap.dueStudents.length > 0) {
       insights.push({
@@ -230,7 +230,7 @@ async function handleAttendanceLow(ctx: Ctx): Promise<AiResponse> {
 
 async function handleClassComparison(ctx: Ctx): Promise<AiResponse> {
   const { user, scope, q } = ctx;
-  const rows = await classSummaries(user.role === 'teacher' ? scope.teacherClasses : undefined);
+  const rows = await classSummaries(user.schoolId, user.role === 'teacher' ? scope.teacherClasses : undefined);
   if (rows.length === 0) {
     return noData('class-comparison', 'Class Comparison', 'No classes found in your scope yet.');
   }
@@ -531,7 +531,7 @@ async function handlePerformanceSummary(ctx: Ctx): Promise<AiResponse> {
     const me = await prisma.student.findUnique({ where: { id: user.id } });
     const [mine, classmates] = await Promise.all([
       studentSubjectDetails(user.id),
-      me ? prisma.student.findMany({ where: { class: me.class }, select: { id: true } }) : Promise.resolve([]),
+      me ? prisma.student.findMany({ where: { class: me.class, schoolId: me.schoolId }, select: { id: true } }) : Promise.resolve([]),
     ]);
     const classAvgs = await subjectAverages(classmates.map(c => c.id));
     if (mine.length === 0) {
@@ -632,7 +632,8 @@ async function handlePerformanceSummary(ctx: Ctx): Promise<AiResponse> {
 }
 
 async function handleEnrollment(ctx: Ctx): Promise<AiResponse> {
-  const chart = await enrollmentPie();
+  const { user } = ctx;
+  const chart = await enrollmentPie(user.schoolId);
   const total = chart.data.reduce((sum, row) => sum + Number(row.value ?? 0), 0);
   return finalize({
     intent: 'enrollment',
@@ -706,8 +707,8 @@ export async function buildInsights(user: AuthUser): Promise<AiInsight[]> {
     const [rates, students, snap, rows, flagged] = await Promise.all([
       perStudentAttendanceRates(scope.studentIds),
       listScopedStudents(user),
-      feeSnapshot(),
-      classSummaries(),
+      feeSnapshot(user.schoolId),
+      classSummaries(user.schoolId),
       strugglingStudents(scope.studentIds),
     ]);
     const low = students.filter(s => {
@@ -744,7 +745,7 @@ export async function buildInsights(user: AuthUser): Promise<AiInsight[]> {
       strugglingStudents(scope.studentIds),
       dailyAttendanceSeries(scope.studentIds),
       overallAttendanceRate(scope.studentIds),
-      prisma.test.count({ where: { class: { in: scope.teacherClasses }, status: 'upcoming' } }),
+      prisma.test.count({ where: { class: { in: scope.teacherClasses }, status: 'upcoming', teacher: { schoolId: user.schoolId } } }),
       prisma.studentStreak.findMany({ where: { studentId: { in: scope.studentIds } } }),
       listScopedStudents(user),
     ]);

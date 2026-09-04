@@ -39,7 +39,9 @@ teacherAssignmentRouter.post('/', async (req, res) => {
     },
   });
 
-  const classStudents = await prisma.student.findMany({ where: { class: input.class } });
+  const classStudents = await prisma.student.findMany({
+    where: { schoolId: teacher.schoolId, class: input.class },
+  });
   if (classStudents.length > 0) {
     await prisma.$transaction(classStudents.map(s =>
       prisma.notification.create({
@@ -120,7 +122,10 @@ studentAssignmentRouter.get('/', async (req, res) => {
   const student = await prisma.student.findUnique({ where: { id: req.user!.id } });
   if (!student) throw notFound('Student record not found');
   const [assignments, submissions] = await Promise.all([
-    prisma.assignment.findMany({ where: { class: student.class }, orderBy: { dueAt: 'asc' } }),
+    prisma.assignment.findMany({
+      where: { class: student.class, teacher: { schoolId: student.schoolId } },
+      orderBy: { dueAt: 'asc' },
+    }),
     prisma.submission.findMany({ where: { studentId: student.id } }),
   ]);
   res.json({ assignments, submissions });

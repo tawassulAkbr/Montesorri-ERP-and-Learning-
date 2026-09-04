@@ -7,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -68,6 +69,56 @@ enum ScheduleCategory {
   LIVE_CLASS
 }
 
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  JAZZCASH
+  EASYPAISA
+}
+
+enum InventoryCategory {
+  STATIONERY
+  CLEANING
+  SPORTS
+  FURNITURE
+  MEDICAL
+  OTHER
+}
+
+enum MovementType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUST
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  RESIGNED
+}
+
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+
+  admins             Admin[]
+  teachers           Teacher[]
+  parents            Parent[]
+  students           Student[]
+  lessons            Lesson[]
+  scheduleItems      ScheduleItem[]
+  liveClassSessions  LiveClassSession[]
+  payments           Payment[]
+  inventoryItems     InventoryItem[]
+  inventoryMovements InventoryMovement[]
+
+  @@map("schools")
+}
+
 model Credential {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -98,30 +149,41 @@ model Admin {
   email     String   @unique
   adminCode String   @unique
   avatarUrl String?
+  schoolId  String
   createdAt DateTime @default(now())
 
+  school School @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
   @@map("admins")
 }
 
 model Teacher {
-  id            String   @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String
-  email         String   @unique
-  employeeId    String   @unique
+  email         String           @unique
+  employeeId    String           @unique
   subject       String
   qualification String
   phone         String
   classes       String[]
   avatarUrl     String?
-  createdAt     DateTime @default(now())
+  status        EmploymentStatus @default(ACTIVE)
+  joinDate      String?
+  schoolId      String
+  createdAt     DateTime         @default(now())
 
-  lessons          Lesson[]
-  tests            Test[]
-  remarks          Remark[]
-  dailyWorks       DailyWork[]
-  attendance       TeacherAttendanceRecord[]
-  leaveRequests    LeaveRequest[]
+  school        School                    @relation(fields: [schoolId], references: [id])
+  lessons       Lesson[]
+  tests         Test[]
+  remarks       Remark[]
+  dailyWorks    DailyWork[]
+  attendance    TeacherAttendanceRecord[]
+  leaveRequests LeaveRequest[]
+  assignments   Assignment[]
+  feedbacks     Feedback[]
 
+  @@index([schoolId])
   @@map("teachers")
 }
 
@@ -131,11 +193,14 @@ model Parent {
   email     String   @unique
   phone     String
   avatarUrl String?
+  schoolId  String
   createdAt DateTime @default(now())
 
+  school        School         @relation(fields: [schoolId], references: [id])
   children      Student[]
   leaveRequests LeaveRequest[]
 
+  @@index([schoolId])
   @@map("parents")
 }
 
@@ -148,6 +213,7 @@ model Student {
   class        String
   ageGroup     String?
   parentId     String
+  schoolId     String
   phone        String
   address      String
   guardianName String
@@ -156,14 +222,76 @@ model Student {
   avatarUrl    String?
   createdAt    DateTime @default(now())
 
-  parent           Parent             @relation(fields: [parentId], references: [id])
-  attendance       AttendanceRecord[]
-  testResults      TestResult[]
-  remarks          Remark[]
-  leaveRequests    LeaveRequest[]
+  school        School             @relation(fields: [schoolId], references: [id])
+  parent        Parent             @relation(fields: [parentId], references: [id])
+  attendance    AttendanceRecord[]
+  testResults   TestResult[]
+  remarks       Remark[]
+  leaveRequests LeaveRequest[]
+  payments      Payment[]
 
-  @@unique([class, rollNo])
+  @@unique([schoolId, class, rollNo])
+  @@index([schoolId])
   @@map("students")
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  receiptNo    String
+  schoolId     String
+  studentId    String
+  amount       Int
+  method       PaymentMethod
+  term         String
+  note         String?
+  receivedById String
+  createdAt    DateTime      @default(now())
+
+  school  School  @relation(fields: [schoolId], references: [id])
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, receiptNo])
+  @@index([schoolId, createdAt])
+  @@index([studentId])
+  @@map("payments")
+}
+
+model InventoryItem {
+  id        String            @id @default(cuid())
+  schoolId  String
+  name      String
+  category  InventoryCategory
+  quantity  Int               @default(0)
+  minStock  Int               @default(0)
+  unit      String?
+  location  String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  school    School              @relation(fields: [schoolId], references: [id])
+  movements InventoryMovement[]
+
+  @@index([schoolId, category])
+  @@map("inventory_items")
+}
+
+model InventoryMovement {
+  id        String       @id @default(cuid())
+  schoolId  String
+  itemId    String
+  type      MovementType
+  quantity  Int
+  note      String?
+  byId      String
+  byName    String
+  createdAt DateTime     @default(now())
+
+  school School        @relation(fields: [schoolId], references: [id])
+  item   InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
+  @@index([itemId])
+  @@map("inventory_movements")
 }
 
 model Notification {
@@ -183,7 +311,7 @@ model Notification {
 }
 
 model Lesson {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   subject     String
   class       String
@@ -195,15 +323,19 @@ model Lesson {
   notes       String?
   duration    String
   uploadedAt  String
-  views       Int      @default(0)
+  views       Int     @default(0)
+  schoolId    String
 
+  school  School  @relation(fields: [schoolId], references: [id])
   teacher Teacher @relation(fields: [teacherId], references: [id])
 
+  @@index([schoolId])
+  @@index([teacherId])
   @@map("lessons")
 }
 
 model Test {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   title        String
   subject      String
   class        String
@@ -211,7 +343,7 @@ model Test {
   date         String
   maxMarks     Int
   instructions String
-  status       String   @default("upcoming")
+  status       String @default("upcoming")
   createdAt    String
 
   teacher Teacher      @relation(fields: [teacherId], references: [id])
@@ -250,6 +382,7 @@ model AttendanceRecord {
   student Student @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, date])
+  @@index([date])
   @@map("attendance_records")
 }
 
@@ -337,19 +470,27 @@ model ScheduleItem {
   description String
   roomOrLink  String?
   isLive      Boolean          @default(false)
+  schoolId    String
 
+  school School @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
+  @@index([class])
   @@map("schedule_items")
 }
 
 model LiveClassSession {
-  id                String   @id @default("singleton")
-  isActive          Boolean  @default(false)
-  topic             String   @default("")
-  subject           String   @default("")
-  class             String   @default("")
-  teacherName       String   @default("")
-  startedAt         String   @default("")
-  participantsCount Int      @default(0)
+  id                String  @id @default(cuid())
+  schoolId          String  @unique
+  isActive          Boolean @default(false)
+  topic             String  @default("")
+  subject           String  @default("")
+  class             String  @default("")
+  teacherName       String  @default("")
+  startedAt         String  @default("")
+  participantsCount Int     @default(0)
+
+  school School @relation(fields: [schoolId], references: [id])
 
   @@map("live_class_session")
 }
@@ -364,12 +505,14 @@ model Feedback {
   readByTeacher Boolean  @default(false)
   createdAt     DateTime @default(now())
 
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
   @@index([teacherId, readByTeacher])
   @@map("feedbacks")
 }
 
 model Assignment {
-  id           String       @id @default(cuid())
+  id           String @id @default(cuid())
   teacherId    String
   teacherName  String
   title        String
@@ -379,13 +522,15 @@ model Assignment {
   dueAt        String
   createdAt    String
 
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
   submissions Submission[]
 
+  @@index([teacherId])
   @@map("assignments")
 }
 
 model Submission {
-  id           String      @id @default(cuid())
+  id           String  @id @default(cuid())
   assignmentId String
   studentId    String
   studentName  String
@@ -393,7 +538,7 @@ model Submission {
   fileName     String?
   filePath     String?
   submittedAt  String
-  isLate       Boolean     @default(false)
+  isLate       Boolean @default(false)
   grade        Int?
   feedback     String?
 
@@ -404,18 +549,19 @@ model Submission {
 }
 
 model Message {
-  id           String   @id @default(cuid())
-  parentId     String
-  parentName   String
-  teacherId    String
-  teacherName  String
-  senderRole   Role
-  content      String
-  readByParent Boolean  @default(false)
-  readByTeacher Boolean @default(false)
-  createdAt    DateTime @default(now())
+  id            String   @id @default(cuid())
+  parentId      String
+  parentName    String
+  teacherId     String
+  teacherName   String
+  senderRole    Role
+  content       String
+  readByParent  Boolean  @default(false)
+  readByTeacher Boolean  @default(false)
+  createdAt     DateTime @default(now())
 
   @@index([parentId, teacherId, createdAt])
+  @@index([teacherId, createdAt])
   @@map("messages")
 }
 

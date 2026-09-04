@@ -26,8 +26,8 @@ export const LessonsPage: React.FC = () => {
   // Form State
   const [sourceMode, setSourceMode] = useState<'youtube' | 'upload'>('youtube');
   const [title, setTitle] = useState('');
-  const [subject, setSubject] = useState('Phonics & Language');
-  const [targetClass, setTargetClass] = useState('Junior Montessori (Nursery)');
+  const [subject, setSubject] = useState('Language Arts');
+  const [targetClass, setTargetClass] = useState('Primary Montessori / Playgroup & Nursery (Ages 3 - 6)');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [duration, setDuration] = useState('08:00');
@@ -124,7 +124,7 @@ export const LessonsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-          {['All', 'Phonics & Language', 'Sensorial & Practical Life', 'Early Mathematics', 'Rhymes & Story Circle', 'Creative Arts & Crafts'].map(subj => (
+          {['All', 'Practical Life', 'Sensorial', 'Language Arts', 'Mathematics', 'Cultural Studies / General Knowledge', 'Islamiyat'].map(subj => (
             <button
               key={subj}
               onClick={() => setSelectedSubject(subj)}
@@ -185,11 +185,12 @@ export const LessonsPage: React.FC = () => {
                   onChange={e => setSubject(e.target.value)}
                   className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
-                  <option>Phonics & Language</option>
-                  <option>Sensorial & Practical Life</option>
-                  <option>Early Mathematics</option>
-                  <option>Rhymes & Story Circle</option>
-                  <option>Creative Arts & Crafts</option>
+                  <option>Practical Life</option>
+                  <option>Sensorial</option>
+                  <option>Language Arts</option>
+                  <option>Mathematics</option>
+                  <option>Cultural Studies / General Knowledge</option>
+                  <option>Islamiyat</option>
                 </select>
               </div>
 
@@ -200,9 +201,10 @@ export const LessonsPage: React.FC = () => {
                   onChange={e => setTargetClass(e.target.value)}
                   className="w-full mt-1 text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#006B5D]"
                 >
-                  <option>Montessori Toddler (Playgroup)</option>
-                  <option>Junior Montessori (Nursery)</option>
-                  <option>Senior Montessori (Prep)</option>
+                  <option>Early Childhood / Toddler (Ages 1.5 - 3)</option>
+                  <option>Primary Montessori / Playgroup & Nursery (Ages 3 - 6)</option>
+                  <option>Lower Elementary / Prep & Class 1 (Ages 6 - 9)</option>
+                  <option>Upper Elementary / Class 2 - 5 (Ages 9 - 12)</option>
                 </select>
               </div>
             </div>
@@ -318,3 +320,5 @@ export const LessonsPage: React.FC = () => {
     </div>
   );
 };
+
+

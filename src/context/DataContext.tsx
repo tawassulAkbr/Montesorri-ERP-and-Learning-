@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { GraduationCap, Loader2 } from 'lucide-react';
 import type {
   Lesson, Test, TestResult, AttendanceRecord, TeacherAttendanceRecord,
   LeaveRequest, Remark, DailyWork, ScheduleItem, LiveClassSession,
   Student, Teacher, Parent, Admin, Notification, IssuedCredentials, Role, FeedbackItem,
-  Assignment, Submission,
+  Assignment, Submission, Payment, FinanceSummary, PaymentMethod,
+  InventoryItem, InventoryMovement, InventoryCategory, MovementType, EmploymentStatus,
 } from '@/types';
-import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete, QueuedError } from '@/lib/api';
+import { setQueueUser, subscribe as subscribeQueue, replayAll, pendingCount } from '@/lib/offlineQueue';
 import { saveSnapshot, loadSnapshot } from '@/lib/offlineCache';
 import { useAuth } from '@/hooks/useAuth';
 import { todayISO, isWeekend, dateInRange } from '@/lib/utils';
@@ -32,6 +35,8 @@ interface DataContextType extends BootstrapData {
   offlineMode: boolean;
   isOnline: boolean;
   lastSyncedAt: string | null;
+  pendingWrites: number;
+  lastQueuedAt: string | null;
   aiEnabled: boolean;
   toggleAi: () => void;
   feedbacks: FeedbackItem[];
@@ -39,6 +44,25 @@ interface DataContextType extends BootstrapData {
   markFeedbackRead: (feedbackId: string) => void;
   assignments: Assignment[];
   submissions: Submission[];
+  payments: Payment[];
+  financeSummary: FinanceSummary | null;
+  inventoryItems: InventoryItem[];
+  inventoryMovements: InventoryMovement[];
+  lowStockCount: number;
+  loadInventory: () => Promise<void>;
+  addInventoryItem: (input: {
+    name: string; category: InventoryCategory; quantity: number; minStock: number;
+    unit?: string; location?: string;
+  }) => Promise<void>;
+  updateInventoryItem: (id: string, input: Partial<{
+    name: string; category: InventoryCategory; minStock: number; unit?: string; location?: string;
+  }>) => Promise<void>;
+  moveInventoryItem: (id: string, input: {
+    type: MovementType; quantity: number; note?: string;
+  }) => Promise<void>;
+  recordPayment: (input: {
+    studentId: string; amount: number; method: PaymentMethod; term: string; note?: string;
+  }) => Promise<Payment>;
   addAssignment: (input: { title: string; class: string; subject: string; instructions: string; dueAt: string }) => Promise<void>;
   deleteAssignment: (assignmentId: string) => Promise<void>;
   submitAssignment: (assignmentId: string, payload: { text?: string; fileName?: string; filePath?: string }) => Promise<void>;
@@ -58,7 +82,8 @@ interface DataContextType extends BootstrapData {
   deleteScheduleItem: (id: string) => void;
   startLiveClass: (topic: string, subject: string, targetClass: string, teacherName?: string) => void;
   endLiveClass: () => void;
-  createTeacher: (input: { name: string; email: string; phone: string; qualification: string; subject: string; classes: string[] }) => Promise<IssuedCredentials>;
+  createTeacher: (input: { name: string; email: string; phone: string; qualification: string; subject: string; classes: string[]; status?: EmploymentStatus; joinDate?: string }) => Promise<IssuedCredentials>;
+  updateTeacher: (id: string, input: Partial<{ name: string; phone: string; qualification: string; subject: string; classes: string[]; status: EmploymentStatus; joinDate: string | null }>) => Promise<void>;
   createStudentWithParent: (input: {
     name: string; email: string; phone: string; address: string;
     guardianName: string; guardianEmail: string; guardianPhone?: string;
@@ -76,7 +101,7 @@ interface DataContextType extends BootstrapData {
 const DataContext = createContext<DataContextType | null>(null);
 
 const EMPTY_LIVE_CLASS: LiveClassSession = {
-  isActive: false, topic: '', subject: '', class: '', teacherName: '', startedAt: '', participantsCount: 0,
+  isActive: false, isLive: false, topic: '', subject: '', class: '', teacherName: '', startedAt: '', participantsCount: 0,
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -87,6 +112,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [offlineMode, setOfflineMode] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+  const [pendingWrites, setPendingWrites] = useState<number>(() => pendingCount());
+  const [lastQueuedAt, setLastQueuedAt] = useState<string | null>(null);
   // AI features are ON by default; preference persists per user.
   const [aiEnabled, setAiEnabled] = useState<boolean>(() => {
     try { return localStorage.getItem(`kg_ai:${userId}`) !== 'false'; } catch { return true; }
@@ -109,6 +136,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [financeSummary, setFinanceSummary] = useState<FinanceSummary | null>(null);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>([]);
 
   const applyBootstrap = useCallback((data: BootstrapData) => {
     setAdmins(data.admins);
@@ -197,6 +228,53 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [role, userId]);
 
+  const loadFinance = useCallback(async () => {
+    try {
+      if (role === 'admin') {
+        const [ledger, summary] = await Promise.all([
+          apiGet<{ payments: Payment[] }>('/admin/finance/payments'),
+          apiGet<FinanceSummary>('/admin/finance/summary'),
+        ]);
+        setPayments(ledger.payments);
+        setFinanceSummary(summary);
+        saveSnapshot(userId, 'payments', ledger.payments);
+      } else if (role === 'parent') {
+        const res = await apiGet<{ payments: Payment[] }>('/parents/finance');
+        setPayments(res.payments);
+        setFinanceSummary(null);
+        saveSnapshot(userId, 'payments', res.payments);
+      } else {
+        setPayments([]);
+        setFinanceSummary(null);
+      }
+    } catch (err) {
+      console.error('Failed to load finance data:', err);
+      const cached = loadSnapshot<Payment[]>(userId, 'payments');
+      if (cached) setPayments(cached);
+    }
+  }, [role, userId]);
+
+  const loadInventory = useCallback(async () => {
+    if (role !== 'admin') {
+      setInventoryItems([]);
+      setInventoryMovements([]);
+      return;
+    }
+    try {
+      const [items, movements] = await Promise.all([
+        apiGet<{ items: InventoryItem[]; lowStockCount: number }>('/admin/inventory/items'),
+        apiGet<{ movements: InventoryMovement[] }>('/admin/inventory/movements'),
+      ]);
+      setInventoryItems(items.items);
+      setInventoryMovements(movements.movements);
+      saveSnapshot(userId, 'inventory', items.items);
+    } catch (err) {
+      console.error('Failed to load inventory:', err);
+      const cached = loadSnapshot<InventoryItem[]>(userId, 'inventory');
+      if (cached) setInventoryItems(cached);
+    }
+  }, [role, userId]);
+
   // Re-read the stored AI preference when a different user signs in.
   useEffect(() => {
     try { setAiEnabled(localStorage.getItem(`kg_ai:${userId}`) !== 'false'); } catch { setAiEnabled(true); }
@@ -210,9 +288,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, [userId]);
 
+  // Bind the write queue to the signed-in user and mirror its depth into state.
+  useEffect(() => {
+    setQueueUser(userId);
+    return subscribeQueue(setPendingWrites);
+  }, [userId]);
+
+  // Replay writes parked while offline, then re-read everything they touched.
+  const syncPendingWrites = useCallback(async () => {
+    if (pendingCount() === 0) return;
+    const result = await replayAll();
+    if (result.sent === 0) return;
+    setLastSyncedAt(new Date().toISOString());
+    await refreshAll().then(() => {
+      loadFeedbacks();
+      loadAssignments();
+      loadFinance();
+      loadInventory();
+    });
+  }, [refreshAll, loadFeedbacks, loadAssignments, loadFinance, loadInventory]);
+
   // Track browser connectivity so the app can switch modes and re-sync.
   useEffect(() => {
-    const goOnline = () => setIsOnline(true);
+    const goOnline = () => { setIsOnline(true); syncPendingWrites(); };
     const goOffline = () => setIsOnline(false);
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
@@ -220,21 +318,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
-  }, []);
+  }, [syncPendingWrites]);
 
-  // While serving cached data, keep probing the server so we auto-recover
-  // as soon as the API is reachable again (no reload needed).
+  // While serving cached data — or holding parked writes — keep probing the
+  // server so we auto-recover as soon as the API is reachable again.
   useEffect(() => {
-    if (!offlineMode || !isAuthenticated || !token) return;
+    if (!isAuthenticated || !token) return;
+    if (!offlineMode && pendingWrites === 0) return;
     const timer = setInterval(() => {
       if (!navigator.onLine) return;
-      refreshAll().then(() => {
+      syncPendingWrites().then(() => refreshAll().then(() => {
         loadFeedbacks();
         loadAssignments();
-      });
-    }, 15000);
+        loadFinance();
+        loadInventory();
+      }));
+    }, 3000);
     return () => clearInterval(timer);
-  }, [offlineMode, isAuthenticated, token, refreshAll, loadFeedbacks, loadAssignments]);
+  }, [offlineMode, pendingWrites, isAuthenticated, token, syncPendingWrites, refreshAll, loadFeedbacks, loadAssignments, loadFinance, loadInventory]);
 
   // Hydrate from the API once authenticated; fall back to the offline cache
   // when the network or API server is unreachable.
@@ -271,8 +372,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     loadAssignments();
+    loadFinance();
+    loadInventory();
     return () => { cancelled = true; };
-  }, [isAuthenticated, token, role, applyBootstrap, loadAssignments, userId, isOnline]);
+  }, [isAuthenticated, token, role, applyBootstrap, loadAssignments, loadFinance, loadInventory, userId, isOnline]);
 
   // Display-parity: derive auto-absent for teachers locally (server derives it on read too).
   useEffect(() => {
@@ -305,6 +408,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     call()
       .then(() => refreshAll())
       .catch(err => {
+        // QueuedError means the write is parked for sync, not lost — keep the
+        // optimistic state and let replayAll() reconcile it once we're back online.
+        if (err instanceof QueuedError) {
+          setLastQueuedAt(new Date().toISOString());
+          return;
+        }
         console.error('Action failed:', err);
         refreshAll();
       });
@@ -445,6 +554,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const startLiveClass = (topic: string, subject: string, targetClass: string, teacherName?: string) => {
     setLiveClass({
       isActive: true,
+      isLive: true,
       topic,
       subject,
       class: targetClass,
@@ -456,15 +566,70 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const endLiveClass = () => {
-    setLiveClass(prev => ({ ...prev, isActive: false }));
+    setLiveClass(prev => ({ ...prev, isActive: false, isLive: false }));
     persist(() => apiPut('/live-class/end'));
   };
 
   // ─── Value-returning (async) mutations ─────────────────────────────────────
-  const createTeacher = async (input: { name: string; email: string; phone: string; qualification: string; subject: string; classes: string[] }): Promise<IssuedCredentials> => {
+  const createTeacher = async (input: { name: string; email: string; phone: string; qualification: string; subject: string; classes: string[]; status?: EmploymentStatus; joinDate?: string }): Promise<IssuedCredentials> => {
     const res = await apiPost<{ teacher: Teacher; issued: IssuedCredentials }>('/admin/teachers', input);
     await refreshAll();
     return res.issued;
+  };
+
+  // A parked write is not a failure: resolve so dialogs close and the queued
+  // op syncs later, instead of showing the sync notice as an error.
+  const parked = (err: unknown): boolean => {
+    if (err instanceof QueuedError) { setLastQueuedAt(new Date().toISOString()); return true; }
+    return false;
+  };
+
+  const updateTeacher = async (id: string, input: Partial<{ name: string; phone: string; qualification: string; subject: string; classes: string[]; status: EmploymentStatus; joinDate: string | null }>): Promise<void> => {
+    try {
+      const res = await apiPatch<{ teacher: Teacher }>(`/admin/teachers/${id}`, input);
+      setTeachers(prev => prev.map(t => (t.id === id ? { ...t, ...res.teacher } : t)));
+      await refreshAll();
+    } catch (err) {
+      if (parked(err)) return;
+      throw err;
+    }
+  };
+
+  const addInventoryItem = async (input: {
+    name: string; category: InventoryCategory; quantity: number; minStock: number;
+    unit?: string; location?: string;
+  }): Promise<void> => {
+    try {
+      await apiPost('/admin/inventory/items', input);
+      await loadInventory();
+    } catch (err) {
+      if (parked(err)) return;
+      throw err;
+    }
+  };
+
+  const updateInventoryItem = async (id: string, input: Partial<{
+    name: string; category: InventoryCategory; minStock: number; unit?: string; location?: string;
+  }>): Promise<void> => {
+    try {
+      await apiPatch(`/admin/inventory/items/${id}`, input);
+      await loadInventory();
+    } catch (err) {
+      if (parked(err)) return;
+      throw err;
+    }
+  };
+
+  const moveInventoryItem = async (id: string, input: {
+    type: MovementType; quantity: number; note?: string;
+  }): Promise<void> => {
+    try {
+      await apiPost(`/admin/inventory/items/${id}/move`, input);
+      await loadInventory();
+    } catch (err) {
+      if (parked(err)) return;
+      throw err;
+    }
   };
 
   const createStudentWithParent = async (input: {
@@ -475,6 +640,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await apiPost<{ student: Student; issued: IssuedCredentials[] }>('/admin/students', input);
     await refreshAll();
     return res.issued;
+  };
+
+  const recordPayment = async (input: {
+    studentId: string; amount: number; method: PaymentMethod; term: string; note?: string;
+  }): Promise<Payment> => {
+    const res = await apiPost<{ payment: Payment }>('/admin/finance/payments', input);
+    setStudents(prev => prev.map(s => (s.id === input.studentId ? { ...s, feeDue: false } : s)));
+    await Promise.all([refreshAll(), loadFinance()]);
+    return res.payment;
   };
 
   const resetPassword = async (userId: string, userRole: 'teacher' | 'student' | 'parent'): Promise<string | null> => {
@@ -565,9 +739,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Loading gate: pages assume populated arrays, so hold rendering until hydrated.
   if (isAuthenticated && loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
-        <div className="w-10 h-10 rounded-xl gradient-primary animate-pulse" />
-        <p className="text-sm font-medium text-[#667085]">Loading your school data...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950/95 p-6">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/80 px-10 py-8 shadow-2xl backdrop-blur">
+          <div className="relative flex h-16 w-16 items-center justify-center">
+            <Loader2 className="absolute h-16 w-16 animate-spin text-teal-400" strokeWidth={1.6} />
+            <GraduationCap className="h-7 w-7 text-white" />
+          </div>
+          <p className="text-sm font-medium text-slate-300 transition-opacity">Loading school data...</p>
+        </div>
       </div>
     );
   }
@@ -575,15 +754,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider
       value={{
-        offlineMode, isOnline, lastSyncedAt,
+        offlineMode, isOnline, lastSyncedAt, pendingWrites, lastQueuedAt,
         aiEnabled, toggleAi,
         admins, students, teachers, parents, notifications, teacherAttendance,
         lessons, tests, testResults, attendance, leaveRequests, remarks, dailyWork, schedules, liveClass,
         feedbacks, addFeedback, markFeedbackRead,
         assignments, submissions, addAssignment, deleteAssignment, submitAssignment, gradeSubmission,
+        payments, financeSummary, recordPayment,
+        inventoryItems, inventoryMovements, loadInventory,
+        lowStockCount: inventoryItems.filter(i => i.lowStock).length,
+        addInventoryItem, updateInventoryItem, moveInventoryItem,
         addLesson, deleteLesson, addTest, saveTestResults, markDailyAttendance, applyLeave, applyTeacherLeave, updateLeaveStatus,
         addRemark, addDailyWork, toggleDailyWorkDone, addScheduleItem, deleteScheduleItem,
-        startLiveClass, endLiveClass, createTeacher, createStudentWithParent, resetPassword, changePassword,
+        startLiveClass, endLiveClass, createTeacher, updateTeacher, createStudentWithParent, resetPassword, changePassword,
         setFeeDue, sendFeeReminder, markTeacherPresent, markNotificationRead, findUser,
       }}
     >
@@ -597,3 +780,4 @@ export const useData = () => {
   if (!ctx) throw new Error('useData must be used within DataProvider');
   return ctx;
 };
+

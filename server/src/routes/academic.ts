@@ -5,6 +5,7 @@ import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
 import { badRequest, notFound, forbidden } from '../utils/errors';
+import { schoolOf } from '../utils/tenant';
 import {
   lessonToFrontend, testToFrontend, testResultToFrontend,
   remarkToFrontend, dailyWorkToFrontend, scheduleToFrontend, liveClassToFrontend,
@@ -23,9 +24,10 @@ export const lessonRouter = Router();
 lessonRouter.use(requireAuth);
 
 lessonRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const cls = typeof req.query.class === 'string' ? req.query.class : undefined;
   const lessons = await prisma.lesson.findMany({
-    where: cls ? { class: cls } : {},
+    where: { schoolId, ...(cls ? { class: cls } : {}) },
     orderBy: { uploadedAt: 'desc' },
   });
   res.json({ lessons: lessons.map(lessonToFrontend) });
@@ -43,6 +45,7 @@ const lessonSchema = z.object({
 }).refine(d => d.youtubeId || d.videoUrl, { message: 'Provide youtubeId or videoUrl' });
 
 lessonRouter.post('/', requireRole('teacher'), async (req, res) => {
+  const schoolId = schoolOf(req);
   const input = lessonSchema.parse(req.body);
   const teacher = await prisma.teacher.findUnique({ where: { id: req.user!.id } });
   if (!teacher) throw notFound('Teacher record not found');
@@ -60,13 +63,15 @@ lessonRouter.post('/', requireRole('teacher'), async (req, res) => {
       teacherName: teacher.name,
       uploadedAt: todayISO(),
       views: 0,
+      schoolId,
     },
   });
   res.json({ lesson: lessonToFrontend(lesson) });
 });
 
 lessonRouter.delete('/:id', requireRole('teacher', 'admin'), async (req, res) => {
-  const lesson = await prisma.lesson.findUnique({ where: { id: String(req.params.id) } });
+  const schoolId = schoolOf(req);
+  const lesson = await prisma.lesson.findFirst({ where: { id: String(req.params.id), schoolId } });
   if (!lesson) throw notFound('Lesson not found');
   if (req.user!.role === 'teacher' && lesson.teacherId !== req.user!.id) {
     throw forbidden('You can only delete your own lessons');
@@ -80,9 +85,10 @@ export const testRouter = Router();
 testRouter.use(requireAuth);
 
 testRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const cls = typeof req.query.class === 'string' ? req.query.class : undefined;
   const tests = await prisma.test.findMany({
-    where: cls ? { class: cls } : {},
+    where: { teacher: { schoolId }, ...(cls ? { class: cls } : {}) },
     orderBy: { date: 'desc' },
   });
   res.json({ tests: tests.map(testToFrontend) });
@@ -116,7 +122,10 @@ const resultsSchema = z.object({
 });
 
 testRouter.post('/:id/results', requireRole('teacher'), async (req, res) => {
-  const test = await prisma.test.findUnique({ where: { id: String(req.params.id) } });
+  const schoolId = schoolOf(req);
+  const test = await prisma.test.findFirst({
+    where: { id: String(req.params.id), teacher: { schoolId } },
+  });
   if (!test) throw notFound('Test not found');
   const { results } = resultsSchema.parse(req.body);
 
@@ -124,7 +133,7 @@ testRouter.post('/:id/results', requireRole('teacher'), async (req, res) => {
     const rows = [];
     for (const r of results) {
       if (r.marksObtained > test.maxMarks) throw badRequest('marksObtained exceeds maxMarks');
-      const student = await tx.student.findUnique({ where: { id: r.studentId } });
+      const student = await tx.student.findFirst({ where: { id: r.studentId, schoolId } });
       if (!student) throw badRequest(`Student ${r.studentId} not found`);
       rows.push(await tx.testResult.create({
         data: {
@@ -149,7 +158,10 @@ testRouter.post('/:id/results', requireRole('teacher'), async (req, res) => {
 });
 
 testRouter.get('/:id/results', async (req, res) => {
-  const results = await prisma.testResult.findMany({ where: { testId: String(req.params.id) } });
+  const schoolId = schoolOf(req);
+  const results = await prisma.testResult.findMany({
+    where: { testId: String(req.params.id), student: { schoolId } },
+  });
   res.json({ results: results.map(testResultToFrontend) });
 });
 
@@ -158,9 +170,10 @@ export const remarkRouter = Router();
 remarkRouter.use(requireAuth);
 
 remarkRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const studentId = typeof req.query.studentId === 'string' ? req.query.studentId : undefined;
   const remarks = await prisma.remark.findMany({
-    where: studentId ? { studentId } : {},
+    where: { student: { schoolId }, ...(studentId ? { studentId } : {}) },
     orderBy: { createdAt: 'desc' },
   });
   res.json({ remarks: remarks.map(remarkToFrontend) });
@@ -174,9 +187,10 @@ const remarkSchema = z.object({
 
 remarkRouter.post('/', requireRole('teacher'), async (req, res) => {
   const input = remarkSchema.parse(req.body);
+  const schoolId = schoolOf(req);
   const [teacher, student] = await Promise.all([
     prisma.teacher.findUnique({ where: { id: req.user!.id } }),
-    prisma.student.findUnique({ where: { id: input.studentId } }),
+    prisma.student.findFirst({ where: { id: input.studentId, schoolId } }),
   ]);
   if (!teacher) throw notFound('Teacher record not found');
   if (!student) throw notFound('Student not found');
@@ -212,9 +226,10 @@ export const dailyWorkRouter = Router();
 dailyWorkRouter.use(requireAuth);
 
 dailyWorkRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const cls = typeof req.query.class === 'string' ? req.query.class : undefined;
   const work = await prisma.dailyWork.findMany({
-    where: cls ? { class: cls } : {},
+    where: { teacher: { schoolId }, ...(cls ? { class: cls } : {}) },
     orderBy: { postedAt: 'desc' },
   });
   res.json({ dailyWork: work.map(dailyWorkToFrontend) });
@@ -248,8 +263,12 @@ dailyWorkRouter.post('/', requireRole('teacher'), async (req, res) => {
 });
 
 dailyWorkRouter.patch('/:id/complete', requireRole('student'), async (req, res) => {
-  const work = await prisma.dailyWork.findUnique({ where: { id: String(req.params.id) } });
-  if (!work) throw notFound('Daily work not found');
+  const schoolId = schoolOf(req);
+  const work = await prisma.dailyWork.findUnique({
+    where: { id: String(req.params.id) },
+    include: { teacher: { select: { schoolId: true } } },
+  });
+  if (!work || work.teacher.schoolId !== schoolId) throw notFound('Daily work not found');
   const studentId = req.user!.id;
   const done = work.completedByStudentIds.includes(studentId);
   const updated = await prisma.dailyWork.update({
@@ -268,8 +287,11 @@ export const scheduleRouter = Router();
 scheduleRouter.use(requireAuth);
 
 scheduleRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const cls = typeof req.query.class === 'string' ? req.query.class : undefined;
-  const items = await prisma.scheduleItem.findMany({ where: cls ? { class: cls } : {} });
+  const items = await prisma.scheduleItem.findMany({
+    where: { schoolId, ...(cls ? { class: cls } : {}) },
+  });
   res.json({ schedules: items.map(scheduleToFrontend) });
 });
 
@@ -286,6 +308,7 @@ const scheduleSchema = z.object({
 });
 
 scheduleRouter.post('/', requireRole('teacher', 'admin'), async (req, res) => {
+  const schoolId = schoolOf(req);
   const input = scheduleSchema.parse(req.body);
   const item = await prisma.scheduleItem.create({
     data: {
@@ -293,26 +316,29 @@ scheduleRouter.post('/', requireRole('teacher', 'admin'), async (req, res) => {
       category: input.category.toUpperCase() as any,
       roomOrLink: input.roomOrLink ?? null,
       isLive: input.isLive ?? false,
+      schoolId,
     },
   });
   res.json({ schedule: scheduleToFrontend(item) });
 });
 
 scheduleRouter.delete('/:id', requireRole('teacher', 'admin'), async (req, res) => {
-  await prisma.scheduleItem.delete({ where: { id: String(req.params.id) } }).catch(() => {
-    throw notFound('Schedule item not found');
-  });
+  const schoolId = schoolOf(req);
+  const item = await prisma.scheduleItem.findFirst({ where: { id: String(req.params.id), schoolId } });
+  if (!item) throw notFound('Schedule item not found');
+  await prisma.scheduleItem.delete({ where: { id: item.id } });
   res.json({ ok: true });
 });
 
 export const liveClassRouter = Router();
 liveClassRouter.use(requireAuth);
 
-liveClassRouter.get('/', async (_req, res) => {
+liveClassRouter.get('/', async (req, res) => {
+  const schoolId = schoolOf(req);
   const session = await prisma.liveClassSession.upsert({
-    where: { id: 'singleton' },
+    where: { schoolId },
     update: {},
-    create: { id: 'singleton' },
+    create: { schoolId },
   });
   res.json({ liveClass: liveClassToFrontend(session) });
 });
@@ -325,18 +351,19 @@ const liveClassSchema = z.object({
 });
 
 liveClassRouter.put('/start', requireRole('teacher', 'admin'), async (req, res) => {
+  const schoolId = schoolOf(req);
   const input = liveClassSchema.parse(req.body);
   const teacherName = input.teacherName
     ?? (await prisma.teacher.findUnique({ where: { id: req.user!.id } }))?.name
     ?? 'Teacher';
   const session = await prisma.liveClassSession.upsert({
-    where: { id: 'singleton' },
+    where: { schoolId },
     update: { isActive: true, ...input, teacherName, startedAt: new Date().toISOString(), participantsCount: 1 },
-    create: { id: 'singleton', isActive: true, ...input, teacherName, startedAt: new Date().toISOString(), participantsCount: 1 },
+    create: { schoolId, isActive: true, ...input, teacherName, startedAt: new Date().toISOString(), participantsCount: 1 },
   });
 
   // Alert students of the class and their parents that the live class is starting.
-  const classStudents = await prisma.student.findMany({ where: { class: input.class } });
+  const classStudents = await prisma.student.findMany({ where: { class: input.class, schoolId } });
   if (classStudents.length > 0) {
     const notifOps = classStudents.flatMap(s => [
       prisma.notification.create({
@@ -362,11 +389,12 @@ liveClassRouter.put('/start', requireRole('teacher', 'admin'), async (req, res) 
   res.json({ liveClass: liveClassToFrontend(session) });
 });
 
-liveClassRouter.put('/end', requireRole('teacher', 'admin'), async (_req, res) => {
+liveClassRouter.put('/end', requireRole('teacher', 'admin'), async (req, res) => {
+  const schoolId = schoolOf(req);
   const session = await prisma.liveClassSession.upsert({
-    where: { id: 'singleton' },
+    where: { schoolId },
     update: { isActive: false },
-    create: { id: 'singleton', isActive: false },
+    create: { schoolId, isActive: false },
   });
   res.json({ liveClass: liveClassToFrontend(session) });
 });

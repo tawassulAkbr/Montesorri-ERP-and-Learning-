@@ -55,7 +55,7 @@ export const AdminTeacherReportsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="no-print flex items-center gap-2">
           <div className="flex items-center bg-white border border-slate-200 rounded-lg p-1">
             {(['daily', 'weekly', 'monthly'] as Range[]).map(r => (
               <button

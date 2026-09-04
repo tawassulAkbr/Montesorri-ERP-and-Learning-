@@ -17,7 +17,7 @@ import { apiGet } from '@/lib/api';
 import type { LearningProgress } from '@/types';
 
 export const StudentDashboard: React.FC = () => {
-  const { lessons, tests, dailyWork, testResults, attendance, students } = useData();
+  const { lessons, tests, dailyWork, testResults, attendance, students, liveClass } = useData();
   const { currentUser } = useAuth();
   const me = students.find(s => s.id === currentUser?.id);
 
@@ -53,11 +53,13 @@ export const StudentDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/student/live-class">
-            <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl bg-[#006B5D] text-xs font-bold text-white shadow-sm hover:bg-[#007A6B]">
-              <Video size={15} /> Join Live Class
-            </Button>
-          </Link>
+          {liveClass.isLive && (
+            <Link to="/student/live-class">
+              <Button variant="secondary" size="sm" className="gap-1.5 rounded-xl bg-[#006B5D] text-xs font-bold text-white shadow-sm hover:bg-[#007A6B]">
+                <Video size={15} /> Join Live Class
+              </Button>
+            </Link>
+          )}
           <Link to="/student/schedule">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-[#D7E7E4] text-xs font-bold text-[#006B5D] shadow-sm hover:bg-[#E6F4F1]">
               <Sparkles size={15} /> Daily Routine

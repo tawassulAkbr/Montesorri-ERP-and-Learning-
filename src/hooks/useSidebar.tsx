@@ -1,9 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 
-export const useSidebar = () => {
+interface SidebarContextType {
+  isCollapsed: boolean;
+  toggle: () => void;
+  isMobileOpen: boolean;
+  openMobile: () => void;
+  closeMobile: () => void;
+}
+
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+
+export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('kg_sidebar_collapsed');
-    return saved === 'true';
+    return saved !== null ? saved === 'true' : false;
   });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -28,5 +38,17 @@ export const useSidebar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return { isCollapsed, toggle, isMobileOpen, openMobile, closeMobile };
+  return (
+    <SidebarContext.Provider value={{ isCollapsed, toggle, isMobileOpen, openMobile, closeMobile }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+};
+
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error('useSidebar must be used within a SidebarProvider');
+  }
+  return context;
 };

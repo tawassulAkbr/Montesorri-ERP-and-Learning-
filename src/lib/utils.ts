@@ -2,12 +2,45 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type {
   AttendanceRecord, TestResult,
-  AttendanceChartPoint, ScoreChartPoint, ClassPerformancePoint,
+  AttendanceChartPoint, ScoreChartPoint, ClassPerformancePoint, PaymentMethod,
+  InventoryCategory, MovementType, EmploymentStatus,
 } from '@/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export function formatPKR(amount: number): string {
+  return `Rs ${amount.toLocaleString('en-PK')}`;
+}
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: 'Cash',
+  bank_transfer: 'Bank Transfer',
+  jazzcash: 'JazzCash',
+  easypaisa: 'Easypaisa',
+};
+
+export const INVENTORY_CATEGORY_LABELS: Record<InventoryCategory, string> = {
+  stationery: 'Stationery',
+  cleaning: 'Cleaning',
+  sports: 'Sports',
+  furniture: 'Furniture',
+  medical: 'Medical',
+  other: 'Other',
+};
+
+export const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
+  stock_in: 'Stock In',
+  stock_out: 'Stock Out',
+  adjust: 'Adjust',
+};
+
+export const EMPLOYMENT_STATUS_LABELS: Record<EmploymentStatus, string> = {
+  active: 'Active',
+  on_leave: 'On Leave',
+  resigned: 'Resigned',
+};
 
 export function getInitials(name: string): string {
   return name
@@ -97,17 +130,19 @@ export function slugEmail(name: string, domain: string): string {
 }
 
 export const MONTESSORI_CLASSES = [
-  'Montessori Toddler (Playgroup)',
-  'Junior Montessori (Nursery)',
-  'Senior Montessori (Prep)',
+  'Early Childhood / Toddler (Ages 1.5 - 3)',
+  'Primary Montessori / Playgroup & Nursery (Ages 3 - 6)',
+  'Lower Elementary / Prep & Class 1 (Ages 6 - 9)',
+  'Upper Elementary / Class 2 - 5 (Ages 9 - 12)',
 ] as const;
 
 export const TEACHER_SUBJECTS = [
-  'Phonics & Early Language',
-  'Sensorial & Practical Life (EPL)',
-  'Early Mathematics & Counting',
-  'Rhymes, Story Circle & Arabic',
-  'Creative Arts & Motor Skills',
+  'Practical Life',
+  'Sensorial',
+  'Language Arts',
+  'Mathematics',
+  'Cultural Studies / General Knowledge',
+  'Islamiyat',
 ] as const;
 
 export function avatarColors(name: string): string {
@@ -165,14 +200,14 @@ export function buildScoreChartData(results: TestResult[], studentId?: string): 
 }
 
 export function buildClassPerformanceData(results: TestResult[]): ClassPerformancePoint[] {
-  const buckets: { name: string; color: string; grades: string[] }[] = [
-    { name: 'Excellent (A+/A)', color: '#10B981', grades: ['A+', 'A'] },
-    { name: 'Good (B)', color: '#006B5D', grades: ['B'] },
-    { name: 'Average (C)', color: '#F59E0B', grades: ['C'] },
-    { name: 'Below Avg (D/F)', color: '#EF4444', grades: ['D', 'F'] },
+  const buckets: { name: string; short: string; color: string; grades: string[] }[] = [
+    { name: 'Excellent (A+/A)', short: 'Excellent', color: '#10B981', grades: ['A+', 'A'] },
+    { name: 'Good (B)', short: 'Good', color: '#006B5D', grades: ['B'] },
+    { name: 'Average (C)', short: 'Average', color: '#F59E0B', grades: ['C'] },
+    { name: 'Below Avg (D/F)', short: 'Below Avg', color: '#EF4444', grades: ['D', 'F'] },
   ];
   return buckets.map(b => ({
-    name: b.name,
+    name: b.short,
     color: b.color,
     value: results.filter(r => b.grades.includes(r.grade)).length,
   }));
