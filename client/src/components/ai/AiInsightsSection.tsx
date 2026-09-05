@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+npx prisma db pushimport { useEffect, useState } from 'react';
 import { Sparkles, Info, AlertTriangle, AlertOctagon, RefreshCw, WifiOff } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AiChart } from './AiChart';
