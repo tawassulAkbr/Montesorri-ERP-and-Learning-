@@ -62,8 +62,6 @@ export async function sendPasswordResetEmail(to: string, rawToken: string): Prom
 
 async function deliver(opts: { to: string; subject: string; html: string }): Promise<void> {
   if (!transporter) {
-    // Dev fallback: no SMTP credentials configured — print the full email to the
-    // server console instead of sending.
     console.log('\n────────────────────────────────────────────────────────────');
     console.log('[EMAIL NOT SENT — no SMTP credentials configured]');
     console.log(`  To:      ${opts.to}`);
@@ -77,7 +75,7 @@ async function deliver(opts: { to: string; subject: string; html: string }): Pro
 
   try {
     await transporter.sendMail({
-      from: `${config.EMAIL_FROM} <${config.SMTP_USER}>`,
+      from: config.EMAIL_FROM, // Cleaned up: directly uses config.EMAIL_FROM
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
@@ -85,6 +83,5 @@ async function deliver(opts: { to: string; subject: string; html: string }): Pro
     console.log(`✅ Email sent to ${opts.to}: "${opts.subject}"`);
   } catch (err: any) {
     console.error(`❌ Failed to send email to ${opts.to}:`, err.message);
-    // Don't crash the request — log the error but let the enrollment succeed
   }
 }

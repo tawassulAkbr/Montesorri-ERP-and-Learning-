@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { EmploymentStatus } from '@prisma/client';
+import type { EmploymentStatus, Role, LeaveStatus } from '@prisma/client';
 import { prisma } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { requireRole } from '../middleware/role';
@@ -12,7 +12,7 @@ import { conflict, notFound, badRequest } from '../utils/errors';
 import { schoolOf } from '../utils/tenant';
 import {
   teacherToFrontend, studentToFrontend, parentToFrontend,
-  leaveToFrontend, notificationToFrontend,
+  leaveToFrontend,
 } from '../utils/serializers';
 
 export const adminRouter = Router();
@@ -315,7 +315,6 @@ adminRouter.patch('/students/:id/fee-due', async (req, res) => {
   const student = await prisma.student.findFirst({ where: { id: String(req.params.id), schoolId } });
   if (!student) throw notFound('Student not found');
 
-  const now = new Date().toISOString();
   await prisma.$transaction([
     prisma.student.update({ where: { id: student.id }, data: { feeDue: due } }),
     prisma.notification.create({
@@ -378,7 +377,7 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
   const schoolId = schoolOf(req);
   const role = z.enum(['teacher', 'student', 'parent']).parse(req.body.role);
   const cred = await prisma.credential.findFirst({
-    where: { userId: String(req.params.id), role: role.toUpperCase() as any },
+    where: { userId: String(req.params.id), role: role.toUpperCase() as Role },
   });
   if (!cred) throw notFound('Credential not found');
 
@@ -395,20 +394,17 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
     data: { passwordHash: await hashPassword(password) },
   });
 
-  const name =
-    role === 'teacher' ? (belongsToSchool as any).name
-    : role === 'student' ? (belongsToSchool as any).name
-    : (belongsToSchool as any).name;
+  const name = belongsToSchool.name || 'User';
 
   await sendCredentialsEmail({
     to: cred.email,
-    name: name || 'User',
+    name,
     roleLabel: role.charAt(0).toUpperCase() + role.slice(1),
     email: cred.email,
     password,
   });
 
-  res.json({ issued: { role, name: name || 'User', email: cred.email, password } });
+  res.json({ issued: { role, name, email: cred.email, password } });
 });
 
 // ─── Leave review ─────────────────────────────────────────────────────────────
@@ -418,7 +414,7 @@ adminRouter.get('/leaves', async (req, res) => {
   const where = {
     kind: 'TEACHER' as const,
     teacher: { schoolId },
-    ...(status === 'all' ? {} : { status: status.toUpperCase() as any }),
+    ...(status === 'all' ? {} : { status: status.toUpperCase() as LeaveStatus }),
   };
   const leaves = await prisma.leaveRequest.findMany({
     where,
@@ -439,10 +435,10 @@ adminRouter.patch('/leaves/:id', async (req, res) => {
   if (leave.teacher?.schoolId !== schoolId) throw notFound('Leave request not found');
   if (leave.status !== 'PENDING') throw badRequest('Leave request already reviewed');
 
-  const ops: any[] = [
+  const ops: ReturnType<typeof prisma.leaveRequest.update | typeof prisma.teacherAttendanceRecord.upsert | typeof prisma.attendanceRecord.upsert>[] = [
     prisma.leaveRequest.update({
       where: { id: leave.id },
-      data: { status: status.toUpperCase() as any, respondedAt: todayISO(), respondedBy: req.user!.id },
+      data: { status: status.toUpperCase() as LeaveStatus, respondedAt: todayISO(), respondedBy: req.user!.id },
     }),
   ];
 
