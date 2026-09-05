@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+      {
+        "source": "/api/:path*",
+        "destination": "https://montessori-erp-and-learning-website-production.up.railway.app/api/:path*"
+      }
+    ]
+  }
